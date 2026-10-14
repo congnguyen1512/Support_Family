@@ -7,6 +7,7 @@ class SignupFormData {
     this.email = '',
     this.phone = '',
     this.password = '',
+    this.role = 'nguoichamsoc',
   });
 
   final String fullName;
@@ -16,6 +17,7 @@ class SignupFormData {
   final String email;
   final String phone;
   final String password;
+  final String role;
 
   SignupFormData copyWith({
     String? fullName,
@@ -25,6 +27,7 @@ class SignupFormData {
     String? email,
     String? phone,
     String? password,
+    String? role,
   }) {
     return SignupFormData(
       fullName: fullName ?? this.fullName,
@@ -34,6 +37,7 @@ class SignupFormData {
       email: email ?? this.email,
       phone: phone ?? this.phone,
       password: password ?? this.password,
+      role: role ?? this.role,
     );
   }
 }

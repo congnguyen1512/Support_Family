@@ -77,4 +77,5 @@ class AppRoutes {
   static const signup = '/signup';
   static const signupAccount = '/signup-account';
   static const signupSecurity = '/signup-security';
+  static const signupRoleSelection = '/signup-role-selection';
 }

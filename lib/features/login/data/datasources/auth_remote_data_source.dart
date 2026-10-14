@@ -4,7 +4,10 @@ import 'package:family_guard/features/login/data/models/auth_profile_model.dart'
 import 'package:family_guard/features/login/data/models/auth_session_model.dart';
 import 'package:family_guard/features/login/data/models/login_request_model.dart';
 
+import 'package:family_guard/features/signup/data/models/register_request_model.dart';
+
 abstract class AuthRemoteDataSource {
+  Future<AuthSessionModel> register(RegisterRequestModel request);
   Future<AuthSessionModel> login({
     required String email,
     required String password,
@@ -26,6 +29,20 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         ? response
         : Map<String, dynamic>.from(response as Map);
     return AuthProfileModel.fromJson(json);
+  }
+
+  @override
+  Future<AuthSessionModel> register(RegisterRequestModel request) async {
+    final response = await _apiClient.post(
+      ApiEndpoints.authRegister,
+      requiresAuth: false,
+      body: request.toJson(),
+    );
+
+    final json = response is Map<String, dynamic>
+        ? response
+        : Map<String, dynamic>.from(response as Map);
+    return AuthSessionModel.fromLoginResponse(json);
   }
 
   @override

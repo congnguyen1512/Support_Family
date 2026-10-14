@@ -253,6 +253,23 @@ create index if not exists kid_reminder_owner_member_idx on public.kid_reminder 
 create index if not exists kid_reminder_member_idx on public.kid_reminder (member_uid);
 
 -- ============================================================
+-- 8.1. QUICK CONTACTS (LIEN HE NHANH)
+-- ============================================================
+create table if not exists public.quick_contacts (
+  id          bigserial primary key,
+  owner_uid   uuid not null references public.user_info(uid) on delete cascade,
+  name        text not null,
+  phone       text not null,
+  avatar_url  text,
+  member_uid  uuid references public.user_info(uid) on delete set null,
+  created_at  timestamptz not null default now(),
+  updated_at  timestamptz not null default now(),
+  constraint uq_quick_contacts_owner unique (owner_uid)
+);
+
+create index if not exists idx_quick_contacts_owner on public.quick_contacts (owner_uid);
+
+-- ============================================================
 -- 9. REALTIME: replica identity (needed for filtered realtime)
 -- ============================================================
 alter table public.notification   replica identity full;
@@ -277,6 +294,11 @@ alter table public.chat_message       enable row level security;
 alter table public.chat_presence      enable row level security;
 alter table public.user_device_tokens enable row level security;
 alter table public.kid_reminder       enable row level security;
+alter table public.quick_contacts     enable row level security;
+
+drop policy if exists quick_contacts_all_own on public.quick_contacts;
+create policy quick_contacts_all_own on public.quick_contacts
+  for all to authenticated using (owner_uid = auth.uid()) with check (owner_uid = auth.uid());
 
 drop policy if exists user_info_select_own on public.user_info;
 create policy user_info_select_own on public.user_info

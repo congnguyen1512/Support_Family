@@ -370,4 +370,88 @@ export class RelationshipsService {
 
     return data;
   }
+
+  async syncFamilyNetwork(initialUids: string[]): Promise<void> {
+    const visited = new Set<string>();
+    const queue: string[] = initialUids.filter((u) => Boolean(u));
+    for (const u of queue) visited.add(u);
+
+    while (queue.length > 0) {
+      const current = queue.shift()!;
+      const { data: rels, error } = await supabaseAdmin
+        .from('relationship')
+        .select('uid, relation_id')
+        .or(`uid.eq.${current},relation_id.eq.${current}`)
+        .eq('processing', 'xacnhan');
+
+      if (error) {
+        console.error('[syncFamilyNetwork] Lỗi query relationship:', error);
+        continue;
+      }
+
+      for (const r of rels ?? []) {
+        const neighbor = r.uid === current ? r.relation_id : r.uid;
+        if (!visited.has(neighbor)) {
+          visited.add(neighbor);
+          queue.push(neighbor);
+        }
+      }
+    }
+
+    const allMembers = Array.from(visited);
+    if (allMembers.length <= 1) return;
+
+    const { data: existingRels } = await supabaseAdmin
+      .from('relationship')
+      .select('id, uid, relation_id, processing')
+      .in('uid', allMembers)
+      .in('relation_id', allMembers);
+
+    const existingMap = new Map<string, any>();
+    for (const rel of existingRels ?? []) {
+      existingMap.set(`${rel.uid}_${rel.relation_id}`, rel);
+    }
+
+    const toInsert: any[] = [];
+    const toReactivateIds: number[] = [];
+
+    for (const u of allMembers) {
+      for (const v of allMembers) {
+        if (u === v) continue;
+        const key = `${u}_${v}`;
+        const existing = existingMap.get(key);
+
+        if (!existing) {
+          toInsert.push({
+            uid: u,
+            relation_id: v,
+            relation_type: 'Người thân',
+            reverse_relation_type: 'Người thân',
+            processing: 'xacnhan',
+          });
+        } else if (existing.processing !== 'xacnhan') {
+          toReactivateIds.push(existing.id);
+        }
+      }
+    }
+
+    if (toInsert.length > 0) {
+      const { error: insertError } = await supabaseAdmin
+        .from('relationship')
+        .insert(toInsert);
+      if (insertError) {
+        console.error('[syncFamilyNetwork] Lỗi insert:', insertError);
+      }
+    }
+
+    if (toReactivateIds.length > 0) {
+      const { error: updateError } = await supabaseAdmin
+        .from('relationship')
+        .update({ processing: 'xacnhan' })
+        .in('id', toReactivateIds);
+      if (updateError) {
+        console.error('[syncFamilyNetwork] Lỗi reactivate:', updateError);
+      }
+    }
+  }
 }

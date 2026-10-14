@@ -5,6 +5,8 @@ import 'package:family_guard/features/login/domain/entities/auth_profile.dart';
 import 'package:family_guard/features/login/domain/entities/auth_session.dart';
 import 'package:family_guard/features/login/domain/repositories/auth_repository.dart';
 
+import 'package:family_guard/features/signup/data/models/register_request_model.dart';
+
 class AuthRepositoryImpl implements AuthRepository {
   AuthRepositoryImpl({
     required AuthRemoteDataSource remote,
@@ -14,6 +16,13 @@ class AuthRepositoryImpl implements AuthRepository {
 
   final AuthRemoteDataSource _remote;
   final AuthLocalDataSource _local;
+
+  @override
+  Future<AuthSession> register(RegisterRequestModel request) async {
+    final session = await _remote.register(request);
+    await _local.saveSession(session);
+    return session;
+  }
 
   @override
   Future<AuthProfile> getCurrentUser() {

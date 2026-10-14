@@ -204,7 +204,33 @@ class _NotificationScreenState extends State<NotificationScreen>
       ];
     }
 
-    for (final notification in notifications) {
+    final filtered = notifications.where((notification) {
+      final isFall = _isFallAlertNotification(notification);
+      switch (selectedFilter) {
+        case _NotificationFilter.emergency:
+          return isFall;
+        case _NotificationFilter.activity:
+          return !isFall;
+        case _NotificationFilter.mood:
+          return false;
+        case _NotificationFilter.all:
+          return true;
+      }
+    }).toList();
+
+    if (filtered.isEmpty) {
+      return const [
+        SizedBox(height: 24),
+        Center(
+          child: Text(
+            'Không có thông báo nào',
+            style: TextStyle(color: Color(0xFF64748B), fontSize: 14),
+          ),
+        ),
+      ];
+    }
+
+    for (final notification in filtered) {
       final isActionable = _isActionableNotification(notification);
       final isFallAlert = _isFallAlertNotification(notification);
       items.add(const SizedBox(height: 12));
@@ -220,7 +246,7 @@ class _NotificationScreenState extends State<NotificationScreen>
                 title: _buildNotificationTitle(notification),
                 content: _buildNotificationContent(notification),
                 timeLabel: _formatNotificationTime(notification.createdAt),
-                showActions: isActionable && notification.processing != 'done',
+                showActions: isActionable,
                 onConfirm: () => _respondToNotification(
                   notificationId: notification.id,
                   accepted: true,
@@ -237,9 +263,7 @@ class _NotificationScreenState extends State<NotificationScreen>
   }
 
   bool _isActionableNotification(AppNotification notification) {
-    final senderName = (notification.senderName ?? '').trim();
-    final senderRelation = (notification.senderRelation ?? '').trim();
-    return senderName.isNotEmpty || senderRelation.isNotEmpty;
+    return notification.processing == 'dagui';
   }
 
   bool _isFallAlertNotification(AppNotification notification) {
@@ -277,42 +301,35 @@ class _NotificationScreenState extends State<NotificationScreen>
   }
 
   String _buildNotificationTitle(AppNotification notification) {
-    if (_isFallAlertNotification(notification)) {
-      final title = notification.title.trim();
-      return title.isEmpty ? 'Cảnh báo té ngã' : title;
+    final title = notification.title.trim();
+    if (title.isNotEmpty) {
+      return title;
     }
-
+    if (_isFallAlertNotification(notification)) {
+      return 'Cảnh báo té ngã';
+    }
     if (_isActionableNotification(notification)) {
       return 'Xác nhận mối quan hệ';
     }
-
-    final title = notification.title.trim();
-    return title.isEmpty ? 'Thông báo' : title;
+    return 'Thông báo';
   }
 
   String _buildNotificationContent(AppNotification notification) {
-    if (_isFallAlertNotification(notification)) {
-      final content = notification.content.trim();
-      return content.isNotEmpty
-          ? content
-          : 'Phạm Thị Thư(mechong_condau) vừa được phát hiện té ngã. Vui lòng kiểm tra ngay vị trí hiện tại.';
+    final content = notification.content.trim();
+    if (content.isNotEmpty) {
+      return content;
     }
-
+    if (_isFallAlertNotification(notification)) {
+      return 'Thành viên gia đình vừa được phát hiện té ngã. Vui lòng kiểm tra ngay vị trí hiện tại.';
+    }
     final senderName = (notification.senderName ?? '').trim();
     final senderRelation = (notification.senderRelation ?? '').trim();
     if (senderName.isNotEmpty && senderRelation.isNotEmpty) {
       return 'Bạn có một lời mời xác nhận mối quan hệ từ $senderName($senderRelation). Xác nhận ngay?';
     }
-
     if (senderName.isNotEmpty) {
       return 'Bạn có một lời mời xác nhận mối quan hệ từ $senderName. Xác nhận ngay?';
     }
-
-    final content = notification.content.trim();
-    if (content.isNotEmpty) {
-      return content;
-    }
-
     return 'Bạn có một lời mời xác nhận mối quan hệ mới. Xác nhận ngay?';
   }
 

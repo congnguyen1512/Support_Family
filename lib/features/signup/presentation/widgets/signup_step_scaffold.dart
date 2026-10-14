@@ -10,6 +10,7 @@ class SignupStepScaffold extends StatelessWidget {
     required this.buttonText,
     required this.child,
     this.onPrimaryPressed,
+    this.isLoading = false,
   });
 
   final String title;
@@ -18,6 +19,7 @@ class SignupStepScaffold extends StatelessWidget {
   final String buttonText;
   final Widget child;
   final VoidCallback? onPrimaryPressed;
+  final bool isLoading;
 
   static const _bg = Color(0xFFEFF3F4);
   static const _titleColor = Color(0xFF0F172A);
@@ -86,20 +88,30 @@ class SignupStepScaffold extends StatelessWidget {
                 width: double.infinity,
                 height: 56,
                 child: ElevatedButton(
-                  onPressed: onPrimaryPressed,
+                  onPressed: isLoading ? null : onPrimaryPressed,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: _accent,
                     foregroundColor: Colors.white,
+                    disabledBackgroundColor: _accent.withValues(alpha: 0.6),
                     elevation: 0,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                   ),
-                  child: Text(
-                    buttonText,
-                    style: GoogleFonts.publicSans(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
+                  child: isLoading
+                      ? const SizedBox(
+                          width: 24,
+                          height: 24,
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2.5,
+                          ),
+                        )
+                      : Text(
+                          buttonText,
+                          style: GoogleFonts.publicSans(
+                            fontSize: 17,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
                 ),
               ),
             ),

@@ -1,10 +1,33 @@
 import { Request, Response } from 'express';
 import { AuthService } from './auth.service';
-import { loginSchema } from './auth.validation';
+import { loginSchema, registerSchema } from './auth.validation';
 
 const authService = new AuthService();
 
 export class AuthController {
+  async register(req: Request, res: Response) {
+    try {
+      const parsed = registerSchema.safeParse(req.body);
+
+      if (!parsed.success) {
+        return res.status(400).json({
+          message: 'Dữ liệu đăng ký không hợp lệ',
+          errors: parsed.error.flatten(),
+        });
+      }
+
+      const data = await authService.register(parsed.data);
+
+      return res.status(201).json({
+        message: 'Đăng ký tài khoản thành công',
+        data,
+      });
+    } catch (error: any) {
+      return res.status(400).json({
+        message: error?.message || 'Đăng ký thất bại',
+      });
+    }
+  }
   async login(req: Request, res: Response) {
     try {
       const parsed = loginSchema.safeParse(req.body);

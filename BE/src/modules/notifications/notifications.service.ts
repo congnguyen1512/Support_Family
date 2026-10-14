@@ -1,8 +1,10 @@
 import { supabaseAdmin } from '../../config/supabase';
 import { PushDeliveryService } from './push-delivery.service';
+import { RelationshipsService } from '../relationships/relationships.service';
 
 export class NotificationsService {
   private readonly pushDeliveryService = new PushDeliveryService();
+  private readonly relationshipsService = new RelationshipsService();
 
   private normalizeRelationLabel(value?: string | null): string {
     const normalized = value?.toString().trim();
@@ -69,7 +71,9 @@ export class NotificationsService {
         fall_latitude: item.fall_latitude ?? null,
         fall_longitude: item.fall_longitude ?? null,
         created_at: item.created_at,
-        sender_name: item.relationship?.inviter?.name ?? null,
+        sender_name: isPendingInvite
+          ? item.relationship?.inviter?.name ?? null
+          : null,
         sender_relation: isPendingInvite
           ? item.relationship?.reverse_relation_type ??
             item.relationship?.relation_type ??
@@ -233,6 +237,15 @@ export class NotificationsService {
 
       if (reverseInsertError) {
         throw reverseInsertError;
+      }
+
+      try {
+        await this.relationshipsService.syncFamilyNetwork([
+          relationship.uid,
+          relationship.relation_id,
+        ]);
+      } catch (syncErr) {
+        console.error('Lỗi syncFamilyNetwork:', syncErr);
       }
     }
 

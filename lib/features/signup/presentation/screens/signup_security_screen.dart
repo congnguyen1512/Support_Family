@@ -39,7 +39,7 @@ class _SignupSecurityScreenState extends State<SignupSecurityScreen> {
       return 'Vui lòng nhập mật khẩu';
     }
     if (value.trim().length < 6) {
-      return 'Mật khẩu không hợp lệ';
+      return 'Mật khẩu phải từ 6 ký tự trở lên';
     }
     return null;
   }
@@ -54,10 +54,15 @@ class _SignupSecurityScreenState extends State<SignupSecurityScreen> {
     return null;
   }
 
-  void _finishSignup() {
+  void _goNext() {
     final valid = _formKey.currentState?.validate() ?? false;
     if (!valid) return;
-    Navigator.pushNamedAndRemoveUntil(context, AppRoutes.home, (_) => false);
+
+    final data = widget.initialData.copyWith(
+      password: _passwordController.text.trim(),
+    );
+
+    Navigator.pushNamed(context, AppRoutes.signupRoleSelection, arguments: data);
   }
 
   @override
@@ -66,8 +71,8 @@ class _SignupSecurityScreenState extends State<SignupSecurityScreen> {
       title: 'Bảo mật tài khoản',
       subtitle: 'Tạo một mật khẩu mạnh để giữ dữ liệu của gia đình an toàn và riêng tư.',
       stepIndex: 2,
-      buttonText: 'Xong',
-      onPrimaryPressed: _finishSignup,
+      buttonText: 'Tiếp theo',
+      onPrimaryPressed: _goNext,
       child: Form(
         key: _formKey,
         child: Column(

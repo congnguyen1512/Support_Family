@@ -54,6 +54,7 @@ import 'package:family_guard/features/safe_zone/presentation/widgets/safe_zone_t
 import 'package:family_guard/features/settings/presentation/screens/settings_screen.dart';
 import 'package:family_guard/features/signup/presentation/screens/signup_account_info_screen.dart';
 import 'package:family_guard/features/signup/presentation/screens/signup_personal_info_screen.dart';
+import 'package:family_guard/features/signup/presentation/screens/signup_role_selection_screen.dart';
 import 'package:family_guard/features/signup/presentation/screens/signup_security_screen.dart';
 import 'package:family_guard/features/signup/presentation/widgets/signup_form_data.dart';
 import 'package:family_guard/features/splash/presentation/screens/splash_screen.dart';
@@ -261,6 +262,11 @@ class AppRouter {
       final args = ModalRoute.of(context)?.settings.arguments;
       final data = args is SignupFormData ? args : const SignupFormData();
       return SignupSecurityScreen(initialData: data);
+    },
+    AppRoutes.signupRoleSelection: (context) {
+      final args = ModalRoute.of(context)?.settings.arguments;
+      final data = args is SignupFormData ? args : const SignupFormData();
+      return SignupRoleSelectionScreen(initialData: data);
     },
   };
 

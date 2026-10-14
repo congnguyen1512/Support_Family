@@ -15,6 +15,7 @@ import remindersRoutes from './modules/reminders/reminders.routes';
 import medicalAppointmentsRoutes from './modules/medical-appointments/medical-appointments.routes';
 import physicalActivitiesRoutes from './modules/physical-activities/physical-activities.routes';
 import healthTrackingRoutes from './modules/health-tracking/health-tracking.routes';
+import quickContactsRoutes from './modules/quick-contacts/quick-contacts.routes';
 
 dotenv.config();
 
@@ -40,5 +41,6 @@ app.use('/api', remindersRoutes);
 app.use('/api', medicalAppointmentsRoutes);
 app.use('/api', physicalActivitiesRoutes);
 app.use('/api', healthTrackingRoutes);
+app.use('/api', quickContactsRoutes);
 
 export default app;

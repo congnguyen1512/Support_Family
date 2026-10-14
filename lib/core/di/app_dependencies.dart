@@ -18,6 +18,7 @@ import 'package:family_guard/features/login/domain/usecases/get_saved_session_us
 import 'package:family_guard/features/login/domain/usecases/load_current_session_usecase.dart';
 import 'package:family_guard/features/login/domain/usecases/login_usecase.dart';
 import 'package:family_guard/features/login/domain/usecases/logout_usecase.dart';
+import 'package:family_guard/features/signup/domain/usecases/register_usecase.dart';
 import 'package:family_guard/features/member_management/data/datasources/member_management_remote_data_source.dart';
 import 'package:family_guard/features/member_management/data/repositories_impl/member_management_repository_impl.dart';
 import 'package:family_guard/features/member_management/domain/repositories/member_management_repository.dart';
@@ -52,6 +53,12 @@ import 'package:family_guard/features/safe_zone/domain/usecases/create_safe_zone
 import 'package:family_guard/features/safe_zone/domain/usecases/delete_safe_zone_usecase.dart';
 import 'package:family_guard/features/safe_zone/domain/usecases/get_safe_zones_usecase.dart';
 import 'package:family_guard/features/safe_zone/domain/usecases/update_safe_zone_usecase.dart';
+import 'package:family_guard/features/home/data/datasources/quick_contact_remote_data_source.dart';
+import 'package:family_guard/features/home/data/repositories_impl/quick_contact_repository_impl.dart';
+import 'package:family_guard/features/home/domain/repositories/quick_contact_repository.dart';
+import 'package:family_guard/features/home/domain/usecases/delete_quick_contact_usecase.dart';
+import 'package:family_guard/features/home/domain/usecases/get_quick_contact_usecase.dart';
+import 'package:family_guard/features/home/domain/usecases/save_quick_contact_usecase.dart';
 
 class AppDependencies {
   AppDependencies._();
@@ -72,6 +79,7 @@ class AppDependencies {
   late final AuthRemoteDataSource authRemoteDataSource;
   late final AuthRepository authRepository;
   late final LoginUseCase loginUseCase;
+  late final RegisterUseCase registerUseCase;
   late final LogoutUseCase logoutUseCase;
   late final GetCurrentUserUseCase getCurrentUserUseCase;
   late final GetSavedSessionUseCase getSavedSessionUseCase;
@@ -114,6 +122,12 @@ class AppDependencies {
   late final ChatRemoteDataSource chatRemoteDataSource;
   late final ChatService chatService;
 
+  late final QuickContactRemoteDataSource quickContactRemoteDataSource;
+  late final QuickContactRepository quickContactRepository;
+  late final GetQuickContactUseCase getQuickContactUseCase;
+  late final SaveQuickContactUseCase saveQuickContactUseCase;
+  late final DeleteQuickContactUseCase deleteQuickContactUseCase;
+
   Future<void> initialize() async {
     if (_initialized) {
       return;
@@ -136,6 +150,7 @@ class AppDependencies {
       local: authLocalDataSource,
     );
     loginUseCase = LoginUseCase(authRepository);
+    registerUseCase = RegisterUseCase(authRepository);
     logoutUseCase = LogoutUseCase(authRepository);
     getCurrentUserUseCase = GetCurrentUserUseCase(authRepository);
     getSavedSessionUseCase = GetSavedSessionUseCase(authRepository);
@@ -217,6 +232,18 @@ class AppDependencies {
     );
     chatRemoteDataSource = ChatRemoteDataSource(apiClient: apiClient);
     chatService = ChatService(remoteDataSource: chatRemoteDataSource);
+
+    quickContactRemoteDataSource = QuickContactRemoteDataSourceImpl(
+      apiClient: apiClient,
+    );
+    quickContactRepository = QuickContactRepositoryImpl(
+      remote: quickContactRemoteDataSource,
+    );
+    getQuickContactUseCase = GetQuickContactUseCase(quickContactRepository);
+    saveQuickContactUseCase = SaveQuickContactUseCase(quickContactRepository);
+    deleteQuickContactUseCase = DeleteQuickContactUseCase(
+      quickContactRepository,
+    );
 
     notificationBadgeController = NotificationBadgeController(
       getNotificationsUseCase: getNotificationsUseCase,

@@ -3,6 +3,7 @@ import 'package:family_guard/core/di/app_dependencies.dart';
 import 'package:family_guard/core/fall_detection/presentation/fall_detection_debug_panel.dart';
 import 'package:family_guard/core/widgets/app_flow_bottom_nav.dart';
 import 'package:family_guard/features/calling/presentation/screens/call_flow_models.dart';
+import 'package:family_guard/features/home/domain/entities/quick_contact.dart';
 import 'package:family_guard/features/home/presentation/widgets/senior_home/senior_sos_sheet.dart';
 import 'package:family_guard/features/tracking/presentation/screens/member_tracking/member_tracking_models.dart';
 import 'package:flutter/material.dart';
@@ -16,7 +17,31 @@ class SeniorHomePage extends StatefulWidget {
 }
 
 class _SeniorHomePageState extends State<SeniorHomePage> {
-  _SeniorQuickContact? _quickContact;
+  QuickContact? _quickContact;
+  bool _isLoadingQuickContact = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadQuickContact();
+  }
+
+  Future<void> _loadQuickContact() async {
+    try {
+      final contact = await AppDependencies.instance.getQuickContactUseCase();
+      if (mounted) {
+        setState(() {
+          _quickContact = contact;
+          _isLoadingQuickContact = false;
+        });
+      }
+    } catch (e) {
+      debugPrint('Lỗi tải liên hệ nhanh: $e');
+      if (mounted) {
+        setState(() => _isLoadingQuickContact = false);
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -201,7 +226,9 @@ class _SeniorHomePageState extends State<SeniorHomePage> {
   Widget _buildQuickContactCard(BuildContext context) {
     final contact = _quickContact;
     return InkWell(
-      onTap: () => _showAddQuickContactSheet(context),
+      onTap: () => contact == null
+          ? _showAddQuickContactSheet(context)
+          : _showQuickContactOptions(context, contact),
       borderRadius: BorderRadius.circular(20),
       child: Ink(
         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
@@ -231,7 +258,16 @@ class _SeniorHomePageState extends State<SeniorHomePage> {
                       fontWeight: FontWeight.w700,
                     ),
                   ),
-                  if (contact != null) ...[
+                  if (_isLoadingQuickContact) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      'Đang tải...',
+                      style: GoogleFonts.beVietnamPro(
+                        color: const Color(0xFF7A869A),
+                        fontSize: 12,
+                      ),
+                    ),
+                  ] else if (contact != null) ...[
                     const SizedBox(height: 4),
                     Text(
                       '${contact.name} • ${contact.phone}',
@@ -277,6 +313,145 @@ class _SeniorHomePageState extends State<SeniorHomePage> {
         ),
       ),
     );
+  }
+
+  Future<void> _showQuickContactOptions(
+    BuildContext context,
+    QuickContact contact,
+  ) async {
+    await showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) {
+        return Container(
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+          ),
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 46,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFE3E8EE),
+                  borderRadius: BorderRadius.circular(999),
+                ),
+              ),
+              const SizedBox(height: 18),
+              Text(
+                contact.name,
+                style: GoogleFonts.lexend(
+                  color: const Color(0xFF17233D),
+                  fontSize: 20,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                contact.phone,
+                style: GoogleFonts.beVietnamPro(
+                  color: const Color(0xFF7A869A),
+                  fontSize: 14,
+                ),
+              ),
+              const SizedBox(height: 20),
+              ListTile(
+                leading: Container(
+                  width: 40,
+                  height: 40,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFFE0F7F7),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.call_rounded, color: Color(0xFF00B3B8)),
+                ),
+                title: Text(
+                  'Gọi ngay',
+                  style: GoogleFonts.lexend(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 15,
+                  ),
+                ),
+                onTap: () {
+                  Navigator.pop(sheetContext);
+                  _startQuickCall(contact);
+                },
+              ),
+              ListTile(
+                leading: Container(
+                  width: 40,
+                  height: 40,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFFF1F5F9),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.edit_outlined, color: Color(0xFF64748B)),
+                ),
+                title: Text(
+                  'Thay đổi người liên hệ',
+                  style: GoogleFonts.lexend(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 15,
+                  ),
+                ),
+                onTap: () {
+                  Navigator.pop(sheetContext);
+                  _showAddQuickContactSheet(context);
+                },
+              ),
+              ListTile(
+                leading: Container(
+                  width: 40,
+                  height: 40,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFFFEE2E2),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.delete_outline_rounded,
+                    color: Color(0xFFDC2626),
+                  ),
+                ),
+                title: Text(
+                  'Xóa liên hệ nhanh',
+                  style: GoogleFonts.lexend(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 15,
+                    color: const Color(0xFFDC2626),
+                  ),
+                ),
+                onTap: () async {
+                  Navigator.pop(sheetContext);
+                  await _deleteQuickContact();
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _deleteQuickContact() async {
+    try {
+      await AppDependencies.instance.deleteQuickContactUseCase();
+      if (mounted) {
+        setState(() => _quickContact = null);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Đã xóa liên hệ nhanh.')),
+        );
+      }
+    } catch (e) {
+      debugPrint('Lỗi xóa liên hệ nhanh: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Lỗi xóa liên hệ nhanh: $e')),
+        );
+      }
+    }
   }
 
   Future<void> _showSosSheet(BuildContext context) async {
@@ -366,11 +541,11 @@ class _SeniorHomePageState extends State<SeniorHomePage> {
               _QuickAddOption(
                 icon: Icons.contact_page_outlined,
                 title: 'Danh bạ',
-                subtitle: 'Chọn từ danh bạ điện thoại của bạn',
+                subtitle: 'Chọn từ danh bạ gia đình của bạn',
                 onTap: () async {
                   Navigator.pop(sheetContext);
                   final result = await Navigator.of(context)
-                      .push<_SeniorQuickContact>(
+                      .push<QuickContact>(
                         MaterialPageRoute(
                           builder: (_) => const _SeniorContactDirectoryScreen(),
                         ),
@@ -386,7 +561,7 @@ class _SeniorHomePageState extends State<SeniorHomePage> {
                 onTap: () async {
                   Navigator.pop(sheetContext);
                   final result = await Navigator.of(context)
-                      .push<_SeniorQuickContact>(
+                      .push<QuickContact>(
                         MaterialPageRoute(
                           builder: (_) => const _SeniorAddPhoneScreen(),
                         ),
@@ -413,21 +588,35 @@ class _SeniorHomePageState extends State<SeniorHomePage> {
     );
   }
 
-  void _applyQuickContact(_SeniorQuickContact? contact) {
+  Future<void> _applyQuickContact(QuickContact? contact) async {
     if (contact == null || !mounted) return;
-    setState(() => _quickContact = contact);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Đã thêm ${contact.name} vào liên hệ nhanh.')),
-    );
+    try {
+      final saved =
+          await AppDependencies.instance.saveQuickContactUseCase(contact);
+      if (mounted) {
+        setState(() => _quickContact = saved);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Đã lưu ${saved.name} vào liên hệ nhanh.')),
+        );
+      }
+    } catch (e) {
+      debugPrint('Lỗi lưu liên hệ nhanh: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Lỗi lưu liên hệ nhanh: $e')),
+        );
+      }
+    }
   }
 
-  void _startQuickCall(_SeniorQuickContact contact) {
+  void _startQuickCall(QuickContact contact) {
     Navigator.pushNamed(
       context,
       AppRoutes.inAppCall,
       arguments: InAppCallArgs(
         name: contact.name,
-        avatarUrl: contact.avatarUrl,
+        avatarUrl: contact.avatarUrl ??
+            'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=256&q=80',
         role: MemberRole.adult,
       ),
     );
@@ -445,9 +634,58 @@ class _SeniorContactDirectoryScreen extends StatefulWidget {
 class _SeniorContactDirectoryScreenState
     extends State<_SeniorContactDirectoryScreen> {
   final TextEditingController _searchController = TextEditingController();
-  String _selectedId = _directoryContacts.first.id;
+  List<QuickContact> _directoryContacts = [];
+  bool _isLoading = true;
+  String? _selectedId;
 
-  List<_SeniorQuickContact> get _filteredContacts {
+  @override
+  void initState() {
+    super.initState();
+    _loadFamilyMembers();
+  }
+
+  Future<void> _loadFamilyMembers() async {
+    try {
+      final rels = await AppDependencies.instance.getRelationshipsUseCase();
+      final contacts = <QuickContact>[];
+      for (final r in rels) {
+        if (r.processing == 'xacnhan' && r.relationUser != null) {
+          final u = r.relationUser!;
+          contacts.add(
+            QuickContact(
+              name: u.name.isNotEmpty ? u.name : 'Người thân',
+              phone: u.phone ?? '',
+              avatarUrl: u.avata ??
+                  'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=256&q=80',
+              memberUid: r.relationId,
+            ),
+          );
+        }
+      }
+      if (contacts.isEmpty) {
+        contacts.addAll(_defaultMockContacts);
+      }
+      if (mounted) {
+        setState(() {
+          _directoryContacts = contacts;
+          _selectedId = contacts.first.phone.isNotEmpty
+              ? contacts.first.phone
+              : contacts.first.name;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _directoryContacts = _defaultMockContacts;
+          _selectedId = _defaultMockContacts.first.phone;
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  List<QuickContact> get _filteredContacts {
     final query = _searchController.text.trim().toLowerCase();
     if (query.isEmpty) return _directoryContacts;
     return _directoryContacts.where((contact) {
@@ -466,8 +704,12 @@ class _SeniorContactDirectoryScreenState
   Widget build(BuildContext context) {
     final contacts = _filteredContacts;
     final selected = _directoryContacts.firstWhere(
-      (contact) => contact.id == _selectedId,
-      orElse: () => _directoryContacts.first,
+      (contact) =>
+          (contact.phone.isNotEmpty ? contact.phone : contact.name) ==
+          _selectedId,
+      orElse: () => _directoryContacts.isNotEmpty
+          ? _directoryContacts.first
+          : const QuickContact(name: '', phone: ''),
     );
 
     return Scaffold(
@@ -480,129 +722,153 @@ class _SeniorContactDirectoryScreenState
               onBack: () => Navigator.maybePop(context),
             ),
             Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-                child: Column(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 14,
-                        vertical: 14,
+              child: _isLoading
+                  ? const Center(
+                      child: CircularProgressIndicator(
+                        color: Color(0xFF00B3B8),
                       ),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(14),
-                        border: Border.all(color: const Color(0xFFE8EDF1)),
-                      ),
-                      child: Row(
+                    )
+                  : SingleChildScrollView(
+                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+                      child: Column(
                         children: [
-                          const Icon(
-                            Icons.search_rounded,
-                            color: Color(0xFF00B3B8),
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: TextField(
-                              controller: _searchController,
-                              onChanged: (_) => setState(() {}),
-                              decoration: InputDecoration(
-                                isDense: true,
-                                hintText: 'Tìm kiếm từ danh bạ',
-                                hintStyle: GoogleFonts.beVietnamPro(
-                                  color: const Color(0xFF9BA6B2),
-                                  fontSize: 14,
-                                ),
-                                border: InputBorder.none,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 18),
-                    ...contacts.map((contact) {
-                      final isSelected = contact.id == _selectedId;
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 10),
-                        child: InkWell(
-                          onTap: () => setState(() => _selectedId = contact.id),
-                          borderRadius: BorderRadius.circular(16),
-                          child: Ink(
+                          Container(
                             padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 10,
+                              horizontal: 14,
+                              vertical: 14,
                             ),
                             decoration: BoxDecoration(
-                              color: isSelected
-                                  ? const Color(0xFFE9FAF9)
-                                  : Colors.white,
-                              borderRadius: BorderRadius.circular(16),
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(14),
                               border: Border.all(
-                                color: isSelected
-                                    ? const Color(0xFF8DDDDD)
-                                    : Colors.transparent,
+                                color: const Color(0xFFE8EDF1),
                               ),
                             ),
                             child: Row(
                               children: [
-                                CircleAvatar(
-                                  radius: 22,
-                                  backgroundImage: NetworkImage(
-                                    contact.avatarUrl,
-                                  ),
+                                const Icon(
+                                  Icons.search_rounded,
+                                  color: Color(0xFF00B3B8),
                                 ),
-                                const SizedBox(width: 12),
+                                const SizedBox(width: 10),
                                 Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        contact.name,
-                                        style: GoogleFonts.lexend(
-                                          color: const Color(0xFF17233D),
-                                          fontSize: 15,
-                                          fontWeight: FontWeight.w700,
-                                        ),
+                                  child: TextField(
+                                    controller: _searchController,
+                                    onChanged: (_) => setState(() {}),
+                                    decoration: InputDecoration(
+                                      isDense: true,
+                                      hintText: 'Tìm kiếm người thân',
+                                      hintStyle: GoogleFonts.beVietnamPro(
+                                        color: const Color(0xFF9BA6B2),
+                                        fontSize: 14,
                                       ),
-                                      const SizedBox(height: 2),
-                                      Text(
-                                        contact.phone,
-                                        style: GoogleFonts.beVietnamPro(
-                                          color: const Color(0xFF7A869A),
-                                          fontSize: 13,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                Container(
-                                  width: 34,
-                                  height: 34,
-                                  decoration: BoxDecoration(
-                                    color: isSelected
-                                        ? const Color(0xFF00B3B8)
-                                        : const Color(0xFFF1F7F8),
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: Icon(
-                                    isSelected
-                                        ? Icons.check_rounded
-                                        : Icons.add_rounded,
-                                    color: isSelected
-                                        ? Colors.white
-                                        : const Color(0xFF00B3B8),
+                                      border: InputBorder.none,
+                                    ),
                                   ),
                                 ),
                               ],
                             ),
                           ),
-                        ),
-                      );
-                    }),
-                  ],
-                ),
-              ),
+                          const SizedBox(height: 18),
+                          if (contacts.isEmpty)
+                            Padding(
+                              padding: const EdgeInsets.all(24),
+                              child: Text(
+                                'Không tìm thấy người liên hệ phù hợp.',
+                                style: GoogleFonts.beVietnamPro(
+                                  color: const Color(0xFF7A869A),
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ),
+                          ...contacts.map((contact) {
+                            final contactId = contact.phone.isNotEmpty
+                                ? contact.phone
+                                : contact.name;
+                            final isSelected = contactId == _selectedId;
+                            return Padding(
+                              padding: const EdgeInsets.only(bottom: 10),
+                              child: InkWell(
+                                onTap: () =>
+                                    setState(() => _selectedId = contactId),
+                                borderRadius: BorderRadius.circular(16),
+                                child: Ink(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 10,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: isSelected
+                                        ? const Color(0xFFE9FAF9)
+                                        : Colors.white,
+                                    borderRadius: BorderRadius.circular(16),
+                                    border: Border.all(
+                                      color: isSelected
+                                          ? const Color(0xFF8DDDDD)
+                                          : Colors.transparent,
+                                    ),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      CircleAvatar(
+                                        radius: 22,
+                                        backgroundImage: NetworkImage(
+                                          contact.avatarUrl ??
+                                              'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=256&q=80',
+                                        ),
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              contact.name,
+                                              style: GoogleFonts.lexend(
+                                                color: const Color(0xFF17233D),
+                                                fontSize: 15,
+                                                fontWeight: FontWeight.w700,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 2),
+                                            Text(
+                                              contact.phone,
+                                              style: GoogleFonts.beVietnamPro(
+                                                color: const Color(0xFF7A869A),
+                                                fontSize: 13,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      Container(
+                                        width: 34,
+                                        height: 34,
+                                        decoration: BoxDecoration(
+                                          color: isSelected
+                                              ? const Color(0xFF00B3B8)
+                                              : const Color(0xFFF1F7F8),
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: Icon(
+                                          isSelected
+                                              ? Icons.check_rounded
+                                              : Icons.add_rounded,
+                                          color: isSelected
+                                              ? Colors.white
+                                              : const Color(0xFF00B3B8),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            );
+                          }),
+                        ],
+                      ),
+                    ),
             ),
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
@@ -610,7 +876,9 @@ class _SeniorContactDirectoryScreenState
                 width: double.infinity,
                 height: 56,
                 child: ElevatedButton(
-                  onPressed: () => Navigator.pop(context, selected),
+                  onPressed: selected.name.isNotEmpty
+                      ? () => Navigator.pop(context, selected)
+                      : null,
                   style: ElevatedButton.styleFrom(
                     elevation: 0,
                     backgroundColor: const Color(0xFF00B3B8),
@@ -758,8 +1026,7 @@ class _SeniorAddPhoneScreenState extends State<_SeniorAddPhoneScreen> {
 
     Navigator.pop(
       context,
-      _SeniorQuickContact(
-        id: phone,
+      QuickContact(
         name: name,
         phone: phone,
         avatarUrl:
@@ -1014,54 +1281,23 @@ class _SeniorTextField extends StatelessWidget {
   }
 }
 
-class _SeniorQuickContact {
-  const _SeniorQuickContact({
-    required this.id,
-    required this.name,
-    required this.phone,
-    required this.avatarUrl,
-  });
-
-  final String id;
-  final String name;
-  final String phone;
-  final String avatarUrl;
-}
-
-const List<_SeniorQuickContact> _directoryContacts = [
-  _SeniorQuickContact(
-    id: 'minh-cong',
-    name: 'Minh Cong',
-    phone: '+1 (555) 012-3456',
+const List<QuickContact> _defaultMockContacts = [
+  QuickContact(
+    name: 'Bố Hoàng',
+    phone: '0901000001',
     avatarUrl:
-        'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=300&auto=format&fit=crop',
+        'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&q=80',
   ),
-  _SeniorQuickContact(
-    id: 'huy-le',
-    name: 'Huy Le',
-    phone: '+1 (555) 987-6543',
+  QuickContact(
+    name: 'Mẹ Mai',
+    phone: '0901000004',
     avatarUrl:
-        'https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=300&auto=format&fit=crop',
+        'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=80',
   ),
-  _SeniorQuickContact(
-    id: 'bao-hiep',
-    name: 'Bao Hiep',
-    phone: '+1 (555) 246-8135',
+  QuickContact(
+    name: 'Bé Na',
+    phone: '0901000002',
     avatarUrl:
-        'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=300&auto=format&fit=crop',
-  ),
-  _SeniorQuickContact(
-    id: 'kha',
-    name: 'Kha',
-    phone: '+1 (555) 369-1472',
-    avatarUrl:
-        'https://images.unsplash.com/photo-1500048993953-d23a436266cf?q=80&w=300&auto=format&fit=crop',
-  ),
-  _SeniorQuickContact(
-    id: 'vo-huy',
-    name: 'Vo Huy',
-    phone: '+1 (555) 753-9514',
-    avatarUrl:
-        'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=300&auto=format&fit=crop',
+        'https://images.unsplash.com/photo-1596870230751-ebdfce98ec42?w=400&q=80',
   ),
 ];
