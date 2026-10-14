@@ -1,0 +1,2230 @@
+{
+  "metadata": {
+    "datasetVersion": "1.0.0",
+    "datasetName": "family_guard_complete_mock_vi",
+    "locale": "vi-VN",
+    "timezone": "Asia/Bangkok",
+    "generatedAt": "2026-04-09T17:45:00+07:00",
+    "familyId": "family_nguyen_001",
+    "notes": "Bo du lieu mock dong bo cho toan bo ung dung FamilyGuard."
+  },
+  "family": {
+    "familyId": "family_nguyen_001",
+    "familyName": "Gia đình Minh - Lan",
+    "createdByUserId": "user_ba_minh",
+    "createdAt": "2025-11-18T20:15:00+07:00",
+    "coManagerUserIds": [
+      "user_me_lan"
+    ],
+    "language": "vi-VN",
+    "homeAddress": "Căn hộ B1508, Riverside Residence, 188 Nguyễn Hữu Thọ, P. Tân Hưng, Quận 7, TP.HCM",
+    "memberUserIds": [
+      "user_ba_minh",
+      "user_me_lan",
+      "user_con_an",
+      "user_ba_noi_hoa"
+    ],
+    "displayOrder": [
+      "user_ba_minh",
+      "user_me_lan",
+      "user_con_an",
+      "user_ba_noi_hoa"
+    ],
+    "priorityWatchlistUserIds": [
+      "user_con_an",
+      "user_ba_noi_hoa"
+    ],
+    "onlineUserIds": [
+      "user_ba_minh",
+      "user_me_lan",
+      "user_con_an",
+      "user_ba_noi_hoa"
+    ],
+    "movingUserIds": [
+      "user_me_lan"
+    ],
+    "atHomeUserIds": [
+      "user_ba_noi_hoa"
+    ],
+    "recentAlertUserIds": [
+      "user_con_an",
+      "user_ba_noi_hoa"
+    ],
+    "familyStatusLabel": "Cần chú ý An và Bà nội trong hôm nay"
+  },
+  "accounts": [
+    {
+      "userId": "user_ba_minh",
+      "familyId": "family_nguyen_001",
+      "email": "ba@gmail.com",
+      "password": "123456",
+      "displayName": "Nguyễn Văn Minh",
+      "role": "ba",
+      "roleLabel": "Ba",
+      "relationshipMap": {
+        "user_me_lan": "Vợ",
+        "user_con_an": "Con",
+        "user_ba_noi_hoa": "Mẹ"
+      },
+      "avatar": "https://api.dicebear.com/9.x/notionists/png?seed=NguyenVanMinh",
+      "accountStatus": "active",
+      "lastLoginAt": "2026-04-09T17:31:22+07:00",
+      "activeDeviceId": "device_ba_minh_phone",
+      "onlineStatus": "online",
+      "isFamilyCreator": true,
+      "isCoManager": true,
+      "visibleUserIds": [
+        "user_ba_minh",
+        "user_me_lan",
+        "user_con_an",
+        "user_ba_noi_hoa"
+      ],
+      "visibleModules": [
+        "dashboard",
+        "member_list",
+        "profiles",
+        "family_map",
+        "location_history",
+        "safe_zones",
+        "alerts",
+        "fall_detection",
+        "sos",
+        "reports",
+        "notifications",
+        "settings",
+        "devices"
+      ],
+      "permissions": [
+        "view_all_members",
+        "receive_all_critical_alerts",
+        "manage_safe_zones",
+        "view_all_location_history",
+        "view_all_reports",
+        "manage_devices",
+        "trigger_sos"
+      ]
+    },
+    {
+      "userId": "user_me_lan",
+      "familyId": "family_nguyen_001",
+      "email": "me@gmail.com",
+      "password": "123456",
+      "displayName": "Trần Thị Lan",
+      "role": "me",
+      "roleLabel": "Mẹ",
+      "relationshipMap": {
+        "user_ba_minh": "Chồng",
+        "user_con_an": "Con",
+        "user_ba_noi_hoa": "Mẹ chồng"
+      },
+      "avatar": "https://api.dicebear.com/9.x/notionists/png?seed=TranThiLan",
+      "accountStatus": "active",
+      "lastLoginAt": "2026-04-09T17:20:04+07:00",
+      "activeDeviceId": "device_me_lan_phone",
+      "onlineStatus": "online",
+      "isFamilyCreator": false,
+      "isCoManager": true,
+      "visibleUserIds": [
+        "user_me_lan",
+        "user_con_an",
+        "user_ba_noi_hoa",
+        "user_ba_minh"
+      ],
+      "visibleModules": [
+        "dashboard",
+        "member_list",
+        "profiles",
+        "family_map",
+        "alerts",
+        "safe_zones_limited",
+        "notifications",
+        "chat",
+        "settings",
+        "devices"
+      ],
+      "permissions": [
+        "view_child_live_location",
+        "view_senior_live_location",
+        "receive_child_and_senior_alerts",
+        "view_spouse_basic_status",
+        "send_internal_alerts",
+        "trigger_sos"
+      ]
+    },
+    {
+      "userId": "user_con_an",
+      "familyId": "family_nguyen_001",
+      "email": "con@gmail.com",
+      "password": "123456",
+      "displayName": "Nguyễn Minh An",
+      "role": "con",
+      "roleLabel": "Con",
+      "relationshipMap": {
+        "user_ba_minh": "Ba",
+        "user_me_lan": "Mẹ",
+        "user_ba_noi_hoa": "Bà nội"
+      },
+      "avatar": "https://api.dicebear.com/9.x/notionists/png?seed=NguyenMinhAn",
+      "accountStatus": "active",
+      "lastLoginAt": "2026-04-09T16:58:40+07:00",
+      "activeDeviceId": "device_con_an_phone",
+      "onlineStatus": "online",
+      "isFamilyCreator": false,
+      "isCoManager": false,
+      "visibleUserIds": [
+        "user_con_an",
+        "user_ba_minh",
+        "user_me_lan",
+        "user_ba_noi_hoa"
+      ],
+      "visibleModules": [
+        "dashboard_simple",
+        "self_profile",
+        "self_location",
+        "sos",
+        "emergency_contacts",
+        "self_notifications",
+        "self_safe_zones",
+        "settings_basic"
+      ],
+      "permissions": [
+        "view_self_basic_profile",
+        "view_own_safe_zones",
+        "view_emergency_contacts",
+        "trigger_sos"
+      ]
+    },
+    {
+      "userId": "user_ba_noi_hoa",
+      "familyId": "family_nguyen_001",
+      "email": "noi@gmail.com",
+      "password": "123456",
+      "displayName": "Lê Thị Hoa",
+      "role": "ba_noi",
+      "roleLabel": "Bà nội",
+      "relationshipMap": {
+        "user_ba_minh": "Con trai",
+        "user_me_lan": "Con dâu",
+        "user_con_an": "Cháu nội"
+      },
+      "avatar": "https://api.dicebear.com/9.x/notionists/png?seed=LeThiHoa",
+      "accountStatus": "active",
+      "lastLoginAt": "2026-04-09T14:12:05+07:00",
+      "activeDeviceId": "device_ba_noi_phone",
+      "onlineStatus": "online",
+      "isFamilyCreator": false,
+      "isCoManager": false,
+      "visibleUserIds": [
+        "user_ba_noi_hoa",
+        "user_ba_minh",
+        "user_me_lan",
+        "user_con_an"
+      ],
+      "visibleModules": [
+        "dashboard_senior",
+        "self_profile",
+        "sos",
+        "emergency_contacts",
+        "simple_notifications",
+        "settings_accessibility"
+      ],
+      "permissions": [
+        "view_self_basic_profile",
+        "view_emergency_contacts",
+        "trigger_sos"
+      ]
+    }
+  ],
+  "members": [
+    {
+      "userId": "user_ba_minh",
+      "familyId": "family_nguyen_001",
+      "fullName": "Nguyễn Văn Minh",
+      "nickname": "Ba Minh",
+      "roleInFamily": "Ba",
+      "age": 42,
+      "dateOfBirth": "1983-07-18",
+      "gender": "Nam",
+      "occupation": "Kỹ sư xây dựng",
+      "phoneNumber": "+84 903 118 286",
+      "email": "ba@gmail.com",
+      "homeAddress": "Căn hộ B1508, Riverside Residence, 188 Nguyễn Hữu Thọ, P. Tân Hưng, Quận 7, TP.HCM",
+      "avatar": "https://api.dicebear.com/9.x/notionists/png?seed=NguyenVanMinh",
+      "healthNotes": "Không có bệnh nền nghiêm trọng, đôi lúc đau lưng khi đứng công trường lâu.",
+      "bloodType": "O+",
+      "emergencyContactIds": [
+        "contact_ba_1"
+      ],
+      "lifeContext": "Người quản lý chính của gia đình, thường xem bản đồ gia đình và báo cáo cuối ngày.",
+      "medicalTags": [
+        "Đau lưng nhẹ",
+        "Không dị ứng thuốc"
+      ]
+    },
+    {
+      "userId": "user_me_lan",
+      "familyId": "family_nguyen_001",
+      "fullName": "Trần Thị Lan",
+      "nickname": "Mẹ Lan",
+      "roleInFamily": "Mẹ",
+      "age": 39,
+      "dateOfBirth": "1986-11-03",
+      "gender": "Nữ",
+      "occupation": "Nhân viên văn phòng",
+      "phoneNumber": "+84 907 226 541",
+      "email": "me@gmail.com",
+      "homeAddress": "Căn hộ B1508, Riverside Residence, 188 Nguyễn Hữu Thọ, P. Tân Hưng, Quận 7, TP.HCM",
+      "avatar": "https://api.dicebear.com/9.x/notionists/png?seed=TranThiLan",
+      "healthNotes": "Viêm xoang nhẹ, dễ đau đầu khi làm việc quá lâu trước màn hình.",
+      "bloodType": "A+",
+      "emergencyContactIds": [
+        "contact_me_1"
+      ],
+      "lifeContext": "Theo dõi Con và Bà nội thường xuyên, ưu tiên gọi nhanh khi có sự cố.",
+      "medicalTags": [
+        "Viêm xoang nhẹ"
+      ]
+    },
+    {
+      "userId": "user_con_an",
+      "familyId": "family_nguyen_001",
+      "fullName": "Nguyễn Minh An",
+      "nickname": "An",
+      "roleInFamily": "Con",
+      "age": 12,
+      "dateOfBirth": "2013-08-21",
+      "gender": "Nam",
+      "occupation": "Học sinh",
+      "phoneNumber": "+84 933 440 115",
+      "email": "con@gmail.com",
+      "homeAddress": "Căn hộ B1508, Riverside Residence, 188 Nguyễn Hữu Thọ, P. Tân Hưng, Quận 7, TP.HCM",
+      "avatar": "https://api.dicebear.com/9.x/notionists/png?seed=NguyenMinhAn",
+      "healthNotes": "Cận thị 1.5 độ, dị ứng nhẹ với tôm cua.",
+      "bloodType": "B+",
+      "emergencyContactIds": [
+        "contact_con_1",
+        "contact_con_2"
+      ],
+      "lifeContext": "Di chuyển giữa nhà, trường và lớp học thêm; có lịch sinh hoạt khá đều nhưng đôi lúc ra khỏi vùng an toàn sớm.",
+      "medicalTags": [
+        "Cận thị",
+        "Dị ứng hải sản nhẹ"
+      ]
+    },
+    {
+      "userId": "user_ba_noi_hoa",
+      "familyId": "family_nguyen_001",
+      "fullName": "Lê Thị Hoa",
+      "nickname": "Bà nội",
+      "roleInFamily": "Bà nội",
+      "age": 72,
+      "dateOfBirth": "1953-02-14",
+      "gender": "Nữ",
+      "occupation": "Nghỉ hưu",
+      "phoneNumber": "+84 908 775 662",
+      "email": "noi@gmail.com",
+      "homeAddress": "Căn hộ B1508, Riverside Residence, 188 Nguyễn Hữu Thọ, P. Tân Hưng, Quận 7, TP.HCM",
+      "avatar": "https://api.dicebear.com/9.x/notionists/png?seed=LeThiHoa",
+      "healthNotes": "Tăng huyết áp, thoái hóa khớp gối, cần theo dõi té ngã và thời gian ra ngoài một mình.",
+      "bloodType": "O-",
+      "emergencyContactIds": [
+        "contact_noi_1",
+        "contact_noi_2"
+      ],
+      "lifeContext": "Thường ở nhà, thỉnh thoảng đi chợ gần nhà; ưu tiên giao diện chữ to và nút SOS lớn.",
+      "medicalTags": [
+        "Tăng huyết áp",
+        "Thoái hóa khớp gối",
+        "Nguy cơ té ngã trung bình"
+      ]
+    }
+  ],
+  "relationships": [
+    {
+      "relationshipId": "rel_ba_me_spouse",
+      "fromUserId": "user_ba_minh",
+      "toUserId": "user_me_lan",
+      "type": "spouse",
+      "label": "Chồng"
+    },
+    {
+      "relationshipId": "rel_me_ba_spouse",
+      "fromUserId": "user_me_lan",
+      "toUserId": "user_ba_minh",
+      "type": "spouse",
+      "label": "Vợ"
+    },
+    {
+      "relationshipId": "rel_ba_con_parent",
+      "fromUserId": "user_ba_minh",
+      "toUserId": "user_con_an",
+      "type": "parent",
+      "label": "Ba"
+    },
+    {
+      "relationshipId": "rel_me_con_parent",
+      "fromUserId": "user_me_lan",
+      "toUserId": "user_con_an",
+      "type": "parent",
+      "label": "Mẹ"
+    },
+    {
+      "relationshipId": "rel_con_ba_child",
+      "fromUserId": "user_con_an",
+      "toUserId": "user_ba_minh",
+      "type": "child",
+      "label": "Con"
+    },
+    {
+      "relationshipId": "rel_con_me_child",
+      "fromUserId": "user_con_an",
+      "toUserId": "user_me_lan",
+      "type": "child",
+      "label": "Con"
+    },
+    {
+      "relationshipId": "rel_noi_ba_parent",
+      "fromUserId": "user_ba_noi_hoa",
+      "toUserId": "user_ba_minh",
+      "type": "parent",
+      "label": "Mẹ"
+    },
+    {
+      "relationshipId": "rel_ba_noi_child",
+      "fromUserId": "user_ba_minh",
+      "toUserId": "user_ba_noi_hoa",
+      "type": "child",
+      "label": "Con trai"
+    },
+    {
+      "relationshipId": "rel_noi_me_inlaw",
+      "fromUserId": "user_ba_noi_hoa",
+      "toUserId": "user_me_lan",
+      "type": "in_law",
+      "label": "Mẹ chồng"
+    },
+    {
+      "relationshipId": "rel_me_noi_inlaw",
+      "fromUserId": "user_me_lan",
+      "toUserId": "user_ba_noi_hoa",
+      "type": "in_law",
+      "label": "Con dâu"
+    },
+    {
+      "relationshipId": "rel_noi_con_grandparent",
+      "fromUserId": "user_ba_noi_hoa",
+      "toUserId": "user_con_an",
+      "type": "grandparent",
+      "label": "Bà nội"
+    },
+    {
+      "relationshipId": "rel_con_noi_grandchild",
+      "fromUserId": "user_con_an",
+      "toUserId": "user_ba_noi_hoa",
+      "type": "grandchild",
+      "label": "Cháu nội"
+    }
+  ],
+  "accessControl": {
+    "familyCreatorUserId": "user_ba_minh",
+    "coManagerUserIds": [
+      "user_me_lan"
+    ],
+    "trackedPriorityUserIds": [
+      "user_con_an",
+      "user_ba_noi_hoa"
+    ],
+    "guardianAssignments": [
+      {
+        "guardianUserId": "user_ba_minh",
+        "trackedUserIds": [
+          "user_me_lan",
+          "user_con_an",
+          "user_ba_noi_hoa"
+        ],
+        "scope": "full"
+      },
+      {
+        "guardianUserId": "user_me_lan",
+        "trackedUserIds": [
+          "user_con_an",
+          "user_ba_noi_hoa"
+        ],
+        "scope": "full"
+      },
+      {
+        "guardianUserId": "user_me_lan",
+        "trackedUserIds": [
+          "user_ba_minh"
+        ],
+        "scope": "basic_live_status"
+      },
+      {
+        "guardianUserId": "user_con_an",
+        "trackedUserIds": [
+          "user_con_an"
+        ],
+        "scope": "self_only"
+      },
+      {
+        "guardianUserId": "user_ba_noi_hoa",
+        "trackedUserIds": [
+          "user_ba_noi_hoa"
+        ],
+        "scope": "self_only"
+      }
+    ],
+    "visibilityMatrix": [
+      {
+        "viewerUserId": "user_ba_minh",
+        "targetUserId": "user_me_lan",
+        "scope": "full"
+      },
+      {
+        "viewerUserId": "user_ba_minh",
+        "targetUserId": "user_con_an",
+        "scope": "full"
+      },
+      {
+        "viewerUserId": "user_ba_minh",
+        "targetUserId": "user_ba_noi_hoa",
+        "scope": "full"
+      },
+      {
+        "viewerUserId": "user_me_lan",
+        "targetUserId": "user_con_an",
+        "scope": "full"
+      },
+      {
+        "viewerUserId": "user_me_lan",
+        "targetUserId": "user_ba_noi_hoa",
+        "scope": "full"
+      },
+      {
+        "viewerUserId": "user_me_lan",
+        "targetUserId": "user_ba_minh",
+        "scope": "basic_live_status"
+      },
+      {
+        "viewerUserId": "user_con_an",
+        "targetUserId": "user_ba_minh",
+        "scope": "contact_only"
+      },
+      {
+        "viewerUserId": "user_con_an",
+        "targetUserId": "user_me_lan",
+        "scope": "contact_only"
+      },
+      {
+        "viewerUserId": "user_ba_noi_hoa",
+        "targetUserId": "user_ba_minh",
+        "scope": "contact_only"
+      },
+      {
+        "viewerUserId": "user_ba_noi_hoa",
+        "targetUserId": "user_me_lan",
+        "scope": "contact_only"
+      }
+    ]
+  },
+  "memberList": {
+    "displayOrder": [
+      "user_ba_minh",
+      "user_me_lan",
+      "user_con_an",
+      "user_ba_noi_hoa"
+    ],
+    "onlineUserIds": [
+      "user_ba_minh",
+      "user_me_lan",
+      "user_con_an",
+      "user_ba_noi_hoa"
+    ],
+    "movingUserIds": [
+      "user_me_lan"
+    ],
+    "atHomeUserIds": [
+      "user_ba_noi_hoa"
+    ],
+    "recentAlertUserIds": [
+      "user_con_an",
+      "user_ba_noi_hoa"
+    ],
+    "priorityWatchUserIds": [
+      "user_con_an",
+      "user_ba_noi_hoa"
+    ],
+    "items": [
+      {
+        "userId": "user_ba_minh",
+        "displayOrder": 1,
+        "displayName": "Ba Minh",
+        "roleLabel": "Ba",
+        "isOnline": true,
+        "isMoving": false,
+        "isAtHome": false,
+        "hasRecentAlert": false,
+        "requiresPriorityWatch": false,
+        "currentStatus": "Đang ở công trình",
+        "locationText": "Midtown M8, Phú Mỹ Hưng",
+        "batteryPercent": 58
+      },
+      {
+        "userId": "user_me_lan",
+        "displayOrder": 2,
+        "displayName": "Mẹ Lan",
+        "roleLabel": "Mẹ",
+        "isOnline": true,
+        "isMoving": true,
+        "isAtHome": false,
+        "hasRecentAlert": false,
+        "requiresPriorityWatch": false,
+        "currentStatus": "Đang đi xe về nhà",
+        "locationText": "Nguyễn Hữu Thọ, Quận 7",
+        "batteryPercent": 41
+      },
+      {
+        "userId": "user_con_an",
+        "displayOrder": 3,
+        "displayName": "Nguyễn Minh An",
+        "roleLabel": "Con",
+        "isOnline": true,
+        "isMoving": false,
+        "isAtHome": false,
+        "hasRecentAlert": true,
+        "requiresPriorityWatch": true,
+        "currentStatus": "Đang học thêm",
+        "locationText": "Trung tâm Anh ngữ Sao Việt",
+        "batteryPercent": 18
+      },
+      {
+        "userId": "user_ba_noi_hoa",
+        "displayOrder": 4,
+        "displayName": "Bà nội",
+        "roleLabel": "Bà nội",
+        "isOnline": true,
+        "isMoving": false,
+        "isAtHome": true,
+        "hasRecentAlert": true,
+        "requiresPriorityWatch": true,
+        "currentStatus": "Đang ở nhà",
+        "locationText": "Riverside Residence, Quận 7",
+        "batteryPercent": 76
+      }
+    ]
+  },
+  "devices": [
+    {
+      "deviceId": "device_ba_minh_phone",
+      "userId": "user_ba_minh",
+      "deviceName": "Samsung Galaxy S24 Ultra",
+      "deviceType": "phone",
+      "operatingSystem": "Android",
+      "osVersion": "15",
+      "appVersion": "1.0.0+1",
+      "batteryPercent": 58,
+      "networkType": "5g",
+      "connectionStatus": "online",
+      "lastSyncAt": "2026-04-09T17:41:03+07:00",
+      "isPrimary": true,
+      "permissions": {
+        "location": true,
+        "notifications": true,
+        "motionActivity": true,
+        "backgroundTracking": true
+      },
+      "backgroundTrackingStatus": "allowed"
+    },
+    {
+      "deviceId": "device_me_lan_phone",
+      "userId": "user_me_lan",
+      "deviceName": "iPhone 14",
+      "deviceType": "phone",
+      "operatingSystem": "iOS",
+      "osVersion": "18.1",
+      "appVersion": "1.0.0+1",
+      "batteryPercent": 41,
+      "networkType": "4g",
+      "connectionStatus": "online",
+      "lastSyncAt": "2026-04-09T17:38:24+07:00",
+      "isPrimary": true,
+      "permissions": {
+        "location": true,
+        "notifications": true,
+        "motionActivity": true,
+        "backgroundTracking": true
+      },
+      "backgroundTrackingStatus": "allowed"
+    },
+    {
+      "deviceId": "device_con_an_phone",
+      "userId": "user_con_an",
+      "deviceName": "Samsung Galaxy A15",
+      "deviceType": "phone",
+      "operatingSystem": "Android",
+      "osVersion": "14",
+      "appVersion": "1.0.0+1",
+      "batteryPercent": 18,
+      "networkType": "wifi",
+      "connectionStatus": "online",
+      "lastSyncAt": "2026-04-09T17:40:18+07:00",
+      "isPrimary": true,
+      "permissions": {
+        "location": true,
+        "notifications": true,
+        "motionActivity": true,
+        "backgroundTracking": true
+      },
+      "backgroundTrackingStatus": "allowed"
+    },
+    {
+      "deviceId": "device_ba_noi_phone",
+      "userId": "user_ba_noi_hoa",
+      "deviceName": "OPPO A58",
+      "deviceType": "phone",
+      "operatingSystem": "Android",
+      "osVersion": "14",
+      "appVersion": "1.0.0+1",
+      "batteryPercent": 76,
+      "networkType": "wifi",
+      "connectionStatus": "online",
+      "lastSyncAt": "2026-04-09T17:39:42+07:00",
+      "isPrimary": true,
+      "permissions": {
+        "location": true,
+        "notifications": true,
+        "motionActivity": true,
+        "backgroundTracking": true
+      },
+      "backgroundTrackingStatus": "allowed"
+    },
+    {
+      "deviceId": "device_ba_noi_band",
+      "userId": "user_ba_noi_hoa",
+      "deviceName": "FamilyGuard Care Band",
+      "deviceType": "wearable",
+      "operatingSystem": "Embedded",
+      "osVersion": "2.3.1",
+      "appVersion": "2.3.1",
+      "batteryPercent": 12,
+      "networkType": "bluetooth",
+      "connectionStatus": "offline",
+      "lastSyncAt": "2026-04-09T14:02:11+07:00",
+      "isPrimary": false,
+      "permissions": {
+        "location": false,
+        "notifications": false,
+        "motionActivity": true,
+        "backgroundTracking": false
+      },
+      "backgroundTrackingStatus": "not_applicable"
+    }
+  ],
+  "zones": [
+    {
+      "zoneId": "zone_home_001",
+      "familyId": "family_nguyen_001",
+      "name": "Nh�",
+      "zoneType": "home",
+      "addressText": "Can h? B1508, Riverside Residence, 188 Nguy?n H?u Th?, P. T�n Hung, Qu?n 7, TP.HCM",
+      "centerLatitude": 10.737463,
+      "centerLongitude": 106.704642,
+      "radiusMeters": 120,
+      "appliesToUserIds": [
+        "user_ba_minh",
+        "user_me_lan",
+        "user_con_an",
+        "user_ba_noi_hoa"
+      ],
+      "activeSchedule": {
+        "timezone": "Asia/Bangkok",
+        "rules": [
+          {
+            "daysOfWeek": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"],
+            "startTime": "00:00",
+            "endTime": "23:59"
+          }
+        ]
+      },
+      "alertOnEnter": true,
+      "alertOnExit": true,
+      "alertRecipientUserIds": ["user_ba_minh", "user_me_lan"],
+      "managedByUserId": "user_ba_minh"
+    },
+    {
+      "zoneId": "zone_school_001",
+      "familyId": "family_nguyen_001",
+      "name": "Tru?ng THCS T�n Hung",
+      "zoneType": "school",
+      "addressText": "12 �u?ng s? 3, P. T�n Hung, Qu?n 7, TP.HCM",
+      "centerLatitude": 10.741985,
+      "centerLongitude": 106.709824,
+      "radiusMeters": 180,
+      "appliesToUserIds": ["user_con_an"],
+      "activeSchedule": {
+        "timezone": "Asia/Bangkok",
+        "rules": [
+          {
+            "daysOfWeek": ["mon", "tue", "wed", "thu", "fri"],
+            "startTime": "06:30",
+            "endTime": "16:30"
+          }
+        ]
+      },
+      "alertOnEnter": true,
+      "alertOnExit": true,
+      "specialRules": [
+        {
+          "condition": "exit_before_16:30",
+          "description": "B�o n?u An r?i tru?ng s?m hon gi? tan h?c.",
+          "notifyUserIds": ["user_ba_minh", "user_me_lan"]
+        }
+      ],
+      "alertRecipientUserIds": ["user_ba_minh", "user_me_lan"],
+      "managedByUserId": "user_ba_minh"
+    },
+    {
+      "zoneId": "zone_office_me_001",
+      "familyId": "family_nguyen_001",
+      "name": "Van ph�ng M?",
+      "zoneType": "office",
+      "addressText": "T�a nh� Sunrise City North, 27 Nguy?n H?u Th?, P. T�n Hung, Qu?n 7, TP.HCM",
+      "centerLatitude": 10.739612,
+      "centerLongitude": 106.705599,
+      "radiusMeters": 140,
+      "appliesToUserIds": ["user_me_lan"],
+      "activeSchedule": {
+        "timezone": "Asia/Bangkok",
+        "rules": [
+          {
+            "daysOfWeek": ["mon", "tue", "wed", "thu", "fri"],
+            "startTime": "07:30",
+            "endTime": "18:30"
+          }
+        ]
+      },
+      "alertOnEnter": true,
+      "alertOnExit": false,
+      "alertRecipientUserIds": ["user_ba_minh", "user_me_lan"],
+      "managedByUserId": "user_ba_minh"
+    },
+    {
+      "zoneId": "zone_site_ba_001",
+      "familyId": "family_nguyen_001",
+      "name": "C�ng tr�nh Midtown M8",
+      "zoneType": "worksite",
+      "addressText": "�u?ng s? 16, Khu d� th? Ph� M? Hung, P. T�n Ph�, Qu?n 7, TP.HCM",
+      "centerLatitude": 10.730284,
+      "centerLongitude": 106.71985,
+      "radiusMeters": 200,
+      "appliesToUserIds": ["user_ba_minh"],
+      "activeSchedule": {
+        "timezone": "Asia/Bangkok",
+        "rules": [
+          {
+            "daysOfWeek": ["mon", "tue", "wed", "thu", "fri", "sat"],
+            "startTime": "07:00",
+            "endTime": "19:00"
+          }
+        ]
+      },
+      "alertOnEnter": false,
+      "alertOnExit": false,
+      "alertRecipientUserIds": ["user_ba_minh"],
+      "managedByUserId": "user_ba_minh"
+    },
+    {
+      "zoneId": "zone_market_noi_001",
+      "familyId": "family_nguyen_001",
+      "name": "Ch? g?n nh� c?a B� n?i",
+      "zoneType": "market",
+      "addressText": "Ch? T�n M?, 19 Nguy?n Th? Th?p, P. T�n Ph�, Qu?n 7, TP.HCM",
+      "centerLatitude": 10.729412,
+      "centerLongitude": 106.721902,
+      "radiusMeters": 100,
+      "appliesToUserIds": ["user_ba_noi_hoa"],
+      "activeSchedule": {
+        "timezone": "Asia/Bangkok",
+        "rules": [
+          {
+            "daysOfWeek": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"],
+            "startTime": "05:30",
+            "endTime": "11:30"
+          }
+        ]
+      },
+      "alertOnEnter": false,
+      "alertOnExit": true,
+      "specialRules": [
+        {
+          "condition": "outside_home_more_than_90_minutes",
+          "description": "B�o khi B� n?i ? ngo�i nh� qu� l�u.",
+          "notifyUserIds": ["user_ba_minh", "user_me_lan"]
+        }
+      ],
+      "alertRecipientUserIds": ["user_ba_minh", "user_me_lan"],
+      "managedByUserId": "user_ba_minh"
+    }
+  ],
+  "currentLocations": [
+    {
+      "userId": "user_ba_minh",
+      "latitude": 10.730391,
+      "longitude": 106.719622,
+      "addressText": "Block M8, C�ng tr�nh Midtown, �u?ng s? 16, Ph� M? Hung, Qu?n 7, TP.HCM",
+      "lastUpdatedAt": "2026-04-09T17:40:58+07:00",
+      "gpsAccuracyMeters": 8,
+      "movementStatus": "dang ? co quan",
+      "placeContext": "�ang ki?m tra cu?i ng�y t?i c�ng tr�nh",
+      "batteryPercent": 58,
+      "networkType": "5g",
+      "speedKmh": 0.4,
+      "headingDegrees": 132,
+      "isOnline": true,
+      "zoneId": "zone_site_ba_001",
+      "zoneName": "C�ng tr�nh Midtown M8"
+    },
+    {
+      "userId": "user_me_lan",
+      "latitude": 10.738264,
+      "longitude": 106.707481,
+      "addressText": "Nguy?n H?u Th?, hu?ng v? Riverside Residence, Qu?n 7, TP.HCM",
+      "lastUpdatedAt": "2026-04-09T17:38:21+07:00",
+      "gpsAccuracyMeters": 11,
+      "movementStatus": "dang di xe",
+      "placeContext": "�ang tr�n du?ng v? nh� sau gi? l�m",
+      "batteryPercent": 41,
+      "networkType": "4g",
+      "speedKmh": 27.6,
+      "headingDegrees": 211,
+      "isOnline": true,
+      "zoneId": null,
+      "zoneName": null
+    },
+    {
+      "userId": "user_con_an",
+      "latitude": 10.7399,
+      "longitude": 106.71185,
+      "addressText": "Trung t�m Anh ng? Sao Vi?t, 41 L�m Van B?n, P. T�n Ki?ng, Qu?n 7, TP.HCM",
+      "lastUpdatedAt": "2026-04-09T17:40:12+07:00",
+      "gpsAccuracyMeters": 12,
+      "movementStatus": "dang d?ng y�n",
+      "placeContext": "�ang ng?i h?c th�m",
+      "batteryPercent": 18,
+      "networkType": "wifi",
+      "speedKmh": 0,
+      "headingDegrees": 0,
+      "isOnline": true,
+      "zoneId": null,
+      "zoneName": null
+    },
+    {
+      "userId": "user_ba_noi_hoa",
+      "latitude": 10.737463,
+      "longitude": 106.704642,
+      "addressText": "Can h? B1508, Riverside Residence, 188 Nguy?n H?u Th?, P. T�n Hung, Qu?n 7, TP.HCM",
+      "lastUpdatedAt": "2026-04-09T17:39:36+07:00",
+      "gpsAccuracyMeters": 6,
+      "movementStatus": "dang ? nh�",
+      "placeContext": "�ang ngh? ? ph�ng kh�ch",
+      "batteryPercent": 76,
+      "networkType": "wifi",
+      "speedKmh": 0,
+      "headingDegrees": 0,
+      "isOnline": true,
+      "zoneId": "zone_home_001",
+      "zoneName": "Nh�"
+    }
+  ],
+  "locationHistory": [
+    {
+      "userId": "user_ba_minh",
+      "date": "2026-04-09",
+      "totalDistanceKm": 14.6,
+      "totalDurationMinutes": 690,
+      "zoneTransitions": {
+        "entered": 2,
+        "exited": 2
+      },
+      "routePolyline": [[10.737463, 106.704642], [10.7361, 106.70841], [10.73382, 106.71399], [10.731552, 106.71821], [10.730391, 106.719622]],
+      "timeline": [
+        {
+          "from": "2026-04-09T06:10:00+07:00",
+          "to": "2026-04-09T07:04:00+07:00",
+          "locationName": "Nh�",
+          "addressText": "Riverside Residence, Qu?n 7",
+          "latitude": 10.737463,
+          "longitude": 106.704642,
+          "activity": "Chu?n b? di l�m, an s�ng c�ng gia d�nh",
+          "movementType": "still",
+          "durationMinutes": 54,
+          "geofenceEvent": "inside_zone_home_001"
+        },
+        {
+          "from": "2026-04-09T07:04:00+07:00",
+          "to": "2026-04-09T07:48:00+07:00",
+          "locationName": "Tr�n du?ng d?n c�ng tr�nh",
+          "addressText": "Nguy?n H?u Th? - Ph� M? Hung, Qu?n 7",
+          "latitude": 10.73495,
+          "longitude": 106.71234,
+          "activity": "�i xe m�y d?n c�ng tr�nh",
+          "movementType": "vehicle",
+          "durationMinutes": 44,
+          "geofenceEvent": "exit_zone_home_001"
+        },
+        {
+          "from": "2026-04-09T07:48:00+07:00",
+          "to": "2026-04-09T11:57:00+07:00",
+          "locationName": "C�ng tr�nh Midtown M8",
+          "addressText": "Ph� M? Hung, Qu?n 7",
+          "latitude": 10.730284,
+          "longitude": 106.71985,
+          "activity": "Ki?m tra hi?n tru?ng v� h?p d?i thi c�ng",
+          "movementType": "walking",
+          "durationMinutes": 249,
+          "geofenceEvent": "enter_zone_site_ba_001"
+        },
+        {
+          "from": "2026-04-09T11:57:00+07:00",
+          "to": "2026-04-09T12:44:00+07:00",
+          "locationName": "Cang tin g?n c�ng tr�nh",
+          "addressText": "Khu d?ch v? Midtown, Qu?n 7",
+          "latitude": 10.731248,
+          "longitude": 106.718204,
+          "activity": "An trua c�ng d?ng nghi?p",
+          "movementType": "still",
+          "durationMinutes": 47,
+          "geofenceEvent": "exit_zone_site_ba_001"
+        },
+        {
+          "from": "2026-04-09T12:44:00+07:00",
+          "to": "2026-04-09T17:40:00+07:00",
+          "locationName": "C�ng tr�nh Midtown M8",
+          "addressText": "Ph� M? Hung, Qu?n 7",
+          "latitude": 10.730391,
+          "longitude": 106.719622,
+          "activity": "Ho�n t?t nghi?m thu cu?i ng�y",
+          "movementType": "walking",
+          "durationMinutes": 296,
+          "geofenceEvent": "enter_zone_site_ba_001"
+        }
+      ]
+    },
+    {
+      "userId": "user_me_lan",
+      "date": "2026-04-09",
+      "totalDistanceKm": 9.1,
+      "totalDurationMinutes": 698,
+      "zoneTransitions": {
+        "entered": 1,
+        "exited": 2
+      },
+      "routePolyline": [[10.737463, 106.704642], [10.73892, 106.70511], [10.739612, 106.705599], [10.74008, 106.70692], [10.738264, 106.707481]],
+      "timeline": [
+        {
+          "from": "2026-04-09T06:00:00+07:00",
+          "to": "2026-04-09T07:18:00+07:00",
+          "locationName": "Nh�",
+          "addressText": "Riverside Residence, Qu?n 7",
+          "latitude": 10.737463,
+          "longitude": 106.704642,
+          "activity": "Chu?n b? d? an s�ng v� dua An di h?c",
+          "movementType": "still",
+          "durationMinutes": 78,
+          "geofenceEvent": "inside_zone_home_001"
+        },
+        {
+          "from": "2026-04-09T07:18:00+07:00",
+          "to": "2026-04-09T07:52:00+07:00",
+          "locationName": "Tr�n du?ng d?n van ph�ng",
+          "addressText": "Nguy?n H?u Th?, Qu?n 7",
+          "latitude": 10.73911,
+          "longitude": 106.70524,
+          "activity": "�i xe d?n van ph�ng",
+          "movementType": "vehicle",
+          "durationMinutes": 34,
+          "geofenceEvent": "exit_zone_home_001"
+        },
+        {
+          "from": "2026-04-09T07:52:00+07:00",
+          "to": "2026-04-09T11:58:00+07:00",
+          "locationName": "Van ph�ng M?",
+          "addressText": "Sunrise City North, Qu?n 7",
+          "latitude": 10.739612,
+          "longitude": 106.705599,
+          "activity": "L�m vi?c t?i van ph�ng",
+          "movementType": "still",
+          "durationMinutes": 246,
+          "geofenceEvent": "enter_zone_office_me_001"
+        },
+        {
+          "from": "2026-04-09T11:58:00+07:00",
+          "to": "2026-04-09T13:05:00+07:00",
+          "locationName": "Qu�n c� ph� trua",
+          "addressText": "Khu Nguy?n H?u Th?, Qu?n 7",
+          "latitude": 10.74042,
+          "longitude": 106.70642,
+          "activity": "An trua v� tr? l?i tin nh?n gia d�nh",
+          "movementType": "walking",
+          "durationMinutes": 67,
+          "geofenceEvent": "exit_zone_office_me_001"
+        },
+        {
+          "from": "2026-04-09T13:05:00+07:00",
+          "to": "2026-04-09T17:18:00+07:00",
+          "locationName": "Van ph�ng M?",
+          "addressText": "Sunrise City North, Qu?n 7",
+          "latitude": 10.739612,
+          "longitude": 106.705599,
+          "activity": "Ti?p t?c l�m vi?c, ki?m tra th�ng b�o c?a Con v� B� n?i",
+          "movementType": "still",
+          "durationMinutes": 253,
+          "geofenceEvent": "enter_zone_office_me_001"
+        },
+        {
+          "from": "2026-04-09T17:18:00+07:00",
+          "to": "2026-04-09T17:38:00+07:00",
+          "locationName": "�u?ng v? nh�",
+          "addressText": "Nguy?n H?u Th?, Qu?n 7",
+          "latitude": 10.738264,
+          "longitude": 106.707481,
+          "activity": "�i xe v? nh�",
+          "movementType": "vehicle",
+          "durationMinutes": 20,
+          "geofenceEvent": "exit_zone_office_me_001"
+        }
+      ]
+    },
+    {
+      "userId": "user_con_an",
+      "date": "2026-04-09",
+      "totalDistanceKm": 7.4,
+      "totalDurationMinutes": 685,
+      "zoneTransitions": {
+        "entered": 1,
+        "exited": 2
+      },
+      "routePolyline": [[10.737463, 106.704642], [10.739884, 106.707402], [10.741985, 106.709824], [10.74241, 106.71102], [10.7399, 106.71185]],
+      "timeline": [
+        {
+          "from": "2026-04-09T06:15:00+07:00",
+          "to": "2026-04-09T07:00:00+07:00",
+          "locationName": "Nh�",
+          "addressText": "Riverside Residence, Qu?n 7",
+          "latitude": 10.737463,
+          "longitude": 106.704642,
+          "activity": "An s�ng, chu?n b? d?n tru?ng",
+          "movementType": "still",
+          "durationMinutes": 45,
+          "geofenceEvent": "inside_zone_home_001"
+        },
+        {
+          "from": "2026-04-09T07:00:00+07:00",
+          "to": "2026-04-09T07:25:00+07:00",
+          "locationName": "Tr�n du?ng d?n tru?ng",
+          "addressText": "Nguy?n H?u Th? - �u?ng s? 3, Qu?n 7",
+          "latitude": 10.739884,
+          "longitude": 106.707402,
+          "activity": "�i xe c�ng M? d?n tru?ng",
+          "movementType": "vehicle",
+          "durationMinutes": 25,
+          "geofenceEvent": "exit_zone_home_001"
+        },
+        {
+          "from": "2026-04-09T07:25:00+07:00",
+          "to": "2026-04-09T15:18:00+07:00",
+          "locationName": "Tru?ng THCS T�n Hung",
+          "addressText": "12 �u?ng s? 3, Qu?n 7",
+          "latitude": 10.741985,
+          "longitude": 106.709824,
+          "activity": "H?c ? tru?ng, ra s�n choi gi? ra choi",
+          "movementType": "still",
+          "durationMinutes": 473,
+          "geofenceEvent": "enter_zone_school_001"
+        },
+        {
+          "from": "2026-04-09T15:18:00+07:00",
+          "to": "2026-04-09T15:42:00+07:00",
+          "locationName": "C?a h�ng ti?n l?i tru?c tru?ng",
+          "addressText": "G?n c?ng Tru?ng THCS T�n Hung, Qu?n 7",
+          "latitude": 10.74241,
+          "longitude": 106.71102,
+          "activity": "Ra ngo�i mua nu?c tru?c gi? tan h?c",
+          "movementType": "walking",
+          "durationMinutes": 24,
+          "geofenceEvent": "exit_zone_school_001"
+        },
+        {
+          "from": "2026-04-09T15:42:00+07:00",
+          "to": "2026-04-09T16:05:00+07:00",
+          "locationName": "Tr�n du?ng d?n l?p h?c th�m",
+          "addressText": "�u?ng L�m Van B?n, Qu?n 7",
+          "latitude": 10.74102,
+          "longitude": 106.71148,
+          "activity": "�i xe c�ng Ba d?n l?p h?c th�m",
+          "movementType": "vehicle",
+          "durationMinutes": 23,
+          "geofenceEvent": "outside_all_zones"
+        },
+        {
+          "from": "2026-04-09T16:05:00+07:00",
+          "to": "2026-04-09T17:40:00+07:00",
+          "locationName": "Trung t�m Anh ng? Sao Vi?t",
+          "addressText": "41 L�m Van B?n, Qu?n 7",
+          "latitude": 10.7399,
+          "longitude": 106.71185,
+          "activity": "H?c th�m ti?ng Anh",
+          "movementType": "still",
+          "durationMinutes": 95,
+          "geofenceEvent": "outside_all_zones"
+        }
+      ]
+    },
+    {
+      "userId": "user_ba_noi_hoa",
+      "date": "2026-04-09",
+      "totalDistanceKm": 2.3,
+      "totalDurationMinutes": 710,
+      "zoneTransitions": {
+        "entered": 2,
+        "exited": 1
+      },
+      "routePolyline": [[10.737463, 106.704642], [10.73482, 106.71012], [10.73195, 106.71782], [10.729412, 106.721902], [10.737463, 106.704642]],
+      "timeline": [
+        {
+          "from": "2026-04-09T05:50:00+07:00",
+          "to": "2026-04-09T08:32:00+07:00",
+          "locationName": "Nh�",
+          "addressText": "Riverside Residence, Qu?n 7",
+          "latitude": 10.737463,
+          "longitude": 106.704642,
+          "activity": "? nh�, tu?i c�y v� an s�ng",
+          "movementType": "still",
+          "durationMinutes": 162,
+          "geofenceEvent": "inside_zone_home_001"
+        },
+        {
+          "from": "2026-04-09T08:32:00+07:00",
+          "to": "2026-04-09T08:52:00+07:00",
+          "locationName": "Tr�n du?ng ra ch?",
+          "addressText": "Nguy?n H?u Th? - Nguy?n Th? Th?p, Qu?n 7",
+          "latitude": 10.73482,
+          "longitude": 106.71012,
+          "activity": "�i b? ch?m ra ch?",
+          "movementType": "walking",
+          "durationMinutes": 20,
+          "geofenceEvent": "exit_zone_home_001"
+        },
+        {
+          "from": "2026-04-09T08:52:00+07:00",
+          "to": "2026-04-09T09:34:00+07:00",
+          "locationName": "Ch? T�n M?",
+          "addressText": "19 Nguy?n Th? Th?p, Qu?n 7",
+          "latitude": 10.729412,
+          "longitude": 106.721902,
+          "activity": "Mua rau v� d? an s�ng",
+          "movementType": "walking",
+          "durationMinutes": 42,
+          "geofenceEvent": "enter_zone_market_noi_001"
+        },
+        {
+          "from": "2026-04-09T09:34:00+07:00",
+          "to": "2026-04-09T10:12:00+07:00",
+          "locationName": "Nh� thu?c Minh Ch�u",
+          "addressText": "�u?ng Nguy?n Th? Th?p, Qu?n 7",
+          "latitude": 10.731318,
+          "longitude": 106.718614,
+          "activity": "Gh� mua thu?c huy?t �p",
+          "movementType": "walking",
+          "durationMinutes": 38,
+          "geofenceEvent": "exit_zone_market_noi_001"
+        },
+        {
+          "from": "2026-04-09T10:12:00+07:00",
+          "to": "2026-04-09T10:34:00+07:00",
+          "locationName": "Tr�n du?ng v? nh�",
+          "addressText": "Nguy?n H?u Th?, Qu?n 7",
+          "latitude": 10.73492,
+          "longitude": 106.70974,
+          "activity": "�i b? v? nh�",
+          "movementType": "walking",
+          "durationMinutes": 22,
+          "geofenceEvent": "outside_all_zones"
+        },
+        {
+          "from": "2026-04-09T10:34:00+07:00",
+          "to": "2026-04-09T17:40:00+07:00",
+          "locationName": "Nh�",
+          "addressText": "Riverside Residence, Qu?n 7",
+          "latitude": 10.737463,
+          "longitude": 106.704642,
+          "activity": "Ngh? ngoi t?i nh� sau khi tr? v?",
+          "movementType": "still",
+          "durationMinutes": 426,
+          "geofenceEvent": "enter_zone_home_001"
+        }
+      ]
+    }
+  ],
+  "activities": [
+    {
+      "userId": "user_ba_minh",
+      "currentActivity": {
+        "type": "still",
+        "label": "�ang d?ng ki?m tra c�ng tr�nh",
+        "startedAt": "2026-04-09T17:18:00+07:00",
+        "confidence": 0.89
+      },
+      "history": [
+        {"from": "2026-04-09T07:04:00+07:00", "to": "2026-04-09T07:48:00+07:00", "type": "vehicle", "label": "�i xe m�y d?n c�ng tr�nh"},
+        {"from": "2026-04-09T07:48:00+07:00", "to": "2026-04-09T11:57:00+07:00", "type": "walking", "label": "Di chuy?n trong c�ng tr�nh"},
+        {"from": "2026-04-09T11:57:00+07:00", "to": "2026-04-09T12:44:00+07:00", "type": "still", "label": "Ng?i an trua"},
+        {"from": "2026-04-09T12:44:00+07:00", "to": "2026-04-09T17:40:00+07:00", "type": "walking", "label": "Ki?m tra hi?n tru?ng"}
+      ],
+      "todaySummary": {
+        "walkingMinutes": 92,
+        "runningMinutes": 0,
+        "vehicleMinutes": 48,
+        "stillMinutes": 535,
+        "unknownMinutes": 15,
+        "totalActiveMinutes": 92,
+        "stepEstimate": 7420
+      }
+    },
+    {
+      "userId": "user_me_lan",
+      "currentActivity": {
+        "type": "vehicle",
+        "label": "�ang ng?i tr�n xe v? nh�",
+        "startedAt": "2026-04-09T17:18:00+07:00",
+        "confidence": 0.93
+      },
+      "history": [
+        {"from": "2026-04-09T07:18:00+07:00", "to": "2026-04-09T07:52:00+07:00", "type": "vehicle", "label": "Di chuy?n d?n van ph�ng"},
+        {"from": "2026-04-09T07:52:00+07:00", "to": "2026-04-09T11:58:00+07:00", "type": "still", "label": "Ng?i l�m vi?c"},
+        {"from": "2026-04-09T11:58:00+07:00", "to": "2026-04-09T13:05:00+07:00", "type": "walking", "label": "�i b? an trua"},
+        {"from": "2026-04-09T13:05:00+07:00", "to": "2026-04-09T17:18:00+07:00", "type": "still", "label": "Ng?i l�m vi?c"},
+        {"from": "2026-04-09T17:18:00+07:00", "to": "2026-04-09T17:38:00+07:00", "type": "vehicle", "label": "�i xe v? nh�"}
+      ],
+      "todaySummary": {
+        "walkingMinutes": 46,
+        "runningMinutes": 0,
+        "vehicleMinutes": 54,
+        "stillMinutes": 580,
+        "unknownMinutes": 18,
+        "totalActiveMinutes": 46,
+        "stepEstimate": 4920
+      }
+    },
+    {
+      "userId": "user_con_an",
+      "currentActivity": {
+        "type": "still",
+        "label": "�ang ng?i h?c th�m",
+        "startedAt": "2026-04-09T16:05:00+07:00",
+        "confidence": 0.95
+      },
+      "history": [
+        {"from": "2026-04-09T07:00:00+07:00", "to": "2026-04-09T07:25:00+07:00", "type": "vehicle", "label": "�i xe d?n tru?ng"},
+        {"from": "2026-04-09T07:25:00+07:00", "to": "2026-04-09T10:15:00+07:00", "type": "still", "label": "Ng?i h?c trong l?p"},
+        {"from": "2026-04-09T10:15:00+07:00", "to": "2026-04-09T10:33:00+07:00", "type": "running", "label": "Ch?y ? s�n tru?ng gi? ra choi"},
+        {"from": "2026-04-09T10:33:00+07:00", "to": "2026-04-09T15:18:00+07:00", "type": "still", "label": "Ng?i h?c"},
+        {"from": "2026-04-09T15:18:00+07:00", "to": "2026-04-09T15:42:00+07:00", "type": "walking", "label": "�i b? ra ngo�i c?ng tru?ng"},
+        {"from": "2026-04-09T15:42:00+07:00", "to": "2026-04-09T16:05:00+07:00", "type": "vehicle", "label": "�i xe d?n l?p h?c th�m"}
+      ],
+      "todaySummary": {
+        "walkingMinutes": 51,
+        "runningMinutes": 18,
+        "vehicleMinutes": 48,
+        "stillMinutes": 545,
+        "unknownMinutes": 14,
+        "totalActiveMinutes": 69,
+        "stepEstimate": 8350
+      }
+    },
+    {
+      "userId": "user_ba_noi_hoa",
+      "currentActivity": {
+        "type": "still",
+        "label": "�ang ngh? ? ph�ng kh�ch",
+        "startedAt": "2026-04-09T15:10:00+07:00",
+        "confidence": 0.91
+      },
+      "history": [
+        {"from": "2026-04-09T05:50:00+07:00", "to": "2026-04-09T08:32:00+07:00", "type": "still", "label": "? nh�"},
+        {"from": "2026-04-09T08:32:00+07:00", "to": "2026-04-09T10:34:00+07:00", "type": "walking", "label": "�i b? ch?m ra ch? v� v? nh�"},
+        {"from": "2026-04-09T10:42:00+07:00", "to": "2026-04-09T10:43:00+07:00", "type": "unknown", "label": "Thi?t b? ghi nh?n va ch?m b?t thu?ng"},
+        {"from": "2026-04-09T10:47:00+07:00", "to": "2026-04-09T17:40:00+07:00", "type": "still", "label": "Ngh? ngoi t?i nh�"}
+      ],
+      "todaySummary": {
+        "walkingMinutes": 64,
+        "runningMinutes": 0,
+        "vehicleMinutes": 0,
+        "stillMinutes": 628,
+        "unknownMinutes": 18,
+        "totalActiveMinutes": 64,
+        "stepEstimate": 3460
+      }
+    }
+  ],
+  "screenUsage": [
+    {
+      "userId": "user_ba_minh",
+      "date": "2026-04-09",
+      "screenTimeMinutesToday": 288,
+      "unlockCount": 67,
+      "mostUsedApps": [
+        {"appName": "Zalo", "minutes": 72},
+        {"appName": "Google Maps", "minutes": 44},
+        {"appName": "Gmail", "minutes": 39},
+        {"appName": "FamilyGuard", "minutes": 34}
+      ],
+      "usageNote": "S? d?ng m?c v?a d?n cao, ch? y?u cho c�ng vi?c v� ki?m tra gia d�nh."
+    },
+    {
+      "userId": "user_me_lan",
+      "date": "2026-04-09",
+      "screenTimeMinutesToday": 236,
+      "unlockCount": 52,
+      "mostUsedApps": [
+        {"appName": "Zalo", "minutes": 61},
+        {"appName": "Outlook", "minutes": 58},
+        {"appName": "FamilyGuard", "minutes": 29},
+        {"appName": "Safari", "minutes": 24}
+      ],
+      "usageNote": "D�ng di?n tho?i d?u trong gi? l�m, uu ti�n ki?m tra th�ng b�o t? An v� B� n?i."
+    },
+    {
+      "userId": "user_con_an",
+      "date": "2026-04-09",
+      "screenTimeMinutesToday": 132,
+      "unlockCount": 31,
+      "mostUsedApps": [
+        {"appName": "Google Classroom", "minutes": 28},
+        {"appName": "FamilyGuard", "minutes": 22},
+        {"appName": "YouTube Kids", "minutes": 18},
+        {"appName": "T? di?n Anh Vi?t", "minutes": 14}
+      ],
+      "studyHours": ["07:30-11:30", "13:00-16:30"],
+      "breakHours": ["12:00-13:00", "19:00-20:00"],
+      "blockedAppAttemptsToday": 2,
+      "usageNote": "Th?i gian d�ng v?a ph?i, ch? y?u cho h?c t?p; thi?t b? dang pin y?u cu?i ng�y."
+    },
+    {
+      "userId": "user_ba_noi_hoa",
+      "date": "2026-04-09",
+      "screenTimeMinutesToday": 38,
+      "unlockCount": 9,
+      "mostUsedApps": [
+        {"appName": "FamilyGuard", "minutes": 14},
+        {"appName": "�i?n tho?i", "minutes": 12},
+        {"appName": "Zalo", "minutes": 8}
+      ],
+      "usageNote": "D�ng r?t �t, ch? y?u d? xem th�ng b�o don gi?n v� g?i nhanh cho ngu?i th�n."
+    }
+  ],
+  "alerts": [
+    {
+      "alertId": "alert_me_arrived_office_20260409_0752",
+      "type": "geofence_enter",
+      "priority": "low",
+      "sourceUserId": "user_me_lan",
+      "sourceDisplayName": "Tr?n Th? Lan",
+      "recipientUserIds": ["user_ba_minh", "user_me_lan"],
+      "title": "M? d� d?n van ph�ng",
+      "message": "Lan d� v�o v�ng an to�n \"Van ph�ng M?\" l�c 07:52.",
+      "createdAt": "2026-04-09T07:52:00+07:00",
+      "relatedZoneId": "zone_office_me_001",
+      "relatedEventId": null,
+      "deliveryStatus": "sent",
+      "readStatus": {"user_ba_minh": true, "user_me_lan": true},
+      "handlingStatus": "processed",
+      "handledByUserId": "user_ba_minh",
+      "handledAt": "2026-04-09T08:05:00+07:00"
+    },
+    {
+      "alertId": "alert_noi_outside_too_long_20260409_1003",
+      "type": "outside_home_too_long",
+      "priority": "high",
+      "sourceUserId": "user_ba_noi_hoa",
+      "sourceDisplayName": "L� Th? Hoa",
+      "recipientUserIds": ["user_ba_minh", "user_me_lan"],
+      "title": "B� n?i ? ngo�i nh� l�u hon b�nh thu?ng",
+      "message": "B� n?i d� ra kh?i v�ng Nh� hon 90 ph�t v� hi?n chua tr? v?.",
+      "createdAt": "2026-04-09T10:03:00+07:00",
+      "relatedZoneId": "zone_home_001",
+      "relatedEventId": null,
+      "deliveryStatus": "sent",
+      "readStatus": {"user_ba_minh": true, "user_me_lan": true},
+      "handlingStatus": "processed",
+      "handledByUserId": "user_me_lan",
+      "handledAt": "2026-04-09T10:06:00+07:00"
+    },
+    {
+      "alertId": "alert_noi_fall_suspected_20260409_1042",
+      "type": "fall_detection",
+      "priority": "critical",
+      "sourceUserId": "user_ba_noi_hoa",
+      "sourceDisplayName": "L� Th? Hoa",
+      "recipientUserIds": ["user_ba_minh", "user_me_lan"],
+      "title": "Nghi ng? B� n?i b? t� ng�",
+      "message": "Thi?t b? c?a B� n?i ghi nh?n va ch?m m?nh t?i nh� l�c 10:42. Chua c� ph?n h?i trong th?i gian d?m ngu?c.",
+      "createdAt": "2026-04-09T10:42:12+07:00",
+      "relatedZoneId": "zone_home_001",
+      "relatedEventId": "fall_noi_20260409_1042",
+      "deliveryStatus": "sent",
+      "readStatus": {"user_ba_minh": true, "user_me_lan": true},
+      "handlingStatus": "processed",
+      "handledByUserId": "user_me_lan",
+      "handledAt": "2026-04-09T10:47:10+07:00"
+    },
+    {
+      "alertId": "alert_noi_sos_real_20260409_1044",
+      "type": "sos",
+      "priority": "critical",
+      "sourceUserId": "user_ba_noi_hoa",
+      "sourceDisplayName": "L� Th? Hoa",
+      "recipientUserIds": ["user_ba_minh", "user_me_lan"],
+      "title": "B� n?i v?a b?m SOS",
+      "message": "B� n?i b?m SOS t?i nh� l�c 10:44 v?i l� do ch�ng m?t trong nh� t?m.",
+      "createdAt": "2026-04-09T10:44:08+07:00",
+      "relatedZoneId": "zone_home_001",
+      "relatedEventId": "sos_noi_20260409_1044",
+      "deliveryStatus": "sent",
+      "readStatus": {"user_ba_minh": true, "user_me_lan": true},
+      "handlingStatus": "processed",
+      "handledByUserId": "user_me_lan",
+      "handledAt": "2026-04-09T10:47:30+07:00"
+    },
+    {
+      "alertId": "alert_con_left_school_early_20260409_1518",
+      "type": "geofence_exit_early",
+      "priority": "high",
+      "sourceUserId": "user_con_an",
+      "sourceDisplayName": "Nguy?n Minh An",
+      "recipientUserIds": ["user_ba_minh", "user_me_lan"],
+      "title": "An r?i tru?ng s?m hon l?ch",
+      "message": "An ra kh?i v�ng an to�n Tru?ng THCS T�n Hung l�c 15:18, s?m hon gi? tan h?c 16:30.",
+      "createdAt": "2026-04-09T15:18:14+07:00",
+      "relatedZoneId": "zone_school_001",
+      "relatedEventId": null,
+      "deliveryStatus": "sent",
+      "readStatus": {"user_ba_minh": true, "user_me_lan": true},
+      "handlingStatus": "processed",
+      "handledByUserId": "user_me_lan",
+      "handledAt": "2026-04-09T15:21:02+07:00"
+    },
+    {
+      "alertId": "alert_con_sos_test_20260409_1638",
+      "type": "sos_test",
+      "priority": "high",
+      "sourceUserId": "user_con_an",
+      "sourceDisplayName": "Nguy?n Minh An",
+      "recipientUserIds": ["user_ba_minh", "user_me_lan"],
+      "title": "An v?a g?i SOS th?",
+      "message": "An b?m SOS th? t?i l?p h?c th�m theo hu?ng d?n c?a Ba.",
+      "createdAt": "2026-04-09T16:38:00+07:00",
+      "relatedZoneId": null,
+      "relatedEventId": "sos_con_20260409_1638",
+      "deliveryStatus": "sent",
+      "readStatus": {"user_ba_minh": true, "user_me_lan": true},
+      "handlingStatus": "processed",
+      "handledByUserId": "user_ba_minh",
+      "handledAt": "2026-04-09T16:41:10+07:00"
+    },
+    {
+      "alertId": "alert_con_low_battery_20260409_1705",
+      "type": "low_battery",
+      "priority": "medium",
+      "sourceUserId": "user_con_an",
+      "sourceDisplayName": "Nguy?n Minh An",
+      "recipientUserIds": ["user_ba_minh", "user_me_lan", "user_con_an"],
+      "title": "Pin thi?t b? c?a An s?p h?t",
+      "message": "Thi?t b? c?a An c�n 18% pin t?i l?p h?c th�m. N�n s?c tru?c khi v? nh�.",
+      "createdAt": "2026-04-09T17:05:00+07:00",
+      "relatedZoneId": null,
+      "relatedEventId": null,
+      "deliveryStatus": "sent",
+      "readStatus": {"user_ba_minh": false, "user_me_lan": true, "user_con_an": false},
+      "handlingStatus": "unprocessed",
+      "handledByUserId": null,
+      "handledAt": null
+    }
+  ],
+  "fallEvents": [
+    {
+      "eventId": "fall_noi_20260408_1918",
+      "userId": "user_ba_noi_hoa",
+      "detectedAt": "2026-04-08T19:18:44+07:00",
+      "latitude": 10.737463,
+      "longitude": 106.704642,
+      "addressText": "Ph�ng kh�ch, Riverside Residence, Qu?n 7",
+      "promptText": "B� c� ?n kh�ng?",
+      "countdownSeconds": 20,
+      "countdownResult": "d� ph?n h?i",
+      "finalStatus": "d� x�c nh?n an to�n",
+      "alertRecipientUserIds": ["user_ba_minh", "user_me_lan"],
+      "alertSentAt": null,
+      "confirmedSafeAt": "2026-04-08T19:19:01+07:00",
+      "note": "B� n?i ch?m nh?m di?n tho?i khi ng?i xu?ng gh?."
+    },
+    {
+      "eventId": "fall_noi_20260409_1042",
+      "userId": "user_ba_noi_hoa",
+      "detectedAt": "2026-04-09T10:42:12+07:00",
+      "latitude": 10.737463,
+      "longitude": 106.704642,
+      "addressText": "Nh� t?m, Riverside Residence, Qu?n 7",
+      "promptText": "B� c� ?n kh�ng?",
+      "countdownSeconds": 30,
+      "countdownResult": "kh�ng ph?n h?i",
+      "finalStatus": "d� g?i c?nh b�o cho ngu?i th�n",
+      "alertRecipientUserIds": ["user_ba_minh", "user_me_lan"],
+      "alertSentAt": "2026-04-09T10:42:42+07:00",
+      "confirmedSafeAt": "2026-04-09T10:47:10+07:00",
+      "note": "B� b? cho�ng nh? trong nh� t?m, sau d� ng?i ngh? v� x�c nh?n d� an to�n qua cu?c g?i c?a M?."
+    }
+  ],
+  "sosEvents": [
+    {
+      "eventId": "sos_con_20260409_1638",
+      "userId": "user_con_an",
+      "testMode": true,
+      "triggerType": "manual_button",
+      "createdAt": "2026-04-09T16:38:00+07:00",
+      "latitude": 10.7399,
+      "longitude": 106.71185,
+      "addressText": "Trung t�m Anh ng? Sao Vi?t, 41 L�m Van B?n, Qu?n 7, TP.HCM",
+      "shortReason": "B?m th? n�t SOS theo hu?ng d?n",
+      "recipientUserIds": ["user_ba_minh", "user_me_lan"],
+      "responseStatus": "d� ph?n h?i",
+      "firstResponderUserId": "user_ba_minh",
+      "firstResponseAt": "2026-04-09T16:39:08+07:00",
+      "resolvedAt": "2026-04-09T16:41:10+07:00",
+      "resolutionNote": "Ba x�c nh?n d�y l� SOS th?, M? d� th?y th�ng b�o.",
+      "communicationLog": [
+        {
+          "type": "in_app_message",
+          "fromUserId": "user_ba_minh",
+          "toUserId": "user_con_an",
+          "time": "2026-04-09T16:39:08+07:00",
+          "content": "Ba d� nh?n du?c SOS th? c?a con."
+        },
+        {
+          "type": "in_app_message",
+          "fromUserId": "user_me_lan",
+          "toUserId": "user_con_an",
+          "time": "2026-04-09T16:40:12+07:00",
+          "content": "M? d� th?y r?i, l�t v? nh? s?c m�y nh�."
+        }
+      ]
+    },
+    {
+      "eventId": "sos_noi_20260409_1044",
+      "userId": "user_ba_noi_hoa",
+      "testMode": false,
+      "triggerType": "manual_button",
+      "createdAt": "2026-04-09T10:44:08+07:00",
+      "latitude": 10.737463,
+      "longitude": 106.704642,
+      "addressText": "Nh� t?m, Riverside Residence, Qu?n 7, TP.HCM",
+      "shortReason": "Ch�ng m?t trong nh� t?m",
+      "recipientUserIds": ["user_ba_minh", "user_me_lan"],
+      "responseStatus": "d� ph?n h?i",
+      "firstResponderUserId": "user_me_lan",
+      "firstResponseAt": "2026-04-09T10:45:02+07:00",
+      "resolvedAt": "2026-04-09T10:47:30+07:00",
+      "resolutionNote": "M? g?i x�c nh?n B� n?i ?n, Ba ti?p t?c theo d�i t? app.",
+      "communicationLog": [
+        {
+          "type": "phone_call",
+          "fromUserId": "user_me_lan",
+          "toUserId": "user_ba_noi_hoa",
+          "time": "2026-04-09T10:45:02+07:00",
+          "content": "Cu?c g?i k?t n?i 1 ph�t 14 gi�y, B� n?i n�i c�n ch�ng m?t nh?."
+        },
+        {
+          "type": "phone_call",
+          "fromUserId": "user_ba_minh",
+          "toUserId": "user_ba_noi_hoa",
+          "time": "2026-04-09T10:46:18+07:00",
+          "content": "Ba g?i l?i d? ki?m tra, cu?c g?i nh? v� M? dang n�i chuy?n v?i B�."
+        },
+        {
+          "type": "in_app_message",
+          "fromUserId": "user_me_lan",
+          "toUserId": "user_ba_minh",
+          "time": "2026-04-09T10:47:30+07:00",
+          "content": "M? ?n r?i, em dang ng?i ngh? v� u?ng nu?c."
+        }
+      ]
+    }
+  ],
+  "notifications": {
+    "user_ba_minh": [
+      {
+        "notificationId": "noti_ba_1",
+        "type": "alert",
+        "title": "Pin c?a An c�n 18%",
+        "body": "Thi?t b? c?a An dang pin y?u t?i l?p h?c th�m.",
+        "createdAt": "2026-04-09T17:05:00+07:00",
+        "isRead": false,
+        "priority": "medium",
+        "relatedAlertId": "alert_con_low_battery_20260409_1705"
+      },
+      {
+        "notificationId": "noti_ba_2",
+        "type": "alert",
+        "title": "An d� g?i SOS th?",
+        "body": "Ba d� x�c nh?n d�y l� thao t�c th? n�t SOS.",
+        "createdAt": "2026-04-09T16:38:00+07:00",
+        "isRead": true,
+        "priority": "high",
+        "relatedAlertId": "alert_con_sos_test_20260409_1638"
+      },
+      {
+        "notificationId": "noti_ba_3",
+        "type": "alert",
+        "title": "An r?i tru?ng s?m",
+        "body": "An ra kh?i v�ng Tru?ng THCS T�n Hung l�c 15:18.",
+        "createdAt": "2026-04-09T15:18:14+07:00",
+        "isRead": true,
+        "priority": "high",
+        "relatedAlertId": "alert_con_left_school_early_20260409_1518"
+      },
+      {
+        "notificationId": "noti_ba_4",
+        "type": "alert",
+        "title": "B� n?i v?a b?m SOS",
+        "body": "S? c? d� du?c M? x? l�, B� n?i hi?n d� an to�n.",
+        "createdAt": "2026-04-09T10:44:08+07:00",
+        "isRead": true,
+        "priority": "critical",
+        "relatedAlertId": "alert_noi_sos_real_20260409_1044"
+      },
+      {
+        "notificationId": "noti_ba_5",
+        "type": "alert",
+        "title": "Nghi ng? B� n?i t� ng�",
+        "body": "Thi?t b? ghi nh?n va ch?m m?nh trong nh� t?m l�c 10:42.",
+        "createdAt": "2026-04-09T10:42:12+07:00",
+        "isRead": true,
+        "priority": "critical",
+        "relatedAlertId": "alert_noi_fall_suspected_20260409_1042"
+      },
+      {
+        "notificationId": "noti_ba_6",
+        "type": "info",
+        "title": "M? d� d?n van ph�ng",
+        "body": "Lan v�o v�ng an to�n l�c 07:52.",
+        "createdAt": "2026-04-09T07:52:00+07:00",
+        "isRead": true,
+        "priority": "low",
+        "relatedAlertId": "alert_me_arrived_office_20260409_0752"
+      }
+    ],
+    "user_me_lan": [
+      {
+        "notificationId": "noti_me_1",
+        "type": "alert",
+        "title": "Pin c?a An s?p h?t",
+        "body": "Thi?t b? c?a An c�n 18% pin ? l?p h?c th�m.",
+        "createdAt": "2026-04-09T17:05:00+07:00",
+        "isRead": true,
+        "priority": "medium",
+        "relatedAlertId": "alert_con_low_battery_20260409_1705"
+      },
+      {
+        "notificationId": "noti_me_2",
+        "type": "alert",
+        "title": "An d� g?i SOS th?",
+        "body": "Ba d� ph?n h?i, d�y l� thao t�c ki?m tra.",
+        "createdAt": "2026-04-09T16:38:00+07:00",
+        "isRead": true,
+        "priority": "high",
+        "relatedAlertId": "alert_con_sos_test_20260409_1638"
+      },
+      {
+        "notificationId": "noti_me_3",
+        "type": "alert",
+        "title": "An r?i tru?ng s?m hon l?ch",
+        "body": "M? d� g?i x�c nh?n An ch? ra c?ng mua nu?c.",
+        "createdAt": "2026-04-09T15:18:14+07:00",
+        "isRead": true,
+        "priority": "high",
+        "relatedAlertId": "alert_con_left_school_early_20260409_1518"
+      },
+      {
+        "notificationId": "noti_me_4",
+        "type": "alert",
+        "title": "B� n?i v?a b?m SOS",
+        "body": "M? d� g?i v� x�c nh?n B� n?i ?n.",
+        "createdAt": "2026-04-09T10:44:08+07:00",
+        "isRead": true,
+        "priority": "critical",
+        "relatedAlertId": "alert_noi_sos_real_20260409_1044"
+      },
+      {
+        "notificationId": "noti_me_5",
+        "type": "alert",
+        "title": "B� n?i ? ngo�i nh� l�u",
+        "body": "C?nh b�o du?c g?i l�c 10:03 v� d� theo d�i an to�n.",
+        "createdAt": "2026-04-09T10:03:00+07:00",
+        "isRead": true,
+        "priority": "high",
+        "relatedAlertId": "alert_noi_outside_too_long_20260409_1003"
+      }
+    ],
+    "user_con_an": [
+      {
+        "notificationId": "noti_con_1",
+        "type": "device",
+        "title": "Pin m�y s?p h?t",
+        "body": "M�y c?a b?n c�n 18%. H�y s?c khi v? nh�.",
+        "createdAt": "2026-04-09T17:05:00+07:00",
+        "isRead": false,
+        "priority": "medium",
+        "relatedAlertId": "alert_con_low_battery_20260409_1705"
+      },
+      {
+        "notificationId": "noti_con_2",
+        "type": "sos",
+        "title": "Gia d�nh d� nh?n SOS",
+        "body": "Ba v� M? d� th?y t�n hi?u SOS th? c?a b?n.",
+        "createdAt": "2026-04-09T16:39:08+07:00",
+        "isRead": true,
+        "priority": "high",
+        "relatedAlertId": "alert_con_sos_test_20260409_1638"
+      },
+      {
+        "notificationId": "noti_con_3",
+        "type": "safe_zone",
+        "title": "B?n d� r?i tru?ng s?m",
+        "body": "?ng d?ng d� b�o cho Ba v� M? d? b?o d?m an to�n.",
+        "createdAt": "2026-04-09T15:18:14+07:00",
+        "isRead": true,
+        "priority": "medium",
+        "relatedAlertId": "alert_con_left_school_early_20260409_1518"
+      },
+      {
+        "notificationId": "noti_con_4",
+        "type": "info",
+        "title": "L?ch h�m nay",
+        "body": "Sau l?p h?c th�m, b?n c?n v? nh� tru?c 18:30.",
+        "createdAt": "2026-04-09T16:00:00+07:00",
+        "isRead": true,
+        "priority": "low",
+        "relatedAlertId": null
+      }
+    ],
+    "user_ba_noi_hoa": [
+      {
+        "notificationId": "noti_noi_1",
+        "type": "simple_alert",
+        "title": "Lan dang g?i cho m?",
+        "body": "M? h�y nh?c m�y nh�.",
+        "createdAt": "2026-04-09T10:45:02+07:00",
+        "isRead": true,
+        "priority": "critical",
+        "relatedAlertId": "alert_noi_sos_real_20260409_1044"
+      },
+      {
+        "notificationId": "noti_noi_2",
+        "type": "simple_alert",
+        "title": "Gia d�nh d� nh?n SOS",
+        "body": "Ba Minh v� M? Lan dang theo d�i m?.",
+        "createdAt": "2026-04-09T10:44:20+07:00",
+        "isRead": true,
+        "priority": "critical",
+        "relatedAlertId": "alert_noi_sos_real_20260409_1044"
+      },
+      {
+        "notificationId": "noti_noi_3",
+        "type": "simple_info",
+        "title": "M? dang an to�n",
+        "body": "?ng d?ng ghi nh?n m? d� ? nh�.",
+        "createdAt": "2026-04-09T11:00:00+07:00",
+        "isRead": true,
+        "priority": "low",
+        "relatedAlertId": null
+      }
+    ]
+  },
+  "dashboards": {
+    "user_ba_minh": {
+      "dashboardType": "family_manager",
+      "header": {
+        "title": "Gia d�nh h�m nay",
+        "subtitle": "Th? Nam, 09/04/2026 - 17:45"
+      },
+      "summary": {
+        "safeMembersCount": 2,
+        "attentionMembersCount": 2,
+        "onlineCount": 4,
+        "criticalUnreadCount": 1
+      },
+      "memberQuickStatus": [
+        {"userId": "user_ba_minh", "label": "Ba", "status": "T?i c�ng tr�nh", "zoneName": "C�ng tr�nh Midtown M8"},
+        {"userId": "user_me_lan", "label": "M?", "status": "�ang di xe v? nh�", "zoneName": null},
+        {"userId": "user_con_an", "label": "An", "status": "�ang h?c th�m", "zoneName": null},
+        {"userId": "user_ba_noi_hoa", "label": "B� n?i", "status": "? nh�", "zoneName": "Nh�"}
+      ],
+      "attentionMembers": [
+        {"userId": "user_con_an", "reason": "R?i tru?ng s?m l�c 15:18 v� hi?n pin ch? c�n 18%."},
+        {"userId": "user_ba_noi_hoa", "reason": "C� nghi ng? t� ng� l�c 10:42, hi?n d� an to�n nhung c?n theo d�i."}
+      ],
+      "latestAlertIds": [
+        "alert_con_low_battery_20260409_1705",
+        "alert_con_sos_test_20260409_1638",
+        "alert_con_left_school_early_20260409_1518",
+        "alert_noi_sos_real_20260409_1044"
+      ],
+      "safeZoneSummary": {
+        "totalZones": 5,
+        "activeZones": 5,
+        "breachCountToday": 2
+      },
+      "quickActions": [
+        "Xem b?n d? gia d�nh",
+        "G?i M?",
+        "G?i An",
+        "T?o v�ng an to�n",
+        "M? b�o c�o h�m nay"
+      ]
+    },
+    "user_me_lan": {
+      "dashboardType": "caregiver_focus",
+      "header": {
+        "title": "Theo d�i An v� B� n?i",
+        "subtitle": "Uu ti�n ngu?i th�n c?n ch� � trong ng�y"
+      },
+      "priorityCards": [
+        {
+          "userId": "user_con_an",
+          "title": "V? tr� hi?n t?i c?a An",
+          "value": "Trung t�m Anh ng? Sao Vi?t",
+          "status": "Pin 18%, dang ng?i h?c th�m"
+        },
+        {
+          "userId": "user_ba_noi_hoa",
+          "title": "T�nh tr?ng c?a B� n?i",
+          "value": "�ang ? nh�",
+          "status": "�� x�c nh?n an to�n sau c?nh b�o t� ng�"
+        }
+      ],
+      "recentNotifications": ["noti_me_1", "noti_me_2", "noti_me_4"],
+      "quickCalls": [
+        {"userId": "user_con_an", "label": "G?i An"},
+        {"userId": "user_ba_noi_hoa", "label": "G?i B� n?i"},
+        {"userId": "user_ba_minh", "label": "G?i Ba Minh"}
+      ],
+      "spouseBasicStatus": {
+        "userId": "user_ba_minh",
+        "status": "�ang ? c�ng tr�nh",
+        "lastUpdatedAt": "2026-04-09T17:40:58+07:00"
+      }
+    },
+    "user_con_an": {
+      "dashboardType": "child_simple",
+      "header": {
+        "title": "Xin ch�o An",
+        "subtitle": "H�m nay b?n dang h?c th�m"
+      },
+      "selfLocation": {
+        "addressText": "Trung t�m Anh ng? Sao Vi?t, Qu?n 7",
+        "lastUpdatedAt": "2026-04-09T17:40:12+07:00",
+        "status": "�ang d?ng y�n"
+      },
+      "currentSafeZone": {
+        "zoneName": "Tru?ng THCS T�n Hung",
+        "status": "�� r?i v�ng l�c 15:18",
+        "nextExpectedZone": "Nh� tru?c 18:30"
+      },
+      "sosButton": {
+        "label": "SOS",
+        "size": "large",
+        "description": "B?m d? b�o ngay cho Ba v� M?"
+      },
+      "emergencyContactsQuick": ["contact_con_1", "contact_con_2"],
+      "notificationsPreview": ["noti_con_1", "noti_con_2"]
+    },
+    "user_ba_noi_hoa": {
+      "dashboardType": "senior_simple",
+      "header": {
+        "title": "B� n?i",
+        "subtitle": "17:45 - H�m nay m? dang an to�n"
+      },
+      "currentStatus": {
+        "timeText": "17:45",
+        "locationText": "�ang ? nh�",
+        "safetyText": "�� an to�n sau khi du?c gia d�nh x�c nh?n"
+      },
+      "largeSosButton": {
+        "label": "SOS KH?N",
+        "color": "red",
+        "description": "B?m m?t l?n d? g?i Ba Minh v� M? Lan"
+      },
+      "quickContacts": ["contact_noi_1", "contact_noi_2"],
+      "simpleNotifications": ["noti_noi_1", "noti_noi_2"]
+    }
+  },
+  "settings": [
+    {
+      "userId": "user_ba_minh",
+      "language": "vi-VN",
+      "theme": "light",
+      "fontScale": 1,
+      "receiveNotifications": true,
+      "alertSound": true,
+      "vibration": true,
+      "shareLocation": true,
+      "autoSendSosAlert": true,
+      "allowBackgroundTracking": true,
+      "privacyMode": "family_full_access",
+      "emergencyContactIds": ["contact_ba_1"]
+    },
+    {
+      "userId": "user_me_lan",
+      "language": "vi-VN",
+      "theme": "light",
+      "fontScale": 1,
+      "receiveNotifications": true,
+      "alertSound": true,
+      "vibration": true,
+      "shareLocation": true,
+      "autoSendSosAlert": true,
+      "allowBackgroundTracking": true,
+      "privacyMode": "caregiver_limited_spouse_view",
+      "emergencyContactIds": ["contact_me_1"]
+    },
+    {
+      "userId": "user_con_an",
+      "language": "vi-VN",
+      "theme": "light",
+      "fontScale": 1,
+      "receiveNotifications": true,
+      "alertSound": true,
+      "vibration": true,
+      "shareLocation": true,
+      "autoSendSosAlert": true,
+      "allowBackgroundTracking": true,
+      "privacyMode": "self_only",
+      "emergencyContactIds": ["contact_con_1", "contact_con_2"]
+    },
+    {
+      "userId": "user_ba_noi_hoa",
+      "language": "vi-VN",
+      "theme": "light",
+      "fontScale": 1.2,
+      "receiveNotifications": true,
+      "alertSound": true,
+      "vibration": true,
+      "shareLocation": true,
+      "autoSendSosAlert": true,
+      "allowBackgroundTracking": true,
+      "privacyMode": "self_only",
+      "simpleMode": true,
+      "emergencyContactIds": ["contact_noi_1", "contact_noi_2"]
+    }
+  ],
+  "emergencyContacts": [
+    {
+      "contactId": "contact_ba_1",
+      "ownerUserId": "user_ba_minh",
+      "contactUserId": "user_me_lan",
+      "name": "Tr?n Th? Lan",
+      "phoneNumber": "+84 907 226 541",
+      "relationship": "V?",
+      "priorityOrder": 1,
+      "canReceiveSos": true
+    },
+    {
+      "contactId": "contact_me_1",
+      "ownerUserId": "user_me_lan",
+      "contactUserId": "user_ba_minh",
+      "name": "Nguy?n Van Minh",
+      "phoneNumber": "+84 903 118 286",
+      "relationship": "Ch?ng",
+      "priorityOrder": 1,
+      "canReceiveSos": true
+    },
+    {
+      "contactId": "contact_con_1",
+      "ownerUserId": "user_con_an",
+      "contactUserId": "user_ba_minh",
+      "name": "Ba Minh",
+      "phoneNumber": "+84 903 118 286",
+      "relationship": "Ba",
+      "priorityOrder": 1,
+      "canReceiveSos": true
+    },
+    {
+      "contactId": "contact_con_2",
+      "ownerUserId": "user_con_an",
+      "contactUserId": "user_me_lan",
+      "name": "M? Lan",
+      "phoneNumber": "+84 907 226 541",
+      "relationship": "M?",
+      "priorityOrder": 2,
+      "canReceiveSos": true
+    },
+    {
+      "contactId": "contact_noi_1",
+      "ownerUserId": "user_ba_noi_hoa",
+      "contactUserId": "user_ba_minh",
+      "name": "Ba Minh",
+      "phoneNumber": "+84 903 118 286",
+      "relationship": "Con trai",
+      "priorityOrder": 1,
+      "canReceiveSos": true
+    },
+    {
+      "contactId": "contact_noi_2",
+      "ownerUserId": "user_ba_noi_hoa",
+      "contactUserId": "user_me_lan",
+      "name": "M? Lan",
+      "phoneNumber": "+84 907 226 541",
+      "relationship": "Con d�u",
+      "priorityOrder": 2,
+      "canReceiveSos": true
+    }
+  ],
+  "reports": {
+    "reportDate": "2026-04-09",
+    "familyDailySummary": {
+      "familyId": "family_nguyen_001",
+      "totalAlertsToday": 7,
+      "totalZoneEntriesToday": 6,
+      "totalZoneExitsToday": 7,
+      "totalDistanceKm": 33.4,
+      "totalActiveMinutes": 271,
+      "totalSosEvents": 2,
+      "totalFallAlerts": 1,
+      "totalLowBatteryAlerts": 1,
+      "lowestSafetyMemberUserId": "user_ba_noi_hoa",
+      "lowestSafetyMemberReason": "C� c?nh b�o t� ng� v� SOS trong c�ng ng�y."
+    },
+    "memberDailySummaries": [
+      {
+        "userId": "user_ba_minh",
+        "distanceKm": 14.6,
+        "activeMinutes": 92,
+        "zoneEntries": 2,
+        "zoneExits": 2,
+        "alertCount": 0,
+        "safetyScore": 95
+      },
+      {
+        "userId": "user_me_lan",
+        "distanceKm": 9.1,
+        "activeMinutes": 46,
+        "zoneEntries": 1,
+        "zoneExits": 2,
+        "alertCount": 1,
+        "safetyScore": 92
+      },
+      {
+        "userId": "user_con_an",
+        "distanceKm": 7.4,
+        "activeMinutes": 69,
+        "zoneEntries": 1,
+        "zoneExits": 2,
+        "alertCount": 3,
+        "safetyScore": 74
+      },
+      {
+        "userId": "user_ba_noi_hoa",
+        "distanceKm": 2.3,
+        "activeMinutes": 64,
+        "zoneEntries": 2,
+        "zoneExits": 1,
+        "alertCount": 3,
+        "safetyScore": 68
+      }
+    ]
+  },
+  "uiStates": {
+    "emptyStates": [
+      {
+        "stateId": "empty_medical_appointments",
+        "module": "medicalAppointments",
+        "title": "Chua c� l?ch h?n n�o",
+        "description": "Gia d�nh chua th�m l?ch kh�m ho?c t�i kh�m."
+      },
+      {
+        "stateId": "empty_shared_notes",
+        "module": "sharedNotes",
+        "title": "Chua c� ghi ch� gia d�nh",
+        "description": "Ba ho?c M? c� th? t?o ghi ch� chung cho c? nh�."
+      }
+    ],
+    "loadingStates": [
+      {
+        "stateId": "loading_family_map",
+        "module": "map",
+        "title": "�ang d?ng b? v? tr� gia d�nh",
+        "description": "?ng d?ng dang l?y d? li?u GPS v� v�ng an to�n m?i nh?t."
+      },
+      {
+        "stateId": "loading_daily_report",
+        "module": "reports",
+        "title": "�ang t?o b�o c�o h�m nay",
+        "description": "H? th?ng dang t?ng h?p l? tr�nh, c?nh b�o v� th?i gian ho?t d?ng."
+      }
+    ],
+    "errorStates": [
+      {
+        "stateId": "error_report_timeout",
+        "module": "reports",
+        "title": "T?i b�o c�o ch?m",
+        "description": "K?t n?i m?ng kh�ng ?n d?nh. H�y th? l?i sau �t gi�y.",
+        "retryable": true
+      },
+      {
+        "stateId": "error_location_permission_partial",
+        "module": "tracking",
+        "title": "Thi?u quy?n v? tr� n?n",
+        "description": "Thi?t b? c?a M? ch? g?i v? tr� d?y d? khi d� b?t ch?y n?n.",
+        "retryable": true,
+        "affectedUserId": "user_me_lan"
+      }
+    ],
+    "neutralStates": [
+      {
+        "stateId": "no_new_alerts",
+        "module": "alerts",
+        "title": "Kh�ng c� c?nh b�o m?i",
+        "description": "M?i c?nh b�o quan tr?ng hi?n d� du?c x? l�."
+      },
+      {
+        "stateId": "temporary_disconnect",
+        "module": "devices",
+        "title": "M?t k?t n?i t?m th?i",
+        "description": "V�ng tay c?a B� n?i dang ngo?i tuy?n, d? li?u s? t? d?ng b? l?i khi k?t n?i tr? l?i.",
+        "affectedDeviceId": "device_ba_noi_band"
+      },
+      {
+        "stateId": "device_offline",
+        "module": "devices",
+        "title": "Thi?t b? offline",
+        "description": "Thi?t b? deo c?a B� n?i chua d?ng b? t? 14:02.",
+        "affectedDeviceId": "device_ba_noi_band"
+      }
+    ]
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
