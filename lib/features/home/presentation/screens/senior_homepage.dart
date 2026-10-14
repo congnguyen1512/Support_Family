@@ -1,4 +1,5 @@
 import 'package:family_guard/core/constants/app_routes.dart';
+import 'package:family_guard/core/di/app_dependencies.dart';
 import 'package:family_guard/core/fall_detection/presentation/fall_detection_debug_panel.dart';
 import 'package:family_guard/core/widgets/app_flow_bottom_nav.dart';
 import 'package:family_guard/features/calling/presentation/screens/call_flow_models.dart';
@@ -288,8 +289,27 @@ class _SeniorHomePageState extends State<SeniorHomePage> {
       builder: (sheetContext) {
         return SeniorSosSheet(
           onSafeTap: () => Navigator.pop(sheetContext),
-          onEmergencyTap: () {
+          onEmergencyTap: () async {
             Navigator.pop(sheetContext);
+            try {
+              final loc =
+                  AppDependencies.instance.locationTrackingService.lastLocation;
+              await AppDependencies.instance.createFallNotificationUseCase(
+                location: loc,
+              );
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Đã gửi cảnh báo khẩn cấp đến người thân!'),
+                    backgroundColor: Color(0xFFFF1717),
+                  ),
+                );
+              }
+            } catch (e) {
+              debugPrint('Lỗi gửi cảnh báo SOS: $e');
+            }
+
+            if (!context.mounted) return;
             if (_quickContact == null) {
               _showAddQuickContactSheet(context);
               return;

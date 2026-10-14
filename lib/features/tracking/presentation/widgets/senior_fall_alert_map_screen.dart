@@ -1,4 +1,7 @@
+import 'package:family_guard/core/constants/app_routes.dart';
 import 'package:family_guard/core/widgets/app_bottom_menu.dart';
+import 'package:family_guard/features/calling/presentation/screens/call_flow_models.dart';
+import 'package:family_guard/features/tracking/presentation/screens/member_tracking/member_tracking_models.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -53,6 +56,29 @@ class _SeniorFallAlertMapScreenState extends State<SeniorFallAlertMapScreen> {
                     focusPoint: focusPoint,
                     displayName: displayName,
                     hasLocation: hasLocation,
+                  ),
+                ),
+                Positioned(
+                  top: 16,
+                  left: 16,
+                  child: Material(
+                    color: Colors.white,
+                    shape: const CircleBorder(),
+                    elevation: 4,
+                    shadowColor: Colors.black26,
+                    child: InkWell(
+                      customBorder: const CircleBorder(),
+                      onTap: () => Navigator.maybePop(context),
+                      child: const SizedBox(
+                        width: 44,
+                        height: 44,
+                        child: Icon(
+                          Icons.arrow_back_ios_new_rounded,
+                          color: Color(0xFF1E293B),
+                          size: 20,
+                        ),
+                      ),
+                    ),
                   ),
                 ),
                 Positioned(
@@ -439,21 +465,31 @@ class _AlertBottomSheet extends StatelessWidget {
               const SizedBox(height: 16),
               SizedBox(
                 width: double.infinity,
-                height: 46,
-                child: ElevatedButton(
-                  onPressed: hasLocation ? () {} : null,
+                height: 48,
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.pushNamed(
+                      context,
+                      AppRoutes.inAppCall,
+                      arguments: InAppCallArgs(
+                        name: displayName,
+                        avatarUrl:
+                            'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=256&q=80',
+                        role: MemberRole.senior,
+                      ),
+                    );
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFDC2626),
                     foregroundColor: Colors.white,
                     shape: const StadiumBorder(),
                     elevation: 0,
-                    disabledBackgroundColor: const Color(0xFFFCA5A5),
-                    disabledForegroundColor: Colors.white,
                   ),
-                  child: Text(
-                    'Điều hướng tới vị trí',
+                  icon: const Icon(Icons.call_rounded, size: 20),
+                  label: Text(
+                    'Gọi ngay',
                     style: GoogleFonts.inter(
-                      fontSize: 14,
+                      fontSize: 16,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
