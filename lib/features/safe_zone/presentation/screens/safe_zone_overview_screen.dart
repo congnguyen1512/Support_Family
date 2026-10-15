@@ -19,6 +19,16 @@ class _SafeZoneOverviewScreenState extends State<SafeZoneOverviewScreen> {
   final MapController _mapController = MapController();
 
   @override
+  void initState() {
+    super.initState();
+    // Tai lai moi lan mo man hinh de dong bo vung do nguoi cham soc khac tao.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      SafeZoneProvider.maybeOf(context)?.refresh();
+    });
+  }
+
+  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     SafeZoneProvider.of(context).initialize();

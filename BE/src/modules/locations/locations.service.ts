@@ -68,7 +68,12 @@ export class LocationsService {
       created_at: updatedAt,
     });
 
-    await safeZonesService.checkLocationForUser(uid, input.latitude, input.longitude);
+    await safeZonesService.checkLocationForUser(
+      uid,
+      input.latitude,
+      input.longitude,
+      input.address ?? input.place_name ?? null,
+    );
 
     return data as UserLocationRecord;
   }
@@ -160,5 +165,59 @@ export class LocationsService {
         updated_at: location?.updated_at ?? null,
       };
     });
+  }
+
+  /**
+   * Lich su di chuyen cua mot thanh vien trong khoang thoi gian.
+   * Chi cho phep xem cua chinh minh hoac thanh vien da xac nhan quan he.
+   */
+  async getLocationHistory(
+    requesterUid: string,
+    memberUid: string,
+    from?: string,
+    to?: string,
+    limit = 1000,
+  ) {
+    const targetUid = memberUid.trim();
+    if (targetUid !== requesterUid) {
+      const { data: rel, error: relError } = await supabaseAdmin
+        .from('relationship')
+        .select('id')
+        .or(
+          `and(uid.eq.${requesterUid},relation_id.eq.${targetUid}),and(uid.eq.${targetUid},relation_id.eq.${requesterUid})`,
+        )
+        .eq('processing', 'xacnhan')
+        .limit(1);
+
+      if (relError) {
+        throw new Error(relError.message || 'Khong kiem tra duoc quan he');
+      }
+      if (!rel || rel.length === 0) {
+        throw new Error('Ban chua co quyen xem lich su cua thanh vien nay');
+      }
+    }
+
+    const now = new Date();
+    const fromIso = from && !Number.isNaN(Date.parse(from))
+      ? new Date(from).toISOString()
+      : new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString();
+    const toIso = to && !Number.isNaN(Date.parse(to))
+      ? new Date(to).toISOString()
+      : now.toISOString();
+
+    const { data, error } = await supabaseAdmin
+      .from('location_history')
+      .select('id, uid, latitude, longitude, accuracy, speed, address, place_name, created_at')
+      .eq('uid', targetUid)
+      .gte('created_at', fromIso)
+      .lte('created_at', toIso)
+      .order('created_at', { ascending: true })
+      .limit(Math.min(Math.max(limit, 1), 5000));
+
+    if (error) {
+      throw new Error(error.message || 'Khong lay duoc lich su di chuyen');
+    }
+
+    return data ?? [];
   }
 }

@@ -1,61 +1,81 @@
+import 'dart:async';
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
+import 'package:family_guard/core/constants/app_routes.dart';
+import 'package:family_guard/core/di/app_dependencies.dart';
+import 'package:family_guard/core/network/api_exception.dart';
 import 'package:family_guard/core/utils/responsive/responsive.dart';
 import 'package:family_guard/core/theme/theme.dart';
+import 'package:family_guard/features/safe_zone/data/datasources/safe_zone_service.dart';
+import 'package:family_guard/features/safe_zone/domain/entities/safe_zone.dart';
+import 'package:family_guard/features/tracking/data/datasources/safe_zone_history_remote_data_source.dart';
+import 'package:family_guard/features/tracking/data/models/safe_zone_event_model.dart';
 
-// ── Data models ──────────────────────────────────────────────────────
+// ── Timeline rows ────────────────────────────────────────────────────
 
-class _Member {
-  final String id;
-  final String name;
-  final Color color;
+class _TimelineRow {
+  const _TimelineRow.day(this.dayLabel, this.isToday) : event = null;
+  const _TimelineRow.event(this.event)
+      : dayLabel = null,
+        isToday = false;
 
-  const _Member({required this.id, required this.name, required this.color});
-}
-
-enum _EventType { enter, leave }
-
-class _ZoneEvent {
-  final String id;
-  final String memberId;
-  final _EventType type;
-  final DateTime dateTime;
-  final String zoneName;
-  final String address;
-  final double lat;
-  final double lng;
-  final Duration? stayDuration;
-  bool expanded = false;
-
-  _ZoneEvent({
-    required this.id,
-    required this.memberId,
-    required this.type,
-    required this.dateTime,
-    required this.zoneName,
-    required this.address,
-    this.lat = 10.7769,
-    this.lng = 106.7009,
-    this.stayDuration,
-  });
-
-  bool get isSafe => type == _EventType.enter;
+  final String? dayLabel;
+  final bool isToday;
+  final SafeZoneEventModel? event;
 }
 
 class ActivityHistoryScreen extends StatefulWidget {
-  const ActivityHistoryScreen({super.key});
+  const ActivityHistoryScreen({super.key, this.initialMemberId});
+
+  /// Thanh vien duoc chon san khi mo man hinh (tuy chon).
+  final String? initialMemberId;
 
   @override
   State<ActivityHistoryScreen> createState() => _ActivityHistoryScreenState();
 }
 
 class _ActivityHistoryScreenState extends State<ActivityHistoryScreen> {
+  static const _filterAll = 'Tất cả';
+  static const _filterLeave = 'Rời vùng';
+  static const _filterEnter = 'Vào vùng';
+  static const _monthEventsLimit = 1000;
+  static const _autoRefreshInterval = Duration(seconds: 60);
+  static const _memberPalette = [
+    Color(0xFF00ACB2),
+    Color(0xFF3B82F6),
+    Color(0xFFF59E0B),
+    Color(0xFFEC4899),
+    Color(0xFF8B5CF6),
+    Color(0xFF10B981),
+  ];
+
+  // ── Dependencies ─────────────────────────────────────────────────
+  late final SafeZoneService _safeZoneService;
+  late final SafeZoneHistoryRemoteDataSource _historySource;
+
   // ── State ────────────────────────────────────────────────────────
-  late List<_Member> _members;
-  late List<_ZoneEvent> _events;
-  String _selectedMemberId = 'm1';
-  String _selectedFilter = 'Tất cả';
+  List<SafeZoneMember> _members = const [];
+  bool _membersLoading = true;
+  String? _selectedMemberId;
+  String _selectedFilter = _filterAll;
   late int _selectedMonth;
   late int _selectedYear;
+
+  /// Su kien cua thang dang xem (tat ca loai) - loc theo tab o client
+  /// de chuyen tab tuc thi, khong goi lai API.
+  List<SafeZoneEventModel> _events = const [];
+  bool _eventsLoading = false;
+  String? _eventsError;
+  final Set<int> _expandedIds = <int>{};
+
+  /// Cache theo "uid|yyyy-mm": quay lai thanh vien/thang da xem hien ngay,
+  /// sau do lam moi ngam.
+  final Map<String, List<SafeZoneEventModel>> _cache = {};
+  int _requestToken = 0;
+  Timer? _autoRefreshTimer;
 
   @override
   void initState() {
@@ -65,131 +85,286 @@ class _ActivityHistoryScreenState extends State<ActivityHistoryScreen> {
     _selectedMonth = now.month;
     _selectedYear = now.year;
 
-    _members = const [
-      _Member(id: 'm1', name: 'Bà Lan', color: Color(0xFF00ACB2)),
-      _Member(id: 'm2', name: 'Ông Hùng', color: Color(0xFF3B82F6)),
-      _Member(id: 'm3', name: 'Bé Bo', color: Color(0xFFF59E0B)),
-    ];
+    _historySource = SafeZoneHistoryRemoteDataSourceImpl();
+    _safeZoneService = AppDependencies.instance.safeZoneService;
+    _safeZoneService.addListener(_onMembersChanged);
+    _syncMembers();
+    unawaited(_initMembers());
 
-    final today = DateTime(now.year, now.month, now.day);
-    final yesterday = today.subtract(const Duration(days: 1));
-    final twoDaysAgo = today.subtract(const Duration(days: 2));
+    _autoRefreshTimer = Timer.periodic(_autoRefreshInterval, (_) {
+      if (mounted && _isViewingCurrentMonth && !_eventsLoading) {
+        unawaited(_loadEvents(silent: true));
+      }
+    });
+  }
 
-    _events = [
-      // Hôm nay
-      _ZoneEvent(
-        id: 'e1', memberId: 'm1', type: _EventType.enter,
-        dateTime: today.add(const Duration(hours: 10, minutes: 45)),
-        zoneName: 'Nhà riêng', address: '123 Đường Lê Lợi, Quận 1',
-        lat: 10.7769, lng: 106.7009, stayDuration: const Duration(hours: 2, minutes: 15),
-      ),
-      _ZoneEvent(
-        id: 'e2', memberId: 'm1', type: _EventType.leave,
-        dateTime: today.add(const Duration(hours: 8, minutes: 15)),
-        zoneName: 'Chợ Bến Thành', address: 'Quận 1, TP. Hồ Chí Minh',
-        lat: 10.7725, lng: 106.6980,
-      ),
-      _ZoneEvent(
-        id: 'e3', memberId: 'm2', type: _EventType.enter,
-        dateTime: today.add(const Duration(hours: 9, minutes: 30)),
-        zoneName: 'Bệnh viện Chợ Rẫy', address: '201B Nguyễn Chí Thanh, Quận 5',
-        lat: 10.7556, lng: 106.6595, stayDuration: const Duration(hours: 1, minutes: 30),
-      ),
-      _ZoneEvent(
-        id: 'e4', memberId: 'm3', type: _EventType.leave,
-        dateTime: today.add(const Duration(hours: 7, minutes: 0)),
-        zoneName: 'Trường Tiểu học', address: '45 Nguyễn Du, Quận 1',
-        lat: 10.7800, lng: 106.6950,
-      ),
-      // Hôm qua
-      _ZoneEvent(
-        id: 'e5', memberId: 'm1', type: _EventType.leave,
-        dateTime: yesterday.add(const Duration(hours: 17, minutes: 30)),
-        zoneName: 'Công viên Tao Đàn', address: 'Quận 1, TP. Hồ Chí Minh',
-        lat: 10.7743, lng: 106.6922,
-      ),
-      _ZoneEvent(
-        id: 'e6', memberId: 'm1', type: _EventType.enter,
-        dateTime: yesterday.add(const Duration(hours: 14, minutes: 0)),
-        zoneName: 'Công viên Tao Đàn', address: 'Quận 1, TP. Hồ Chí Minh',
-        lat: 10.7743, lng: 106.6922, stayDuration: const Duration(hours: 3, minutes: 30),
-      ),
-      _ZoneEvent(
-        id: 'e7', memberId: 'm2', type: _EventType.enter,
-        dateTime: yesterday.add(const Duration(hours: 8, minutes: 45)),
-        zoneName: 'Nhà riêng', address: '56 Trần Hưng Đạo, Quận 5',
-        lat: 10.7556, lng: 106.6700, stayDuration: const Duration(hours: 5),
-      ),
-      // 2 ngày trước
-      _ZoneEvent(
-        id: 'e8', memberId: 'm3', type: _EventType.enter,
-        dateTime: twoDaysAgo.add(const Duration(hours: 16, minutes: 20)),
-        zoneName: 'Nhà riêng', address: '789 Lý Thường Kiệt, Quận 10',
-        lat: 10.7730, lng: 106.6620, stayDuration: const Duration(hours: 4),
-      ),
-      _ZoneEvent(
-        id: 'e9', memberId: 'm1', type: _EventType.leave,
-        dateTime: twoDaysAgo.add(const Duration(hours: 11, minutes: 10)),
-        zoneName: 'Siêu thị CoopMart', address: 'Quận 3, TP. Hồ Chí Minh',
-        lat: 10.7800, lng: 106.6860,
-      ),
-      _ZoneEvent(
-        id: 'e10', memberId: 'm2', type: _EventType.leave,
-        dateTime: twoDaysAgo.add(const Duration(hours: 6, minutes: 30)),
-        zoneName: 'Bệnh viện Chợ Rẫy', address: '201B Nguyễn Chí Thanh, Quận 5',
-        lat: 10.7556, lng: 106.6595,
-      ),
-    ];
+  @override
+  void dispose() {
+    _autoRefreshTimer?.cancel();
+    _safeZoneService.removeListener(_onMembersChanged);
+    super.dispose();
+  }
+
+  // ── Members ──────────────────────────────────────────────────────
+
+  Future<void> _initMembers() async {
+    try {
+      await _safeZoneService.initialize();
+      if (_safeZoneService.members.isEmpty) {
+        await _safeZoneService.refresh();
+      }
+    } catch (_) {
+      // Loi da duoc SafeZoneService luu vao lastErrorMessage.
+    }
+    if (!mounted) return;
+    setState(() => _membersLoading = false);
+    _syncMembers();
+  }
+
+  void _onMembersChanged() {
+    if (!mounted) return;
+    _syncMembers();
+  }
+
+  void _syncMembers() {
+    // Nguoi duoc cham soc (co vung an toan) len truoc, nguoi cham soc xep sau.
+    final members = List<SafeZoneMember>.of(_safeZoneService.members)
+      ..sort((a, b) {
+        final aCaregiver = a.role == 'nguoichamsoc' ? 1 : 0;
+        final bCaregiver = b.role == 'nguoichamsoc' ? 1 : 0;
+        return aCaregiver.compareTo(bCaregiver);
+      });
+
+    final previous = _selectedMemberId;
+    String? nextSelected = previous;
+    if (nextSelected == null || !members.any((m) => m.id == nextSelected)) {
+      final initial = widget.initialMemberId;
+      if (previous == null &&
+          initial != null &&
+          members.any((m) => m.id == initial)) {
+        nextSelected = initial;
+      } else {
+        nextSelected = members.isEmpty ? null : members.first.id;
+      }
+    }
+
+    setState(() {
+      _members = members;
+      if (members.isNotEmpty) _membersLoading = false;
+      _selectedMemberId = nextSelected;
+    });
+
+    if (nextSelected != previous) {
+      _onSelectionChanged();
+    }
+  }
+
+  SafeZoneMember? get _selectedMember {
+    final id = _selectedMemberId;
+    if (id == null) return null;
+    for (final m in _members) {
+      if (m.id == id) return m;
+    }
+    return null;
+  }
+
+  Color _memberColor(SafeZoneMember member) {
+    final index = _members.indexWhere((m) => m.id == member.id);
+    return _memberPalette[(index < 0 ? 0 : index) % _memberPalette.length];
+  }
+
+  Future<void> _openAddMember() async {
+    await Navigator.pushNamed(context, AppRoutes.addMember);
+    if (!mounted) return;
+    unawaited(_safeZoneService.refresh());
+  }
+
+  // ── Events ───────────────────────────────────────────────────────
+
+  bool get _isViewingCurrentMonth {
+    final now = DateTime.now();
+    return now.year == _selectedYear && now.month == _selectedMonth;
+  }
+
+  String get _cacheKey =>
+      '$_selectedMemberId|$_selectedYear-${_selectedMonth.toString().padLeft(2, '0')}';
+
+  void _onSelectionChanged() {
+    final cached = _selectedMemberId == null ? null : _cache[_cacheKey];
+    setState(() {
+      _events = cached ?? const [];
+      _eventsError = null;
+      _expandedIds.clear();
+    });
+    unawaited(_loadEvents(silent: cached != null));
+  }
+
+  Future<void> _loadEvents({bool silent = false}) async {
+    final memberId = _selectedMemberId;
+    if (memberId == null) {
+      setState(() {
+        _events = const [];
+        _eventsLoading = false;
+      });
+      return;
+    }
+
+    final token = ++_requestToken;
+    final key = _cacheKey;
+    final from = DateTime(_selectedYear, _selectedMonth, 1);
+    final to = DateTime(_selectedYear, _selectedMonth + 1, 1);
+
+    if (!silent) {
+      setState(() {
+        _eventsLoading = true;
+        _eventsError = null;
+      });
+    }
+
+    try {
+      final events = await _historySource.getEvents(
+        memberUid: memberId,
+        from: from,
+        to: to,
+        limit: _monthEventsLimit,
+      );
+      _cache[key] = events;
+      if (!mounted || token != _requestToken) return;
+      setState(() {
+        _events = events;
+        _eventsLoading = false;
+        _eventsError = null;
+        _expandedIds.removeWhere((id) => !events.any((e) => e.id == id));
+      });
+    } catch (error) {
+      if (!mounted || token != _requestToken) return;
+      final message = _errorMessage(error);
+      setState(() {
+        _eventsLoading = false;
+        if (_events.isEmpty) _eventsError = message;
+      });
+      if (_events.isNotEmpty && !silent) {
+        _showSnack(message, isError: true);
+      }
+    }
+  }
+
+  Future<void> _refreshAll() async {
+    await Future.wait([
+      _safeZoneService.refresh(),
+      _loadEvents(silent: _events.isNotEmpty),
+    ]);
+  }
+
+  String _errorMessage(Object error) {
+    if (error is ApiException) {
+      if (error.statusCode == 403) {
+        return 'Bạn không có quyền xem lịch sử của thành viên này.';
+      }
+      if (error.message.trim().isNotEmpty) return error.message;
+    }
+    return 'Không tải được lịch sử di chuyển. Vui lòng thử lại.';
+  }
+
+  void _showSnack(String message, {bool isError = false}) {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(
+        content: Text(message,
+            style: const TextStyle(fontFamily: 'Lexend', color: Colors.white)),
+        backgroundColor:
+            isError ? const Color(0xFFEF4444) : const Color(0xFF00ACB2),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+      ));
   }
 
   // ── Derived data ─────────────────────────────────────────────────
 
-  List<_ZoneEvent> get _filteredEvents {
+  List<SafeZoneEventModel> get _filteredEvents {
     return _events.where((e) {
-      if (e.memberId != _selectedMemberId) return false;
-      if (e.dateTime.month != _selectedMonth || e.dateTime.year != _selectedYear) return false;
-      if (_selectedFilter == 'Vào vùng' && e.type != _EventType.enter) return false;
-      if (_selectedFilter == 'Rời vùng' && e.type != _EventType.leave) return false;
+      if (_selectedFilter == _filterEnter && !e.isEnter) return false;
+      if (_selectedFilter == _filterLeave && e.isEnter) return false;
       return true;
     }).toList()
-      ..sort((a, b) => b.dateTime.compareTo(a.dateTime));
+      ..sort((a, b) => b.occurredAt.compareTo(a.occurredAt));
   }
 
-  Map<String, List<_ZoneEvent>> get _groupedEvents {
+  List<_TimelineRow> get _timelineRows {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final yesterday = today.subtract(const Duration(days: 1));
-    final grouped = <String, List<_ZoneEvent>>{};
+    final rows = <_TimelineRow>[];
+    DateTime? currentDay;
 
     for (final e in _filteredEvents) {
-      final d = DateTime(e.dateTime.year, e.dateTime.month, e.dateTime.day);
-      String label;
-      if (d == today) {
-        label = 'HÔM NAY, ${e.dateTime.day.toString().padLeft(2, '0')}/${e.dateTime.month.toString().padLeft(2, '0')}';
-      } else if (d == yesterday) {
-        label = 'HÔM QUA, ${e.dateTime.day.toString().padLeft(2, '0')}/${e.dateTime.month.toString().padLeft(2, '0')}';
-      } else {
-        label = '${e.dateTime.day.toString().padLeft(2, '0')}/${e.dateTime.month.toString().padLeft(2, '0')}/${e.dateTime.year}';
+      final t = e.occurredAt;
+      final d = DateTime(t.year, t.month, t.day);
+      if (currentDay == null || d != currentDay) {
+        currentDay = d;
+        final dd = t.day.toString().padLeft(2, '0');
+        final mm = t.month.toString().padLeft(2, '0');
+        final String label;
+        if (d == today) {
+          label = 'HÔM NAY, $dd/$mm';
+        } else if (d == yesterday) {
+          label = 'HÔM QUA, $dd/$mm';
+        } else {
+          label = '$dd/$mm/${t.year}';
+        }
+        rows.add(_TimelineRow.day(label, d == today));
       }
-      grouped.putIfAbsent(label, () => []).add(e);
+      rows.add(_TimelineRow.event(e));
     }
-    return grouped;
+    return rows;
   }
 
   String get _monthLabel {
-    const months = [
-      '', 'Tháng 01', 'Tháng 02', 'Tháng 03', 'Tháng 04', 'Tháng 05',
-      'Tháng 06', 'Tháng 07', 'Tháng 08', 'Tháng 09', 'Tháng 10',
-      'Tháng 11', 'Tháng 12',
-    ];
-    return '${months[_selectedMonth]}, $_selectedYear';
+    return 'Tháng ${_selectedMonth.toString().padLeft(2, '0')}, $_selectedYear';
+  }
+
+  // ── Formatting ───────────────────────────────────────────────────
+
+  String _two(int v) => v.toString().padLeft(2, '0');
+
+  String _formatTime(DateTime t) => '${_two(t.hour)}:${_two(t.minute)}';
+
+  String _formatDateTime(DateTime t) =>
+      '${_formatTime(t)} - ${_two(t.day)}/${_two(t.month)}/${t.year}';
+
+  String _formatDuration(Duration d) {
+    if (d.inMinutes < 1) return 'dưới 1 phút';
+    final days = d.inDays;
+    final hours = d.inHours.remainder(24);
+    final minutes = d.inMinutes.remainder(60);
+    if (days > 0) return '$days ngày ${hours}h ${_two(minutes)}m';
+    if (d.inHours > 0) return '${d.inHours}h ${_two(minutes)}m';
+    return '$minutes phút';
+  }
+
+  String _formatDistance(double meters) {
+    if (meters >= 1000) return '${(meters / 1000).toStringAsFixed(1)} km';
+    return '${meters.round()} m';
+  }
+
+  String _eventSubtitle(SafeZoneEventModel e) {
+    if (e.address != null) return e.address!;
+    if (e.hasEventPoint) {
+      return '${e.latitude!.toStringAsFixed(5)}, ${e.longitude!.toStringAsFixed(5)}';
+    }
+    return 'Không rõ vị trí';
   }
 
   // ── Actions ──────────────────────────────────────────────────────
 
   void _showMonthPicker() {
+    final now = DateTime.now();
     int tmpMonth = _selectedMonth;
     int tmpYear = _selectedYear;
+    bool isFuture(int year, int month) =>
+        year > now.year || (year == now.year && month > now.month);
+
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.white,
@@ -205,13 +380,13 @@ class _ActivityHistoryScreenState extends State<ActivityHistoryScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('Chọn tháng', style: TextStyle(
-                    color: const Color(0xFF0C1D1A), fontSize: 18,
+                  const Text('Chọn tháng', style: TextStyle(
+                    color: Color(0xFF0C1D1A), fontSize: 18,
                     fontFamily: 'Lexend', fontWeight: FontWeight.w700,
                   )),
                   GestureDetector(
                     onTap: () => Navigator.pop(ctx),
-                    child: Icon(Icons.close, color: const Color(0xFF6B7280)),
+                    child: const Icon(Icons.close, color: Color(0xFF6B7280)),
                   ),
                 ],
               ),
@@ -223,13 +398,25 @@ class _ActivityHistoryScreenState extends State<ActivityHistoryScreen> {
                     onPressed: () => setBS(() => tmpYear--),
                     icon: Icon(Icons.chevron_left, color: AppColors.primary),
                   ),
-                  Text('$tmpYear', style: TextStyle(
+                  Text('$tmpYear', style: const TextStyle(
                     fontSize: 18, fontFamily: 'Lexend', fontWeight: FontWeight.w700,
-                    color: const Color(0xFF0C1D1A),
+                    color: Color(0xFF0C1D1A),
                   )),
                   IconButton(
-                    onPressed: () => setBS(() => tmpYear++),
-                    icon: Icon(Icons.chevron_right, color: AppColors.primary),
+                    onPressed: tmpYear >= now.year
+                        ? null
+                        : () => setBS(() {
+                              tmpYear++;
+                              if (isFuture(tmpYear, tmpMonth)) {
+                                tmpMonth = now.month;
+                              }
+                            }),
+                    icon: Icon(
+                      Icons.chevron_right,
+                      color: tmpYear >= now.year
+                          ? const Color(0xFFD1D5DB)
+                          : AppColors.primary,
+                    ),
                   ),
                 ],
               ),
@@ -243,21 +430,25 @@ class _ActivityHistoryScreenState extends State<ActivityHistoryScreen> {
                 children: List.generate(12, (i) {
                   final m = i + 1;
                   final sel = m == tmpMonth;
+                  final disabled = isFuture(tmpYear, m);
                   return GestureDetector(
-                    onTap: () => setBS(() => tmpMonth = m),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: sel ? AppColors.primary : Colors.transparent,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: sel ? AppColors.primary : const Color(0xFFE5E7EB),
+                    onTap: disabled ? null : () => setBS(() => tmpMonth = m),
+                    child: Opacity(
+                      opacity: disabled ? 0.35 : 1,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: sel ? AppColors.primary : Colors.transparent,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: sel ? AppColors.primary : const Color(0xFFE5E7EB),
+                          ),
                         ),
+                        alignment: Alignment.center,
+                        child: Text('Th ${_two(m)}', style: TextStyle(
+                          color: sel ? Colors.white : const Color(0xFF6B7280),
+                          fontSize: 13, fontFamily: 'Lexend', fontWeight: FontWeight.w600,
+                        )),
                       ),
-                      alignment: Alignment.center,
-                      child: Text('Th ${m.toString().padLeft(2, '0')}', style: TextStyle(
-                        color: sel ? Colors.white : const Color(0xFF6B7280),
-                        fontSize: 13, fontFamily: 'Lexend', fontWeight: FontWeight.w600,
-                      )),
                     ),
                   );
                 }),
@@ -267,8 +458,15 @@ class _ActivityHistoryScreenState extends State<ActivityHistoryScreen> {
                 width: double.infinity, height: 48,
                 child: ElevatedButton(
                   onPressed: () {
-                    setState(() { _selectedMonth = tmpMonth; _selectedYear = tmpYear; });
                     Navigator.pop(ctx);
+                    if (tmpMonth == _selectedMonth && tmpYear == _selectedYear) {
+                      return;
+                    }
+                    setState(() {
+                      _selectedMonth = tmpMonth;
+                      _selectedYear = tmpYear;
+                    });
+                    _onSelectionChanged();
                   },
                   child: const Text('Xác nhận'),
                 ),
@@ -280,436 +478,12 @@ class _ActivityHistoryScreenState extends State<ActivityHistoryScreen> {
     );
   }
 
-  void _showAddActivitySheet() {
-    final nameCtrl = TextEditingController();
-    _EventType selectedType = _EventType.enter;
-    double duration = 60; // minutes
-    TimeOfDay startTime = TimeOfDay.now();
-    List<int> selectedDays = [1, 2, 3, 4, 5]; // T2-T6
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setBS) {
-          return Container(
-            constraints: BoxConstraints(
-              maxHeight: MediaQuery.of(ctx).size.height * 0.88,
-            ),
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-            ),
-            child: Column(mainAxisSize: MainAxisSize.min, children: [
-              Container(
-                margin: const EdgeInsets.only(top: 12),
-                width: 40, height: 4,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFD1D5DB),
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(24, 16, 24, 8),
-                child: Row(children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: const BoxDecoration(
-                      color: AppColors.kPrimaryLight,
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(Icons.add_location_alt_rounded,
-                        color: Color(0xFF00ACB2), size: 20),
-                  ),
-                  const SizedBox(width: 10),
-                  const Text('Thêm hoạt động',
-                      style: TextStyle(
-                        fontFamily: 'Lexend', fontSize: 18,
-                        fontWeight: FontWeight.w700,
-                        color: Color(0xFF006D5B),
-                      )),
-                ]),
-              ),
-              const Divider(color: Color(0xFFF1F5F9)),
-              Flexible(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.fromLTRB(24, 8, 24, 16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Tên hoạt động
-                      _sheetLabel('Tên hoạt động'),
-                      TextField(
-                        controller: nameCtrl,
-                        style: const TextStyle(fontFamily: 'Lexend', fontSize: 14),
-                        decoration: _sheetInputDecor('Nhập tên vùng / hoạt động...'),
-                      ),
-                      const SizedBox(height: 16),
-
-                      // Loại hoạt động
-                      _sheetLabel('Loại hoạt động'),
-                      Row(children: [
-                        _typeChip(setBS, 'Vào vùng', _EventType.enter, selectedType,
-                            (t) => selectedType = t),
-                        const SizedBox(width: 10),
-                        _typeChip(setBS, 'Rời vùng', _EventType.leave, selectedType,
-                            (t) => selectedType = t),
-                      ]),
-                      const SizedBox(height: 16),
-
-                      // Thời lượng
-                      _sheetLabel('Thời lượng: ${duration >= 60 ? '${(duration / 60).toStringAsFixed(1)} giờ' : '${duration.round()} phút'}'),
-                      SliderTheme(
-                        data: SliderThemeData(
-                          activeTrackColor: const Color(0xFF00ACB2),
-                          inactiveTrackColor: const Color(0xFF00ACB2).withAlpha(30),
-                          thumbColor: const Color(0xFF00ACB2),
-                          overlayColor: const Color(0xFF00ACB2).withAlpha(30),
-                          trackHeight: 4,
-                          thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8),
-                        ),
-                        child: Slider(
-                          value: duration,
-                          min: 15, max: 480, divisions: 31,
-                          onChanged: (v) => setBS(() => duration = v),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-
-                      // Giờ bắt đầu
-                      _sheetLabel('Giờ bắt đầu'),
-                      GestureDetector(
-                        onTap: () async {
-                          final t = await showTimePicker(
-                            context: ctx,
-                            initialTime: startTime,
-                            builder: (c, child) => Theme(
-                              data: Theme.of(c).copyWith(
-                                colorScheme: const ColorScheme.light(
-                                    primary: Color(0xFF00ACB2)),
-                              ),
-                              child: child!,
-                            ),
-                          );
-                          if (t != null) setBS(() => startTime = t);
-                        },
-                        child: Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 14, vertical: 12),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFF9FAFB),
-                            borderRadius: BorderRadius.circular(14),
-                            border: Border.all(color: const Color(0xFFF3F4F6)),
-                          ),
-                          child: Row(children: [
-                            const Icon(Icons.access_time_rounded,
-                                size: 18, color: Color(0xFF00ACB2)),
-                            const SizedBox(width: 8),
-                            Text(
-                              '${startTime.hour.toString().padLeft(2, '0')}:${startTime.minute.toString().padLeft(2, '0')}',
-                              style: const TextStyle(
-                                  fontFamily: 'Lexend', fontSize: 14,
-                                  fontWeight: FontWeight.w600,
-                                  color: Color(0xFF1E293B)),
-                            ),
-                            const Spacer(),
-                            const Icon(Icons.keyboard_arrow_down_rounded,
-                                size: 20, color: Color(0xFF9CA3AF)),
-                          ]),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-
-                      // Ngày lặp
-                      _sheetLabel('Ngày lặp'),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: List.generate(7, (i) {
-                          final day = (i + 1) % 7; // 1=T2..6=T7,0=CN
-                          final labels = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
-                          final isOn = selectedDays.contains(day);
-                          return GestureDetector(
-                            onTap: () => setBS(() {
-                              if (isOn) {
-                                selectedDays.remove(day);
-                              } else {
-                                selectedDays.add(day);
-                              }
-                            }),
-                            child: Container(
-                              width: 38, height: 38,
-                              decoration: BoxDecoration(
-                                color: isOn
-                                    ? const Color(0xFF00ACB2)
-                                    : const Color(0xFFF9FAFB),
-                                borderRadius: BorderRadius.circular(10),
-                                border: Border.all(
-                                  color: isOn
-                                      ? const Color(0xFF00ACB2)
-                                      : const Color(0xFFE5E7EB),
-                                ),
-                              ),
-                              child: Center(
-                                child: Text(labels[day],
-                                    style: TextStyle(
-                                      fontFamily: 'Lexend', fontSize: 12,
-                                      fontWeight: FontWeight.w600,
-                                      color: isOn
-                                          ? Colors.white
-                                          : const Color(0xFF6B7280),
-                                    )),
-                              ),
-                            ),
-                          );
-                        }),
-                      ),
-                      const SizedBox(height: 20),
-                    ],
-                  ),
-                ),
-              ),
-
-              // Buttons
-              Padding(
-                padding: EdgeInsets.fromLTRB(
-                    24, 4, 24, 20 + MediaQuery.of(ctx).viewInsets.bottom),
-                child: Row(children: [
-                  Expanded(
-                    child: SizedBox(
-                      height: 48,
-                      child: OutlinedButton(
-                        onPressed: () => Navigator.pop(ctx),
-                        child: const Text('Hủy'),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: SizedBox(
-                      height: 48,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          final name = nameCtrl.text.trim();
-                          if (name.isEmpty) {
-                            ScaffoldMessenger.of(ctx)
-                              ..hideCurrentSnackBar()
-                              ..showSnackBar(const SnackBar(
-                                content: Text('Vui lòng nhập tên hoạt động',
-                                    style: TextStyle(fontFamily: 'Lexend')),
-                                backgroundColor: Color(0xFFEF4444),
-                                behavior: SnackBarBehavior.floating,
-                              ));
-                            return;
-                          }
-                          final now = DateTime.now();
-                          final dt = DateTime(now.year, now.month, now.day,
-                              startTime.hour, startTime.minute);
-                          setState(() {
-                            _events.add(_ZoneEvent(
-                              id: 'e${_events.length + 1}',
-                              memberId: _selectedMemberId,
-                              type: selectedType,
-                              dateTime: dt,
-                              zoneName: name,
-                              address: '',
-                              stayDuration: selectedType == _EventType.enter
-                                  ? Duration(minutes: duration.round())
-                                  : null,
-                            ));
-                          });
-                          Navigator.pop(ctx);
-                          ScaffoldMessenger.of(context)
-                            ..hideCurrentSnackBar()
-                            ..showSnackBar(SnackBar(
-                              content: Text('Đã thêm thành công',
-                                  style: const TextStyle(
-                                      fontFamily: 'Lexend',
-                                      color: Colors.white)),
-                              backgroundColor: const Color(0xFF00ACB2),
-                              behavior: SnackBarBehavior.floating,
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12)),
-                              margin: const EdgeInsets.symmetric(
-                                  horizontal: 24, vertical: 12),
-                            ));
-                        },
-                        child: const Text('Lưu',
-                            style: TextStyle(
-                                fontFamily: 'Lexend',
-                                fontWeight: FontWeight.w700,
-                                color: Colors.white)),
-                      ),
-                    ),
-                  ),
-                ]),
-              ),
-            ]),
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _sheetLabel(String text) => Padding(
-        padding: const EdgeInsets.only(bottom: 6),
-        child: Text(text,
-            style: const TextStyle(
-                fontFamily: 'Lexend', fontSize: 13,
-                fontWeight: FontWeight.w600, color: Color(0xFF006D5B))),
-      );
-
-  InputDecoration _sheetInputDecor(String hint) => InputDecoration(
-        hintText: hint,
-        hintStyle: const TextStyle(
-            fontFamily: 'Lexend', fontSize: 14, color: Color(0xFF9CA3AF)),
-        filled: true, fillColor: const Color(0xFFF9FAFB),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: Color(0xFFF3F4F6)),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: Color(0xFFF3F4F6)),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: Color(0xFF00ACB2), width: 1.5),
-        ),
-      );
-
-  Widget _typeChip(StateSetter setBS, String label, _EventType type,
-      _EventType selected, ValueChanged<_EventType> onSelect) {
-    final isActive = type == selected;
-    return Expanded(
-      child: GestureDetector(
-        onTap: () => setBS(() => onSelect(type)),
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 10),
-          decoration: BoxDecoration(
-            color: isActive ? const Color(0xFF00ACB2) : const Color(0xFFF9FAFB),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: isActive ? const Color(0xFF00ACB2) : const Color(0xFFE5E7EB),
-            ),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                type == _EventType.enter
-                    ? Icons.login_rounded
-                    : Icons.logout_rounded,
-                size: 16,
-                color: isActive ? Colors.white : const Color(0xFF6B7280),
-              ),
-              const SizedBox(width: 6),
-              Text(label,
-                  style: TextStyle(
-                    fontFamily: 'Lexend', fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: isActive ? Colors.white : const Color(0xFF6B7280),
-                  )),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _showAddMemberDialog() {
-    final nameCtrl = TextEditingController();
-    Color pickedColor = const Color(0xFFEC4899);
-    final palette = const [
-      Color(0xFFEC4899), Color(0xFF8B5CF6), Color(0xFFF59E0B),
-      Color(0xFF10B981), Color(0xFF3B82F6), Color(0xFFEF4444),
-    ];
-    showDialog(
-      context: context,
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setDlg) => AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-          title: Text('Thêm thành viên', style: TextStyle(
-            fontFamily: 'Lexend', fontWeight: FontWeight.w700, fontSize: 18,
-            color: const Color(0xFF0C1D1A),
-          )),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: nameCtrl,
-                decoration: InputDecoration(
-                  hintText: 'Nhập tên', hintStyle: TextStyle(color: const Color(0xFF9CA3AF)),
-                  filled: true, fillColor: const Color(0xFFF9FAFB),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    borderSide: BorderSide(color: const Color(0xFFE5E7EB)),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    borderSide: BorderSide(color: const Color(0xFFE5E7EB)),
-                  ),
-                ),
-                style: TextStyle(fontFamily: 'Lexend'),
-              ),
-              const SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: palette.map((c) => GestureDetector(
-                  onTap: () => setDlg(() => pickedColor = c),
-                  child: Container(
-                    width: 36, height: 36,
-                    decoration: BoxDecoration(
-                      color: c, shape: BoxShape.circle,
-                      border: Border.all(
-                        color: pickedColor == c ? const Color(0xFF0C1D1A) : Colors.transparent,
-                        width: 2.5,
-                      ),
-                    ),
-                  ),
-                )).toList(),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx),
-              child: Text('Hủy', style: TextStyle(color: const Color(0xFF6B7280), fontFamily: 'Lexend')),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                final n = nameCtrl.text.trim();
-                if (n.isEmpty) return;
-                setState(() {
-                  _members.add(_Member(
-                    id: 'm${_members.length + 1}',
-                    name: n, color: pickedColor,
-                  ));
-                });
-                Navigator.pop(ctx);
-              },
-              child: const Text('Thêm'),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   // ── Build ────────────────────────────────────────────────────────
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      floatingActionButton: FloatingActionButton(
-        onPressed: _showAddActivitySheet,
-        backgroundColor: const Color(0xFF00ACB2),
-        shape: const CircleBorder(),
-        child: const Icon(Icons.add_rounded, color: Colors.white, size: 28),
-      ),
       body: Column(
         children: [
           _buildHeader(),
@@ -722,24 +496,167 @@ class _ActivityHistoryScreenState extends State<ActivityHistoryScreen> {
                   colors: [AppColors.kPrimaryLight, AppColors.background],
                 ),
               ),
-              child: SingleChildScrollView(
-                child: Padding(
-                  padding: EdgeInsets.only(
-                      top: 24,
-                      left: ResponsiveHelper.horizontalPadding(context),
-                      right: ResponsiveHelper.horizontalPadding(context)),
-                  child: Column(
-                    children: [
-                      _buildFilterTabs(),
-                      const SizedBox(height: 24),
-                      _buildTimeline(),
-                    ],
-                  ),
-                ),
+              child: RefreshIndicator(
+                color: AppColors.primary,
+                onRefresh: _refreshAll,
+                child: _buildBody(),
               ),
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildBody() {
+    final hPad = ResponsiveHelper.horizontalPadding(context);
+    final rows = _timelineRows;
+
+    Widget content;
+    if (_members.isEmpty && _membersLoading) {
+      content = _buildLoadingSliver();
+    } else if (_members.isEmpty) {
+      content = _buildMessageSliver(
+        icon: Icons.group_outlined,
+        title: 'Chưa có thành viên',
+        message: 'Hãy thêm thành viên gia đình để theo dõi lịch sử di chuyển.',
+        actionLabel: 'Thêm thành viên',
+        onAction: _openAddMember,
+      );
+    } else if (_eventsLoading && _events.isEmpty) {
+      content = _buildLoadingSliver();
+    } else if (_eventsError != null && _events.isEmpty) {
+      content = _buildMessageSliver(
+        icon: Icons.cloud_off_rounded,
+        title: 'Không tải được dữ liệu',
+        message: _eventsError!,
+        actionLabel: 'Thử lại',
+        onAction: () => _loadEvents(),
+      );
+    } else if (rows.isEmpty) {
+      content = _buildMessageSliver(
+        icon: Icons.history,
+        title: _events.isEmpty
+            ? 'Chưa có lịch sử trong tháng này'
+            : 'Không có hoạt động phù hợp',
+        message: _events.isEmpty
+            ? 'Lịch sử được ghi tự động mỗi khi ${_selectedMember?.name ?? 'thành viên'} '
+                'vào hoặc rời một vùng an toàn.'
+            : 'Thử chọn bộ lọc khác để xem thêm hoạt động.',
+      );
+    } else {
+      content = SliverPadding(
+        padding: EdgeInsets.symmetric(horizontal: hPad),
+        sliver: SliverList(
+          delegate: SliverChildBuilderDelegate(
+            (context, index) {
+              final row = rows[index];
+              if (row.event == null) {
+                return Padding(
+                  padding: EdgeInsets.only(top: index == 0 ? 0 : 8, bottom: 16),
+                  child: _buildTimelineBadge(row.dayLabel!, row.isToday),
+                );
+              }
+              return Padding(
+                key: ValueKey('event_${row.event!.id}'),
+                padding: const EdgeInsets.only(bottom: 16),
+                child: _buildTimelineItem(event: row.event!),
+              );
+            },
+            childCount: rows.length,
+          ),
+        ),
+      );
+    }
+
+    return CustomScrollView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      slivers: [
+        SliverPadding(
+          padding: EdgeInsets.only(top: 24, left: hPad, right: hPad),
+          sliver: SliverToBoxAdapter(child: _buildFilterTabs()),
+        ),
+        SliverToBoxAdapter(
+          child: SizedBox(
+            height: 24,
+            child: (_eventsLoading && _events.isNotEmpty)
+                ? Padding(
+                    padding: EdgeInsets.symmetric(horizontal: hPad + 24, vertical: 11),
+                    child: LinearProgressIndicator(
+                      minHeight: 2,
+                      color: AppColors.primary,
+                      backgroundColor: AppColors.primary.withValues(alpha: 0.12),
+                    ),
+                  )
+                : null,
+          ),
+        ),
+        content,
+        const SliverToBoxAdapter(child: SizedBox(height: 40)),
+      ],
+    );
+  }
+
+  Widget _buildLoadingSliver() {
+    return const SliverToBoxAdapter(
+      child: Padding(
+        padding: EdgeInsets.only(top: 60),
+        child: Center(
+          child: CircularProgressIndicator(color: Color(0xFF00ACB2)),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMessageSliver({
+    required IconData icon,
+    required String title,
+    required String message,
+    String? actionLabel,
+    VoidCallback? onAction,
+  }) {
+    return SliverToBoxAdapter(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(32, 48, 32, 0),
+        child: Column(
+          children: [
+            Container(
+              width: 72,
+              height: 72,
+              decoration: BoxDecoration(
+                color: AppColors.primary.withValues(alpha: 0.10),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, size: 34, color: AppColors.primary),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: Color(0xFF0C1D1A), fontSize: 16,
+                fontFamily: 'Lexend', fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: Color(0xFF6B7280), fontSize: 13,
+                fontFamily: 'Lexend', fontWeight: FontWeight.w400, height: 1.5,
+              ),
+            ),
+            if (actionLabel != null && onAction != null) ...[
+              const SizedBox(height: 16),
+              OutlinedButton.icon(
+                onPressed: onAction,
+                icon: const Icon(Icons.refresh_rounded, size: 18),
+                label: Text(actionLabel),
+              ),
+            ],
+          ],
+        ),
       ),
     );
   }
@@ -812,17 +729,31 @@ class _ActivityHistoryScreenState extends State<ActivityHistoryScreen> {
   }
 
   Widget _buildMemberSelector() {
-    return Padding(
-      padding: EdgeInsets.symmetric(
-          horizontal: ResponsiveHelper.horizontalPadding(context),
-          vertical: 12),
+    final hPad = ResponsiveHelper.horizontalPadding(context);
+    if (_members.isEmpty && _membersLoading) {
+      return const SizedBox(
+        height: 100,
+        child: Center(
+          child: SizedBox(
+            width: 22, height: 22,
+            child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFF00ACB2)),
+          ),
+        ),
+      );
+    }
+
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      padding: EdgeInsets.symmetric(horizontal: hPad, vertical: 12),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           ..._members.map((m) {
             final isSel = m.id == _selectedMemberId;
             return Padding(
               padding: const EdgeInsets.only(right: 24),
-              child: Opacity(
+              child: AnimatedOpacity(
+                duration: const Duration(milliseconds: 200),
                 opacity: isSel ? 1.0 : 0.60,
                 child: _buildMemberAvatar(m, isSelected: isSel),
               ),
@@ -837,12 +768,29 @@ class _ActivityHistoryScreenState extends State<ActivityHistoryScreen> {
     );
   }
 
-  Widget _buildMemberAvatar(_Member member, {required bool isSelected}) {
+  Widget _buildMemberAvatar(SafeZoneMember member, {required bool isSelected}) {
+    final color = _memberColor(member);
+    final initial = member.name.trim().isEmpty
+        ? '?'
+        : member.name.trim().characters.first.toUpperCase();
+    final initialWidget = Center(
+      child: Text(
+        initial,
+        style: TextStyle(
+          color: color,
+          fontSize: 22,
+          fontFamily: 'Lexend',
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+    );
+    final hasAvatar = member.avatarUrl.startsWith('http');
+
     return GestureDetector(
       onTap: () {
-        setState(() {
-          _selectedMemberId = member.id;
-        });
+        if (member.id == _selectedMemberId) return;
+        setState(() => _selectedMemberId = member.id);
+        _onSelectionChanged();
       },
       child: SizedBox(
         width: 64,
@@ -852,7 +800,7 @@ class _ActivityHistoryScreenState extends State<ActivityHistoryScreen> {
               width: 56,
               height: 56,
               decoration: ShapeDecoration(
-                color: member.color.withValues(alpha: 0.15),
+                color: color.withValues(alpha: 0.15),
                 shape: RoundedRectangleBorder(
                   side: BorderSide(
                     width: 2,
@@ -871,21 +819,24 @@ class _ActivityHistoryScreenState extends State<ActivityHistoryScreen> {
                       ]
                     : null,
               ),
-              child: Center(
-                child: Text(
-                  member.name.characters.first,
-                  style: TextStyle(
-                    color: member.color,
-                    fontSize: 22,
-                    fontFamily: 'Lexend',
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
+              child: hasAvatar
+                  ? ClipOval(
+                      child: Image.network(
+                        member.avatarUrl,
+                        width: 52,
+                        height: 52,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, _, _) => initialWidget,
+                      ),
+                    )
+                  : initialWidget,
             ),
             const SizedBox(height: 8),
             Text(
               member.name,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
               style: TextStyle(
                 color: isSelected ? AppColors.primary : const Color(0xFF0C1D1A),
                 fontSize: ResponsiveHelper.sp(context, 12),
@@ -902,7 +853,7 @@ class _ActivityHistoryScreenState extends State<ActivityHistoryScreen> {
 
   Widget _buildAddMember() {
     return GestureDetector(
-      onTap: _showAddMemberDialog,
+      onTap: _openAddMember,
       child: SizedBox(
         width: 64,
         child: Column(
@@ -997,7 +948,6 @@ class _ActivityHistoryScreenState extends State<ActivityHistoryScreen> {
     );
   }
 
-
   Widget _buildFilterTabs() {
     return Container(
       width: double.infinity,
@@ -1028,9 +978,9 @@ class _ActivityHistoryScreenState extends State<ActivityHistoryScreen> {
       ),
       child: Row(
         children: [
-          Expanded(child: _buildFilterTab('Tất cả')),
-          Expanded(child: _buildFilterTab('Rời vùng')),
-          Expanded(child: _buildFilterTab('Vào vùng')),
+          Expanded(child: _buildFilterTab(_filterAll)),
+          Expanded(child: _buildFilterTab(_filterLeave)),
+          Expanded(child: _buildFilterTab(_filterEnter)),
         ],
       ),
     );
@@ -1040,6 +990,7 @@ class _ActivityHistoryScreenState extends State<ActivityHistoryScreen> {
     final isSelected = _selectedFilter == label;
     return GestureDetector(
       onTap: () {
+        if (_selectedFilter == label) return;
         setState(() {
           _selectedFilter = label;
         });
@@ -1085,41 +1036,6 @@ class _ActivityHistoryScreenState extends State<ActivityHistoryScreen> {
     );
   }
 
-  Widget _buildTimeline() {
-    final grouped = _groupedEvents;
-    if (grouped.isEmpty) {
-      return Padding(
-        padding: const EdgeInsets.only(top: 60),
-        child: Column(
-          children: [
-            Icon(Icons.history, size: 48, color: const Color(0xFF9CA3AF)),
-            const SizedBox(height: 12),
-            Text('Không có hoạt động', style: TextStyle(
-              color: const Color(0xFF9CA3AF), fontSize: 16,
-              fontFamily: 'Lexend', fontWeight: FontWeight.w500,
-            )),
-          ],
-        ),
-      );
-    }
-
-    final dayKeys = grouped.keys.toList();
-    return Column(
-      children: [
-        for (int d = 0; d < dayKeys.length; d++) ...[
-          if (d > 0) const SizedBox(height: 24),
-          _buildTimelineBadge(dayKeys[d], dayKeys[d].startsWith('HÔM NAY')),
-          const SizedBox(height: 16),
-          ...grouped[dayKeys[d]]!.map((e) => Padding(
-            padding: const EdgeInsets.only(bottom: 16),
-            child: _buildTimelineItem(event: e),
-          )),
-        ],
-        const SizedBox(height: 80),
-      ],
-    );
-  }
-
   Widget _buildTimelineBadge(String label, bool isToday) {
     return Align(
       alignment: Alignment.centerLeft,
@@ -1159,14 +1075,17 @@ class _ActivityHistoryScreenState extends State<ActivityHistoryScreen> {
     );
   }
 
-  Widget _buildTimelineItem({required _ZoneEvent event}) {
-    final isEnter = event.type == _EventType.enter;
+  Widget _buildTimelineItem({required SafeZoneEventModel event}) {
+    final isEnter = event.isEnter;
+    final expanded = _expandedIds.contains(event.id);
     final pinColor = isEnter ? AppColors.primary : const Color(0xFFF43F5E);
     final iconColor = isEnter ? const Color(0xFFD1FAE5) : const Color(0xFFFFE4E6);
-    final timeStr = '${event.dateTime.hour.toString().padLeft(2, '0')}:${event.dateTime.minute.toString().padLeft(2, '0')}';
 
     return GestureDetector(
-      onTap: () => setState(() => event.expanded = !event.expanded),
+      behavior: HitTestBehavior.opaque,
+      onTap: () => setState(() {
+        if (!_expandedIds.remove(event.id)) _expandedIds.add(event.id);
+      }),
       child: Stack(
         children: [
           // Timeline line
@@ -1190,7 +1109,7 @@ class _ActivityHistoryScreenState extends State<ActivityHistoryScreen> {
                 child: Padding(
                   padding: EdgeInsets.only(top: 8),
                   child: Text(
-                    timeStr,
+                    _formatTime(event.occurredAt),
                     textAlign: TextAlign.right,
                     style: TextStyle(
                       color: isEnter ? const Color(0xFF6B7280) : const Color(0xFF9CA3AF),
@@ -1264,7 +1183,9 @@ class _ActivityHistoryScreenState extends State<ActivityHistoryScreen> {
                                     ),
                                   ),
                                   Text(
-                                    event.address,
+                                    _eventSubtitle(event),
+                                    maxLines: expanded ? 3 : 1,
+                                    overflow: TextOverflow.ellipsis,
                                     style: TextStyle(
                                       color: const Color(0xFF6B7280),
                                       fontSize: ResponsiveHelper.sp(context, 11),
@@ -1276,71 +1197,23 @@ class _ActivityHistoryScreenState extends State<ActivityHistoryScreen> {
                                 ],
                               ),
                             ),
-                            if (isEnter)
-                              Container(
-                                padding: EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                  vertical: 4,
-                                ),
-                                decoration: ShapeDecoration(
-                                  color: const Color(0xFFECFDF5),
-                                  shape: RoundedRectangleBorder(
-                                    side: BorderSide(
-                                      width: 1,
-                                      color: const Color(0xFFD1FAE5),
-                                    ),
-                                    borderRadius: BorderRadius.circular(9999),
-                                  ),
-                                ),
-                                child: Text(
-                                  'AN TOÀN',
-                                  style: TextStyle(
-                                    color: const Color(0xFF047857),
-                                    fontSize: ResponsiveHelper.sp(context, 10),
-                                    fontFamily: 'Lexend',
-                                    fontWeight: FontWeight.w700,
-                                    height: 1.50,
-                                  ),
-                                ),
-                              )
-                            else
-                              Container(
-                                padding: EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                  vertical: 4,
-                                ),
-                                decoration: ShapeDecoration(
-                                  color: const Color(0xFFFEF2F2),
-                                  shape: RoundedRectangleBorder(
-                                    side: BorderSide(
-                                      width: 1,
-                                      color: const Color(0xFFFECACA),
-                                    ),
-                                    borderRadius: BorderRadius.circular(9999),
-                                  ),
-                                ),
-                                child: Text(
-                                  'CẢNH BÁO',
-                                  style: TextStyle(
-                                    color: const Color(0xFFDC2626),
-                                    fontSize: ResponsiveHelper.sp(context, 10),
-                                    fontFamily: 'Lexend',
-                                    fontWeight: FontWeight.w700,
-                                    height: 1.50,
-                                  ),
-                                ),
-                              ),
+                            const SizedBox(width: 8),
+                            _buildStatusBadge(isEnter),
                           ],
                         ),
+                        if (event.isOngoing) ...[
+                          const SizedBox(height: 10),
+                          _buildOngoingChip(event),
+                        ],
                         const SizedBox(height: 12),
-                        _buildMapPreview(pinColor, isEnter),
+                        _buildMapPreview(event, pinColor),
                         // Expanded detail
                         AnimatedCrossFade(
                           duration: const Duration(milliseconds: 200),
-                          crossFadeState: event.expanded
+                          crossFadeState: expanded
                               ? CrossFadeState.showSecond
                               : CrossFadeState.showFirst,
-                          firstChild: const SizedBox.shrink(),
+                          firstChild: const SizedBox(width: double.infinity),
                           secondChild: _buildEventDetail(event),
                         ),
                       ],
@@ -1355,7 +1228,73 @@ class _ActivityHistoryScreenState extends State<ActivityHistoryScreen> {
     );
   }
 
-  Widget _buildEventDetail(_ZoneEvent event) {
+  Widget _buildStatusBadge(bool isEnter) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: ShapeDecoration(
+        color: isEnter ? const Color(0xFFECFDF5) : const Color(0xFFFEF2F2),
+        shape: RoundedRectangleBorder(
+          side: BorderSide(
+            width: 1,
+            color: isEnter ? const Color(0xFFD1FAE5) : const Color(0xFFFECACA),
+          ),
+          borderRadius: BorderRadius.circular(9999),
+        ),
+      ),
+      child: Text(
+        isEnter ? 'AN TOÀN' : 'CẢNH BÁO',
+        style: TextStyle(
+          color: isEnter ? const Color(0xFF047857) : const Color(0xFFDC2626),
+          fontSize: ResponsiveHelper.sp(context, 10),
+          fontFamily: 'Lexend',
+          fontWeight: FontWeight.w700,
+          height: 1.50,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildOngoingChip(SafeZoneEventModel event) {
+    final duration = event.stayDuration;
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+        decoration: BoxDecoration(
+          color: AppColors.primary.withValues(alpha: 0.10),
+          borderRadius: BorderRadius.circular(9999),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 6,
+              height: 6,
+              decoration: BoxDecoration(
+                color: AppColors.primary,
+                shape: BoxShape.circle,
+              ),
+            ),
+            const SizedBox(width: 6),
+            Text(
+              duration == null
+                  ? 'Đang ở trong vùng'
+                  : 'Đang ở trong vùng · ${_formatDuration(duration)}',
+              style: TextStyle(
+                color: AppColors.primary,
+                fontSize: ResponsiveHelper.sp(context, 11),
+                fontFamily: 'Lexend',
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEventDetail(SafeZoneEventModel event) {
+    final stay = event.stayDuration;
     return Padding(
       padding: const EdgeInsets.only(top: 12),
       child: Container(
@@ -1368,15 +1307,40 @@ class _ActivityHistoryScreenState extends State<ActivityHistoryScreen> {
         ),
         child: Column(
           children: [
-            _buildDetailRow(Icons.location_on_outlined, 'Tọa độ',
-                '${event.lat.toStringAsFixed(4)}, ${event.lng.toStringAsFixed(4)}'),
-            const SizedBox(height: 8),
-            _buildDetailRow(Icons.access_time, 'Thời gian',
-                '${event.dateTime.hour.toString().padLeft(2, '0')}:${event.dateTime.minute.toString().padLeft(2, '0')} - ${event.dateTime.day}/${event.dateTime.month}/${event.dateTime.year}'),
-            if (event.stayDuration != null) ...[
+            if (event.hasEventPoint) ...[
+              _buildDetailRow(Icons.location_on_outlined, 'Tọa độ',
+                  '${event.latitude!.toStringAsFixed(5)}, ${event.longitude!.toStringAsFixed(5)}'),
               const SizedBox(height: 8),
-              _buildDetailRow(Icons.timer_outlined, 'Thời gian ở',
-                  '${event.stayDuration!.inHours}h ${event.stayDuration!.inMinutes.remainder(60)}m'),
+            ],
+            _buildDetailRow(Icons.access_time, 'Thời gian',
+                _formatDateTime(event.occurredAt)),
+            if (event.distanceMeters != null) ...[
+              const SizedBox(height: 8),
+              _buildDetailRow(Icons.social_distance_outlined, 'Cách tâm vùng',
+                  _formatDistance(event.distanceMeters!)),
+            ],
+            if (event.zoneRadiusMeters != null) ...[
+              const SizedBox(height: 8),
+              _buildDetailRow(Icons.radar_outlined, 'Bán kính vùng',
+                  _formatDistance(event.zoneRadiusMeters!)),
+            ],
+            if (stay != null) ...[
+              const SizedBox(height: 8),
+              _buildDetailRow(
+                Icons.timer_outlined,
+                event.isOngoing ? 'Đã ở được' : 'Thời gian ở',
+                _formatDuration(stay),
+              ),
+            ],
+            if (!event.isEnter && event.stayStartedAt != null) ...[
+              const SizedBox(height: 8),
+              _buildDetailRow(Icons.login_rounded, 'Vào vùng lúc',
+                  _formatDateTime(event.stayStartedAt!)),
+            ],
+            if (event.isEnter && !event.isOngoing && event.stayEndedAt != null) ...[
+              const SizedBox(height: 8),
+              _buildDetailRow(Icons.logout_rounded, 'Rời vùng lúc',
+                  _formatDateTime(event.stayEndedAt!)),
             ],
           ],
         ),
@@ -1386,6 +1350,7 @@ class _ActivityHistoryScreenState extends State<ActivityHistoryScreen> {
 
   Widget _buildDetailRow(IconData icon, String label, String value) {
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Icon(icon, size: 16, color: const Color(0xFF6B7280)),
         const SizedBox(width: 8),
@@ -1403,79 +1368,106 @@ class _ActivityHistoryScreenState extends State<ActivityHistoryScreen> {
     );
   }
 
-  Widget _buildMapPreview(Color pinColor, bool isActive) {
-    return Container(
-      width: double.infinity,
-      height: 96,
-      decoration: ShapeDecoration(
-        color: const Color(0xFFF3F4F6),
-        shape: RoundedRectangleBorder(
-          side: const BorderSide(
-            width: 1,
-            color: Color(0xFFF3F4F6),
-          ),
+  /// Ban do thu nho (khong tuong tac): vong tron vung an toan + diem vi tri
+  /// luc vao/roi vung. Zoom tu tinh de thay ca vung lan diem.
+  Widget _buildMapPreview(SafeZoneEventModel event, Color pinColor) {
+    const height = 110.0;
+    final eventPoint = event.hasEventPoint
+        ? LatLng(event.latitude!, event.longitude!)
+        : null;
+    final zoneCenter = (event.zoneLatitude != null && event.zoneLongitude != null)
+        ? LatLng(event.zoneLatitude!, event.zoneLongitude!)
+        : null;
+    final center = zoneCenter ?? eventPoint;
+
+    if (center == null) {
+      return Container(
+        width: double.infinity,
+        height: height,
+        decoration: BoxDecoration(
+          color: const Color(0xFFF3F4F6),
           borderRadius: BorderRadius.circular(16),
         ),
-      ),
-      child: Stack(
-        children: [
-          // Geofence circle
-          Positioned(
-            left: 15,
-            top: 16,
-            child: Container(
-              width: isActive ? 58 : 64,
-              height: 64,
-              decoration: ShapeDecoration(
-                color: pinColor.withValues(alpha: 0.2),
-                shape: RoundedRectangleBorder(
-                  side: BorderSide(
-                    width: 2,
-                    color: pinColor,
-                  ),
-                  borderRadius: BorderRadius.circular(9999),
-                ),
+        alignment: Alignment.center,
+        child: const Icon(Icons.map_outlined, color: Color(0xFF9CA3AF)),
+      );
+    }
+
+    final radius = event.zoneRadiusMeters ?? 100;
+    final distance = (zoneCenter != null && eventPoint != null)
+        ? const Distance().as(LengthUnit.Meter, zoneCenter, eventPoint)
+        : 0.0;
+    final extent = math.max(radius, distance) * 1.3;
+    // met/pixel tai zoom z = 156543.03 * cos(lat) / 2^z; can extent vua ~45% chieu cao
+    final metersPerPixel = math.max(extent, 30) / (height * 0.45);
+    final zoom = (math.log(156543.03 * math.cos(center.latitude * math.pi / 180) /
+                metersPerPixel) /
+            math.ln2)
+        .clamp(3.0, 18.0);
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(16),
+      child: SizedBox(
+        width: double.infinity,
+        height: height,
+        child: IgnorePointer(
+          child: FlutterMap(
+            options: MapOptions(
+              initialCenter: center,
+              initialZoom: zoom,
+              interactionOptions: const InteractionOptions(
+                flags: InteractiveFlag.none,
               ),
             ),
-          ),
-          // Location pin
-          Positioned(
-            left: 0,
-            right: 0,
-            top: 0,
-            bottom: 0,
-            child: Center(
-              child: Container(
-                width: 12,
-                height: 12,
-                decoration: ShapeDecoration(
-                  color: pinColor,
-                  shape: RoundedRectangleBorder(
-                    side: const BorderSide(width: 2, color: Colors.white),
-                    borderRadius: BorderRadius.circular(9999),
-                  ),
-                  shadows: const [
-                    BoxShadow(
-                      color: Color(0x19000000),
-                      blurRadius: 6,
-                      offset: Offset(0, 4),
-                      spreadRadius: -4,
-                    ),
-                    BoxShadow(
-                      color: Color(0x19000000),
-                      blurRadius: 15,
-                      offset: Offset(0, 10),
-                      spreadRadius: -3,
+            children: [
+              TileLayer(
+                urlTemplate: 'https://tile.openstreetmap.de/{z}/{x}/{y}.png',
+                userAgentPackageName: 'com.familyguard.app',
+                maxZoom: 19,
+              ),
+              if (zoneCenter != null)
+                CircleLayer(
+                  circles: [
+                    CircleMarker(
+                      point: zoneCenter,
+                      radius: radius,
+                      useRadiusInMeter: true,
+                      color: pinColor.withValues(alpha: 0.18),
+                      borderColor: pinColor,
+                      borderStrokeWidth: 2,
                     ),
                   ],
                 ),
-              ),
-            ),
+              if (eventPoint != null)
+                MarkerLayer(
+                  markers: [
+                    Marker(
+                      point: eventPoint,
+                      width: 16,
+                      height: 16,
+                      child: Container(
+                        decoration: ShapeDecoration(
+                          color: pinColor,
+                          shape: RoundedRectangleBorder(
+                            side: const BorderSide(width: 2, color: Colors.white),
+                            borderRadius: BorderRadius.circular(9999),
+                          ),
+                          shadows: const [
+                            BoxShadow(
+                              color: Color(0x33000000),
+                              blurRadius: 6,
+                              offset: Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
 }
-
-

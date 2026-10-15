@@ -9,6 +9,8 @@ export class PushDeliveryService {
     title: string;
     body: string;
     data?: Record<string, string>;
+    /** Tag Android: thong bao cung tag se thay the nhau thay vi hien trung. */
+    androidTag?: string;
   }) {
     if (!firebaseMessaging) {
       return;
@@ -30,6 +32,7 @@ export class PushDeliveryService {
         priority: 'high',
         notification: {
           channelId: 'family_guard_high_importance',
+          ...(params.androidTag ? { tag: params.androidTag } : {}),
         },
       },
       apns: {

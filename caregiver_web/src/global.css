@@ -1,0 +1,288 @@
+/* ==========================================================
+   Support Family Caregiver Web — Global styles
+   (font, scrollbar, keyframes, Leaflet markers, form controls)
+   ========================================================== */
+@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap');
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  font-family: 'Be Vietnam Pro', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  overflow: hidden;
+}
+
+::selection {
+  background: rgba(0, 172, 178, 0.25);
+}
+
+/* Scrollbar mảnh, hiện đại */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(120, 140, 150, 0.35) transparent;
+}
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+*::-webkit-scrollbar-thumb {
+  background: rgba(120, 140, 150, 0.32);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: rgba(120, 140, 150, 0.55);
+  background-clip: content-box;
+}
+
+/* Loại bỏ outline mặc định của input RN Web, dùng focus ring riêng */
+input,
+textarea,
+select {
+  outline: none;
+  font-family: inherit;
+}
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+[role='button']:focus-visible,
+a:focus-visible {
+  outline: 2px solid rgba(0, 172, 178, 0.55);
+  outline-offset: 2px;
+}
+
+input[type='time']::-webkit-calendar-picker-indicator,
+input[type='date']::-webkit-calendar-picker-indicator,
+input[type='datetime-local']::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  opacity: 0.6;
+}
+[data-theme='dark'] input[type='time']::-webkit-calendar-picker-indicator,
+[data-theme='dark'] input[type='date']::-webkit-calendar-picker-indicator,
+[data-theme='dark'] input[type='datetime-local']::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+}
+
+input[type='range'] {
+  accent-color: #00acb2;
+  cursor: pointer;
+}
+
+/* ── Keyframes ───────────────────────────────────────────── */
+@keyframes fg-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes fg-rise {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fg-pop {
+  0% { opacity: 0; transform: scale(0.94) translateY(8px); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+@keyframes fg-slide-left {
+  from { opacity: 0; transform: translateX(24px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes fg-spin {
+  to { transform: rotate(360deg); }
+}
+@keyframes fg-shimmer {
+  0% { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+@keyframes fg-pulse-ring {
+  0% { transform: scale(0.6); opacity: 0.75; }
+  80%, 100% { transform: scale(2.2); opacity: 0; }
+}
+@keyframes fg-alarm {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.55); }
+  50% { box-shadow: 0 0 0 18px rgba(239, 68, 68, 0); }
+}
+@keyframes fg-shake {
+  0%, 100% { transform: rotate(0); }
+  20% { transform: rotate(-12deg); }
+  40% { transform: rotate(10deg); }
+  60% { transform: rotate(-8deg); }
+  80% { transform: rotate(6deg); }
+}
+@keyframes fg-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+[data-anim='fade'] { animation: fg-fade-in 0.25s ease both; }
+[data-anim='rise'] { animation: fg-rise 0.45s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+[data-anim='pop'] { animation: fg-pop 0.28s cubic-bezier(0.2, 0.9, 0.3, 1.1) both; }
+[data-anim='slide-left'] { animation: fg-slide-left 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+[data-anim='spin'] { animation: fg-spin 0.8s linear infinite; }
+[data-anim='alarm'] { animation: fg-alarm 1.4s ease-out infinite; }
+[data-anim='shake'] { animation: fg-shake 0.9s ease-in-out infinite; }
+[data-anim='float'] { animation: fg-float 5s ease-in-out infinite; }
+[data-anim='shimmer'] {
+  background-image: linear-gradient(90deg, rgba(150, 170, 180, 0.08) 0px, rgba(150, 170, 180, 0.22) 80px, rgba(150, 170, 180, 0.08) 160px);
+  background-size: 800px 100%;
+  animation: fg-shimmer 1.3s linear infinite;
+}
+
+[data-delay='1'] { animation-delay: 0.04s; }
+[data-delay='2'] { animation-delay: 0.08s; }
+[data-delay='3'] { animation-delay: 0.12s; }
+[data-delay='4'] { animation-delay: 0.16s; }
+[data-delay='5'] { animation-delay: 0.2s; }
+[data-delay='6'] { animation-delay: 0.24s; }
+
+/* ── Leaflet ─────────────────────────────────────────────── */
+.leaflet-container {
+  font-family: 'Be Vietnam Pro', system-ui, sans-serif;
+  background: transparent;
+  width: 100%;
+  height: 100%;
+}
+.leaflet-control-attribution {
+  font-size: 11px !important;
+  border-radius: 8px 0 0 0;
+}
+.fg-tiles {
+  transition: filter 0.3s ease;
+}
+[data-theme='dark'] .fg-tiles {
+  filter: invert(1) hue-rotate(180deg) brightness(0.92) contrast(0.88) saturate(0.7);
+}
+.leaflet-bar {
+  border: none !important;
+  box-shadow: 0 6px 20px rgba(15, 40, 45, 0.16) !important;
+  border-radius: 12px !important;
+  overflow: hidden;
+}
+.leaflet-bar a {
+  width: 34px !important;
+  height: 34px !important;
+  line-height: 34px !important;
+}
+[data-theme='dark'] .leaflet-bar a {
+  background: #16242b;
+  color: #e8f3f4;
+  border-color: #1f3038;
+}
+[data-theme='dark'] .leaflet-control-attribution {
+  background: rgba(17, 27, 32, 0.8) !important;
+  color: #829aa2;
+}
+[data-theme='dark'] .leaflet-control-attribution a {
+  color: #19c3c9;
+}
+
+.fg-marker {
+  position: relative;
+  width: 48px;
+  height: 58px;
+}
+.fg-marker__pin {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 48px;
+  height: 48px;
+  border-radius: 50% 50% 50% 6px;
+  transform: rotate(-45deg);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease;
+}
+.fg-marker:hover .fg-marker__pin {
+  transform: rotate(-45deg) scale(1.08);
+}
+.fg-marker__avatar {
+  transform: rotate(45deg);
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: #fff center/cover no-repeat;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 14px;
+  color: #0c1d1a;
+  border: 2px solid #fff;
+  overflow: hidden;
+}
+.fg-marker__status {
+  position: absolute;
+  right: -2px;
+  top: -2px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2.5px solid #fff;
+}
+.fg-marker--selected .fg-marker__pin {
+  transform: rotate(-45deg) scale(1.15);
+}
+.fg-pulse {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 26px;
+  height: 26px;
+  margin: -13px 0 0 -13px;
+  border-radius: 50%;
+  animation: fg-pulse-ring 1.8s cubic-bezier(0.2, 0.6, 0.4, 1) infinite;
+}
+.fg-dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 3px solid #fff;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+.fg-alert-marker {
+  position: relative;
+  width: 44px;
+  height: 44px;
+}
+.fg-alert-marker__core {
+  position: absolute;
+  inset: 8px;
+  border-radius: 50%;
+  background: #ef4444;
+  color: #fff;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 3px solid #fff;
+  box-shadow: 0 6px 18px rgba(239, 68, 68, 0.5);
+}
+.fg-alert-marker .fg-pulse {
+  background: rgba(239, 68, 68, 0.55);
+  width: 44px;
+  height: 44px;
+  margin: -22px 0 0 -22px;
+}
+
+.leaflet-tooltip.fg-tooltip {
+  background: rgba(12, 29, 26, 0.92);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 6px 10px;
+  font-weight: 600;
+  font-size: 12px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+}
+.leaflet-tooltip.fg-tooltip::before {
+  display: none;
+}

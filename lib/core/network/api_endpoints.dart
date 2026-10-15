@@ -21,6 +21,7 @@ class ApiEndpoints {
   static const String locationsMe = '/locations/me';
   static const String locationsFamily = '/locations/family';
   static const String safeZones = '/safe-zones';
+  static const String safeZoneEvents = '/safe-zones/events';
   static const String kidReminders = '/kid-reminders';
   static const String reminders = '/reminders';
   static const String remindersBulkDelete = '/reminders/bulk-delete';

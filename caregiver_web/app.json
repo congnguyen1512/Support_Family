@@ -1,0 +1,28 @@
+{
+  "expo": {
+    "name": "Support Family - Người chăm sóc",
+    "slug": "support-family-caregiver-web",
+    "version": "1.0.0",
+    "scheme": "supportfamilyweb",
+    "userInterfaceStyle": "automatic",
+    "icon": "./assets/icon.png",
+    "web": {
+      "bundler": "metro",
+      "output": "single",
+      "favicon": "./assets/favicon.png",
+      "name": "Support Family - Bảng điều khiển người chăm sóc",
+      "shortName": "Support Family",
+      "description": "Bảng điều khiển web dành cho người chăm sóc: theo dõi vị trí, vùng an toàn, nhắc nhở, lịch khám và cảnh báo té ngã theo thời gian thực.",
+      "themeColor": "#00ACB2",
+      "backgroundColor": "#F3F7F8",
+      "lang": "vi"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-font"
+    ],
+    "experiments": {
+      "typedRoutes": false
+    }
+  }
+}

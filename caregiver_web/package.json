@@ -1,0 +1,41 @@
+{
+  "name": "support-family-caregiver-web",
+  "version": "1.0.0",
+  "main": "expo-router/entry",
+  "private": true,
+  "scripts": {
+    "dev": "expo start --web --port 8081",
+    "start": "expo start --web --port 8081",
+    "web": "expo start --web --port 8081",
+    "build": "expo export --platform web",
+    "preview": "npx -y serve dist --single -l 4173",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@expo/metro-runtime": "~57.0.17",
+    "@expo/vector-icons": "^15.0.2",
+    "@supabase/supabase-js": "^2.117.3",
+    "@tanstack/react-query": "^5.104.2",
+    "expo": "~57.0.29",
+    "expo-constants": "~57.0.22",
+    "expo-font": "~57.0.4",
+    "expo-linking": "~57.0.13",
+    "expo-router": "~57.0.27",
+    "expo-status-bar": "~57.0.1",
+    "leaflet": "^1.9.4",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "react-leaflet": "^5.0.0",
+    "react-native": "0.86.3",
+    "react-native-safe-area-context": "~5.7.0",
+    "react-native-screens": "~4.26.0",
+    "react-native-svg": "15.15.4",
+    "react-native-web": "^0.21.2",
+    "zustand": "^5.0.15"
+  },
+  "devDependencies": {
+    "@types/leaflet": "^1.9.22",
+    "@types/react": "~19.2.2",
+    "typescript": "~6.0.3"
+  }
+}

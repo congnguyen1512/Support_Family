@@ -45,4 +45,29 @@ export class LocationsController {
       });
     }
   }
+
+  async getHistory(req: Request, res: Response) {
+    try {
+      const memberUid = String(req.query.member_uid ?? req.userId ?? '').trim();
+      if (!memberUid) {
+        return res.status(400).json({ message: 'Thieu member_uid' });
+      }
+      const from = req.query.from ? String(req.query.from) : undefined;
+      const to = req.query.to ? String(req.query.to) : undefined;
+      const limit = req.query.limit ? Number(req.query.limit) : undefined;
+
+      const data = await locationsService.getLocationHistory(
+        req.userId!,
+        memberUid,
+        from,
+        to,
+        Number.isFinite(limit) ? limit : undefined,
+      );
+      return res.status(200).json({ data });
+    } catch (error: any) {
+      return res.status(400).json({
+        message: error?.message || 'Khong lay duoc lich su di chuyen',
+      });
+    }
+  }
 }

@@ -193,6 +193,34 @@ create index if not exists idx_safe_zones_target_uid on public.safe_zones (targe
 create index if not exists idx_safe_zones_target_uid_active on public.safe_zones (target_uid, is_active);
 create index if not exists idx_safe_zone_states_uid on public.safe_zone_states (uid);
 
+-- Lich su vao/roi vung an toan. Luu snapshot ten/toa do vung de lich su
+-- van con dung khi vung bi sua hoac xoa (safe_zone_id -> NULL).
+create table if not exists public.safe_zone_events (
+  id                 bigint generated always as identity primary key,
+  safe_zone_id       bigint references public.safe_zones(id) on delete set null,
+  uid                uuid not null references public.user_info(uid) on delete cascade,
+  owner_uid          uuid references public.user_info(uid) on delete set null,
+  event_type         text not null check (event_type in ('enter', 'leave')),
+  zone_name          text not null,
+  zone_latitude      double precision not null,
+  zone_longitude     double precision not null,
+  zone_radius_meters integer not null,
+  latitude           double precision not null,
+  longitude          double precision not null,
+  distance_meters    double precision,
+  address            text,
+  occurred_at        timestamptz not null default now(),
+  stay_started_at    timestamptz,
+  stay_ended_at      timestamptz,
+  created_at         timestamptz not null default now()
+);
+
+create index if not exists idx_safe_zone_events_uid_occurred
+  on public.safe_zone_events (uid, occurred_at desc);
+create index if not exists idx_safe_zone_events_open_enter
+  on public.safe_zone_events (safe_zone_id, uid, occurred_at desc)
+  where event_type = 'enter' and stay_ended_at is null;
+
 -- ============================================================
 -- 6. CHAT
 -- ============================================================
@@ -290,6 +318,7 @@ alter table public.user_locations     enable row level security;
 alter table public.location_history   enable row level security;
 alter table public.safe_zones         enable row level security;
 alter table public.safe_zone_states   enable row level security;
+alter table public.safe_zone_events   enable row level security;
 alter table public.chat_message       enable row level security;
 alter table public.chat_presence      enable row level security;
 alter table public.user_device_tokens enable row level security;
@@ -337,6 +366,18 @@ create policy safe_zones_select_owner_or_target on public.safe_zones
 drop policy if exists safe_zone_states_select_own_uid on public.safe_zone_states;
 create policy safe_zone_states_select_own_uid on public.safe_zone_states
   for select to authenticated using (uid = auth.uid());
+
+drop policy if exists safe_zone_events_select_self_or_family on public.safe_zone_events;
+create policy safe_zone_events_select_self_or_family on public.safe_zone_events
+  for select to authenticated using (
+    uid = auth.uid()
+    or exists (
+      select 1 from public.relationship r
+      where r.processing = 'xacnhan'
+        and r.uid = auth.uid()
+        and r.relation_id = safe_zone_events.uid
+    )
+  );
 
 drop policy if exists chat_message_select_own on public.chat_message;
 create policy chat_message_select_own on public.chat_message

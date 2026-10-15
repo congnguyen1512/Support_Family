@@ -1,6 +1,10 @@
 import { Request, Response } from 'express';
-import { createSafeZoneSchema, updateSafeZoneSchema } from './safe-zones.types';
-import { safeZonesService } from './safe-zones.service';
+import {
+  createSafeZoneSchema,
+  listSafeZoneEventsSchema,
+  updateSafeZoneSchema,
+} from './safe-zones.types';
+import { SafeZoneAccessError, safeZonesService } from './safe-zones.service';
 
 export class SafeZonesController {
   async create(req: Request, res: Response) {
@@ -29,6 +33,28 @@ export class SafeZonesController {
     } catch (error: any) {
       return res.status(500).json({
         message: error?.message || 'Khong lay duoc danh sach vung an toan',
+      });
+    }
+  }
+
+  async listEvents(req: Request, res: Response) {
+    try {
+      const parsed = listSafeZoneEventsSchema.safeParse(req.query);
+      if (!parsed.success) {
+        return res.status(400).json({
+          message: 'Tham so khong hop le',
+          errors: parsed.error.flatten(),
+        });
+      }
+
+      const data = await safeZonesService.listEvents(req.userId!, parsed.data);
+      return res.status(200).json({ data });
+    } catch (error: any) {
+      if (error instanceof SafeZoneAccessError) {
+        return res.status(403).json({ message: error.message });
+      }
+      return res.status(500).json({
+        message: error?.message || 'Khong lay duoc lich su di chuyen',
       });
     }
   }

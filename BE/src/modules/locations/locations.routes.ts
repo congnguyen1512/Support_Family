@@ -8,5 +8,6 @@ const controller = new LocationsController();
 router.post('/locations/me', authMiddleware, controller.updateMe.bind(controller));
 router.get('/locations/me', authMiddleware, controller.getMe.bind(controller));
 router.get('/locations/family', authMiddleware, controller.getFamily.bind(controller));
+router.get('/locations/history', authMiddleware, controller.getHistory.bind(controller));
 
 export default router;

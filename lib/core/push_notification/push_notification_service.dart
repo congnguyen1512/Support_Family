@@ -24,6 +24,7 @@ class PushNotificationService {
       FlutterLocalNotificationsPlugin();
 
   bool _initialized = false;
+  bool _localReady = false;
   void Function()? _onOpenNotifications;
   Future<void> Function(String token)? _onFcmToken;
 
@@ -41,6 +42,17 @@ class PushNotificationService {
       await Firebase.initializeApp();
     } catch (error) {
       debugPrint('Firebase initialize failed: $error');
+      // Van bat thong bao cuc bo de canh bao trong app (khong phu thuoc FCM).
+      try {
+        await _initLocalNotifications();
+        await _localNotificationsPlugin
+            .resolvePlatformSpecificImplementation<
+              AndroidFlutterLocalNotificationsPlugin
+            >()
+            ?.requestNotificationsPermission();
+      } catch (localError) {
+        debugPrint('Local notifications init failed: $localError');
+      }
       return;
     }
 
@@ -83,6 +95,41 @@ class PushNotificationService {
           AndroidFlutterLocalNotificationsPlugin
         >()
         ?.createNotificationChannel(channel);
+    _localReady = true;
+  }
+
+  /// Hien thong bao he thong cho 1 ban ghi notification cua BE.
+  /// Dung chung tag `fg_notification_<id>` voi push FCM -> neu ca hai cung den
+  /// thi Android chi hien 1 thong bao.
+  Future<void> showNotificationAlert({
+    required int notificationId,
+    required String title,
+    required String body,
+  }) async {
+    if (!_localReady) {
+      return;
+    }
+    try {
+      await _localNotificationsPlugin.show(
+        0,
+        title,
+        body,
+        NotificationDetails(
+          android: AndroidNotificationDetails(
+            'family_guard_high_importance',
+            'Support Family Alerts',
+            channelDescription: 'Kênh thông báo khẩn và cập nhật an toàn',
+            importance: Importance.max,
+            priority: Priority.high,
+            tag: 'fg_notification_$notificationId',
+            styleInformation: BigTextStyleInformation(body),
+          ),
+          iOS: const DarwinNotificationDetails(),
+        ),
+      );
+    } catch (error) {
+      debugPrint('Show local alert failed: $error');
+    }
   }
 
   Future<void> _setupForegroundHandler() async {
@@ -99,6 +146,18 @@ class PushNotificationService {
       debugPrint(
         'Push foreground message: title="$title", body="$body", data=$data',
       );
+
+      final backendNotificationId = int.tryParse(
+        data['notification_id']?.toString() ?? '',
+      );
+      if (backendNotificationId != null) {
+        await showNotificationAlert(
+          notificationId: backendNotificationId,
+          title: title,
+          body: body,
+        );
+        return;
+      }
 
       await _localNotificationsPlugin.show(
         message.messageId?.hashCode ?? DateTime.now().millisecondsSinceEpoch,
