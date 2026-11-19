@@ -74,7 +74,11 @@ export default function LoginScreen() {
   return (
     <View style={[styles.root, { backgroundColor: c.bg }]}>
       {isDesktop ? (
-        <View style={[styles.hero, gradient('#062A2E', '#14245A', 145)]}>
+        <ScrollView
+          style={[styles.heroScroll, gradient('#062A2E', '#14245A', 145)]}
+          contentContainerStyle={styles.heroContent}
+          showsVerticalScrollIndicator={false}
+        >
           <View style={[styles.orb, { width: 520, height: 520, left: -160, top: -180, backgroundColor: 'rgba(25,195,201,0.25)' }]} />
           <View style={[styles.orb, { width: 420, height: 420, right: -140, bottom: -140, backgroundColor: 'rgba(124,92,255,0.25)' }]} />
 
@@ -92,15 +96,15 @@ export default function LoginScreen() {
             </View>
           </View>
 
-          <View style={{ flex: 1, justifyContent: 'center', gap: 28, maxWidth: 640 }}>
-            <View dataSet={{ anim: 'rise' }} style={{ gap: 12 }}>
-              <T variant="hero" style={{ color: '#fff', fontSize: 40, lineHeight: 50 }}>
+          <View style={styles.heroBody}>
+            <View dataSet={{ anim: 'rise' }} style={{ gap: 8 }}>
+              <T variant="hero" style={styles.heroTitle}>
                 Chăm sóc người thân,{'\n'}
-                <T variant="hero" style={{ color: '#5EE6EA', fontSize: 40, lineHeight: 50 }}>
+                <T variant="hero" style={[styles.heroTitle, { color: '#5EE6EA' }]}>
                   ngay trên máy tính.
                 </T>
               </T>
-              <T variant="body" style={{ color: 'rgba(255,255,255,0.72)', fontSize: 17, lineHeight: 26, maxWidth: 540 }}>
+              <T variant="body" style={styles.heroSubtitle}>
                 Theo dõi vị trí, nhận cảnh báo khẩn cấp và quản lý lịch chăm sóc của cả gia đình — nhanh gọn trong lúc bạn đang làm việc.
               </T>
             </View>
@@ -109,7 +113,7 @@ export default function LoginScreen() {
               <Image source={require('../../assets/images/login-hero.jpg')} style={styles.heroImage} resizeMode="cover" accessibilityLabel="Gia đình được chăm sóc an toàn" />
             </View>
 
-            <View style={{ flexDirection: 'row', gap: 14, flexWrap: 'wrap' }}>
+            <View style={styles.featureGrid}>
               {FEATURES.map((f, i) => (
                 <View key={f.title} dataSet={{ anim: 'rise', delay: String(i + 2) }} style={[styles.feature, web({ backdropFilter: 'blur(10px)' })]}>
                   <View style={styles.featureIcon}>
@@ -118,7 +122,7 @@ export default function LoginScreen() {
                   <T variant="bodyStrong" style={{ color: '#fff' }}>
                     {f.title}
                   </T>
-                  <T variant="caption" style={{ color: 'rgba(255,255,255,0.62)', lineHeight: 19 }}>
+                  <T variant="caption" style={{ color: 'rgba(255,255,255,0.62)', lineHeight: 18 }}>
                     {f.text}
                   </T>
                 </View>
@@ -126,10 +130,10 @@ export default function LoginScreen() {
             </View>
           </View>
 
-          <T variant="caption" style={{ color: 'rgba(255,255,255,0.4)' }}>
+          <T variant="caption" style={styles.heroFooter}>
             © {new Date().getFullYear()} Support Family · Đồng hành cùng gia đình bạn
           </T>
-        </View>
+        </ScrollView>
       ) : null}
 
       <ScrollView style={{ flex: 1 }} contentContainerStyle={[styles.formWrap, { padding: isMobile ? 20 : 48 }]}>
@@ -245,24 +249,37 @@ export default function LoginScreen() {
 
 const styles = StyleSheet.create({
   root: { flex: 1, flexDirection: 'row' },
-  hero: { flex: 1.15, padding: 48, gap: 24, overflow: 'hidden' },
+  heroScroll: { flex: 1.15 },
+  heroContent: {
+    minHeight: '100%',
+    padding: 40,
+    gap: 20,
+    justifyContent: 'space-between',
+    position: 'relative',
+    overflow: 'hidden',
+  },
+  heroBody: { gap: 18, maxWidth: 640 },
+  heroTitle: { color: '#fff', fontSize: 32, lineHeight: 42 },
+  heroSubtitle: { color: 'rgba(255,255,255,0.72)', fontSize: 15, lineHeight: 22, maxWidth: 540 },
   orb: { position: 'absolute', borderRadius: 999, ...({ filter: 'blur(80px)' } as object) },
   brandRow: { flexDirection: 'row', alignItems: 'center', gap: 14 },
-  logo: { width: 52, height: 52, borderRadius: 16, alignItems: 'center', justifyContent: 'center', backgroundColor: '#FFFFFF' },
-  logoImg: { width: 38, height: 38 },
-  heroImageWrap: { borderRadius: 26, overflow: 'hidden', borderWidth: 1, borderColor: 'rgba(255,255,255,0.12)', maxWidth: 560 },
-  heroImage: { width: '100%', aspectRatio: 4 / 3, maxHeight: 340 },
+  logo: { width: 48, height: 48, borderRadius: 14, alignItems: 'center', justifyContent: 'center', backgroundColor: '#FFFFFF' },
+  logoImg: { width: 34, height: 34 },
+  heroImageWrap: { borderRadius: 20, overflow: 'hidden', borderWidth: 1, borderColor: 'rgba(255,255,255,0.12)', maxWidth: 560 },
+  heroImage: { width: '100%', aspectRatio: 16 / 9, maxHeight: 220 },
+  featureGrid: { flexDirection: 'row', gap: 12, flexWrap: 'wrap' },
   feature: {
     flex: 1,
-    minWidth: 170,
-    padding: 16,
-    gap: 6,
-    borderRadius: 18,
+    minWidth: 150,
+    padding: 12,
+    gap: 4,
+    borderRadius: 14,
     backgroundColor: 'rgba(255,255,255,0.06)',
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.1)',
   },
-  featureIcon: { width: 34, height: 34, borderRadius: 10, backgroundColor: 'rgba(94,230,234,0.14)', alignItems: 'center', justifyContent: 'center', marginBottom: 4 },
+  featureIcon: { width: 30, height: 30, borderRadius: 8, backgroundColor: 'rgba(94,230,234,0.14)', alignItems: 'center', justifyContent: 'center', marginBottom: 2 },
+  heroFooter: { color: 'rgba(255,255,255,0.4)', marginTop: 8 },
   formWrap: { flexGrow: 1, alignItems: 'center', justifyContent: 'center' },
   topRight: { position: 'absolute', top: 20, right: 20 },
   themeBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, borderWidth: 1, borderRadius: 999, paddingHorizontal: 12, height: 34 },
