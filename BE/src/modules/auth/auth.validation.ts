@@ -27,3 +27,12 @@ export const registerSchema = z
   );
 
 export type RegisterInput = z.infer<typeof registerSchema>;
+
+export const changePasswordSchema = z.object({
+  currentPassword: z.string().min(1, 'Vui lòng nhập mật khẩu hiện tại'),
+  newPassword: z.string().min(6, 'Mật khẩu mới phải có ít nhất 6 ký tự'),
+});
+
+export const forgotPasswordSchema = z.object({
+  identifier: z.string().min(1, 'Vui lòng nhập email hoặc số điện thoại'),
+});

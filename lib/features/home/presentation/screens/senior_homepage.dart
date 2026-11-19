@@ -1,10 +1,16 @@
 import 'package:family_guard/core/constants/app_routes.dart';
 import 'package:family_guard/core/di/app_dependencies.dart';
+import 'package:family_guard/core/services/kid_reminder_notification_scheduler.dart';
+import 'package:family_guard/core/widgets/buttons/app_back_button.dart';
 import 'package:family_guard/core/fall_detection/presentation/fall_detection_debug_panel.dart';
 import 'package:family_guard/core/widgets/app_flow_bottom_nav.dart';
 import 'package:family_guard/features/calling/presentation/screens/call_flow_models.dart';
 import 'package:family_guard/features/home/domain/entities/quick_contact.dart';
+import 'package:family_guard/features/home/presentation/widgets/senior_home/senior_home_data.dart';
+import 'package:family_guard/features/home/presentation/widgets/senior_home/senior_home_schedule_design.dart';
 import 'package:family_guard/features/home/presentation/widgets/senior_home/senior_sos_sheet.dart';
+import 'package:family_guard/features/reminder/data/datasources/reminder_remote_data_source.dart';
+import 'package:family_guard/features/reminder/data/models/reminder_model.dart';
 import 'package:family_guard/features/tracking/presentation/screens/member_tracking/member_tracking_models.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -19,11 +25,14 @@ class SeniorHomePage extends StatefulWidget {
 class _SeniorHomePageState extends State<SeniorHomePage> {
   QuickContact? _quickContact;
   bool _isLoadingQuickContact = true;
+  List<ReminderModel> _reminders = [];
+  bool _isLoadingReminders = true;
 
   @override
   void initState() {
     super.initState();
     _loadQuickContact();
+    _loadReminders();
   }
 
   Future<void> _loadQuickContact() async {
@@ -43,6 +52,48 @@ class _SeniorHomePageState extends State<SeniorHomePage> {
     }
   }
 
+  Future<void> _loadReminders() async {
+    try {
+      final list = await ReminderRemoteDataSourceImpl().getReminders();
+      if (mounted) {
+        setState(() {
+          _reminders = list;
+          _isLoadingReminders = false;
+        });
+        _scheduleSeniorReminders(list);
+      }
+    } catch (e) {
+      debugPrint('Lỗi tải lịch nhắc người cao tuổi: $e');
+      if (mounted) {
+        setState(() => _isLoadingReminders = false);
+      }
+    }
+  }
+
+  void _scheduleSeniorReminders(List<ReminderModel> list) {
+    List<ReminderNotificationItem> activeToday;
+    if (list.isNotEmpty) {
+      activeToday = list.where((r) => r.isActive).map((r) {
+        return ReminderNotificationItem(
+          id: r.id,
+          title: r.title,
+          reminderTime: r.reminderTime,
+          subtitle: r.subtitle,
+        );
+      }).toList();
+    } else {
+      activeToday = SeniorHomeMockData.schedule.asMap().entries.map((e) {
+        return ReminderNotificationItem(
+          id: 1000 + e.key,
+          title: e.value.title,
+          reminderTime: e.value.timeLabel,
+          subtitle: e.value.subtitle,
+        );
+      }).toList();
+    }
+    ReminderNotificationScheduler.instance.scheduleToday(activeToday);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -52,31 +103,37 @@ class _SeniorHomePageState extends State<SeniorHomePage> {
           children: [
             const Positioned.fill(child: _SeniorBackground()),
             Positioned.fill(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(10, 8, 10, 118),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildTopBar(context),
-                    const SizedBox(height: 22),
-                    _buildStatusPill(),
-                    const SizedBox(height: 20),
-                    _buildTitle(),
-                    const SizedBox(height: 26),
-                    _buildSosHero(context),
-                    const SizedBox(height: 34),
-                    _buildQuickContactCard(context),
-                  ],
+              child: RefreshIndicator(
+                color: const Color(0xFF00AEB4),
+                onRefresh: () async {
+                  await Future.wait([
+                    _loadQuickContact(),
+                    _loadReminders(),
+                  ]);
+                },
+                child: SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: const EdgeInsets.fromLTRB(14, 8, 14, 110),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildTopBar(context),
+                      const SizedBox(height: 12),
+                      _buildStatusPill(),
+                      const SizedBox(height: 10),
+                      _buildTitle(),
+                      const SizedBox(height: 14),
+                      _buildSosHero(context),
+                      const SizedBox(height: 18),
+                      _buildQuickContactCard(context),
+                      const SizedBox(height: 20),
+                      _buildScheduleSection(context),
+                      const SizedBox(height: 24),
+                      const FallDetectionDebugPanel(),
+                      const SizedBox(height: 16),
+                    ],
+                  ),
                 ),
-              ),
-            ),
-            Positioned(
-              left: 8,
-              right: 8,
-              bottom: 110,
-              child: SizedBox(
-                width: double.maxFinite,
-                child: const FallDetectionDebugPanel(),
               ),
             ),
             Positioned(
@@ -179,8 +236,8 @@ class _SeniorHomePageState extends State<SeniorHomePage> {
         onTap: () => _showSosSheet(context),
         borderRadius: BorderRadius.circular(999),
         child: Container(
-          width: 162,
-          height: 162,
+          width: 140,
+          height: 140,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             gradient: const LinearGradient(
@@ -312,6 +369,389 @@ class _SeniorHomePageState extends State<SeniorHomePage> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildScheduleSection(BuildContext context) {
+    List<SeniorScheduleItem> scheduleItems = _reminders
+        .where((r) => r.isActive)
+        .map((r) => SeniorScheduleItem.fromReminder(r))
+        .toList();
+
+    if (scheduleItems.isEmpty) {
+      scheduleItems = SeniorHomeMockData.schedule;
+    }
+
+    return SeniorHomeScheduleDesign(
+      items: scheduleItems,
+      isLoading: _isLoadingReminders,
+      onItemTap: (item) => _showReminderDetailSheet(context, item),
+      onSupportTap: () => _showSupportOptionsSheet(context),
+    );
+  }
+
+  Future<void> _showReminderDetailSheet(
+    BuildContext context,
+    SeniorScheduleItem item,
+  ) async {
+    final reminder = item.reminderModel;
+    await showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (sheetContext) {
+        return Container(
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+          ),
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 44,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFE2E8F0),
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  Container(
+                    width: 56,
+                    height: 56,
+                    decoration: BoxDecoration(
+                      color: item.accent,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Icon(item.icon, color: item.iconColor, size: 30),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFDDF8F5),
+                            borderRadius: BorderRadius.circular(999),
+                          ),
+                          child: Text(
+                            item.timeLabel,
+                            style: GoogleFonts.lexend(
+                              color: const Color(0xFF0B6E73),
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          item.title,
+                          style: GoogleFonts.lexend(
+                            color: const Color(0xFF17233D),
+                            fontSize: 20,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 18),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF8FAFC),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: const Color(0xFFEDF2F7)),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Chi tiết & Ghi chú',
+                      style: GoogleFonts.lexend(
+                        color: const Color(0xFF64748B),
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      item.subtitle.isNotEmpty
+                          ? item.subtitle
+                          : 'Đến giờ thực hiện theo lịch nhắc của gia đình.',
+                      style: GoogleFonts.beVietnamPro(
+                        color: const Color(0xFF1E293B),
+                        fontSize: 15,
+                        height: 1.5,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    if (reminder?.memberName != null &&
+                        reminder!.memberName!.isNotEmpty) ...[
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          const Icon(
+                            Icons.favorite_rounded,
+                            size: 16,
+                            color: Color(0xFF00ACB2),
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            'Lịch được gửi bởi: ${reminder.memberName}',
+                            style: GoogleFonts.beVietnamPro(
+                              color: const Color(0xFF00ACB2),
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.pop(sheetContext),
+                      style: OutlinedButton.styleFrom(
+                        minimumSize: const Size.fromHeight(50),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        side: const BorderSide(color: Color(0xFFE2E8F0)),
+                      ),
+                      child: Text(
+                        'Đóng',
+                        style: GoogleFonts.lexend(
+                          color: const Color(0xFF64748B),
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    flex: 2,
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        Navigator.pop(sheetContext);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            backgroundColor: const Color(0xFF1D9C63),
+                            behavior: SnackBarBehavior.floating,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                            content: Row(
+                              children: [
+                                const Icon(
+                                  Icons.check_circle_rounded,
+                                  color: Colors.white,
+                                ),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: Text(
+                                    'Bà đã ghi nhận hoàn thành lịch nhắc này!',
+                                    style: GoogleFonts.beVietnamPro(
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        elevation: 0,
+                        backgroundColor: const Color(0xFF00ACB2),
+                        foregroundColor: Colors.white,
+                        minimumSize: const Size.fromHeight(50),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                      ),
+                      icon: const Icon(Icons.check_circle_outline_rounded, size: 20),
+                      label: Text(
+                        'Đã hoàn thành',
+                        style: GoogleFonts.lexend(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 15,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _showSupportOptionsSheet(BuildContext context) async {
+    await showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) {
+        return Container(
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+          ),
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 28),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 44,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFE2E8F0),
+                  borderRadius: BorderRadius.circular(999),
+                ),
+              ),
+              const SizedBox(height: 20),
+              Text(
+                'Hỗ trợ gia đình',
+                style: GoogleFonts.lexend(
+                  color: const Color(0xFF17233D),
+                  fontSize: 22,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                'Bà muốn liên lạc với người thân bằng cách nào?',
+                style: GoogleFonts.beVietnamPro(
+                  color: const Color(0xFF7A869A),
+                  fontSize: 14,
+                ),
+              ),
+              const SizedBox(height: 20),
+              ListTile(
+                contentPadding: const EdgeInsets.symmetric(horizontal: 8),
+                leading: Container(
+                  width: 44,
+                  height: 44,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFFE0F7F7),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.call_rounded, color: Color(0xFF00B3B8)),
+                ),
+                title: Text(
+                  'Gọi cho người thân',
+                  style: GoogleFonts.lexend(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 16,
+                  ),
+                ),
+                subtitle: Text(
+                  _quickContact != null
+                      ? 'Gọi nhanh cho ${_quickContact!.name}'
+                      : 'Mở danh bạ người thân',
+                  style: GoogleFonts.beVietnamPro(fontSize: 13),
+                ),
+                trailing: const Icon(Icons.chevron_right_rounded),
+                onTap: () {
+                  Navigator.pop(sheetContext);
+                  if (_quickContact != null) {
+                    _startQuickCall(_quickContact!);
+                  } else {
+                    _showAddQuickContactSheet(context);
+                  }
+                },
+              ),
+              const Divider(height: 16, thickness: 0.8),
+              ListTile(
+                contentPadding: const EdgeInsets.symmetric(horizontal: 8),
+                leading: Container(
+                  width: 44,
+                  height: 44,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFFE8F0FE),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.chat_bubble_rounded,
+                    color: Color(0xFF1A73E8),
+                  ),
+                ),
+                title: Text(
+                  'Nhắn tin gia đình',
+                  style: GoogleFonts.lexend(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 16,
+                  ),
+                ),
+                subtitle: Text(
+                  'Mở cuộc trò chuyện cùng con cháu',
+                  style: GoogleFonts.beVietnamPro(fontSize: 13),
+                ),
+                trailing: const Icon(Icons.chevron_right_rounded),
+                onTap: () {
+                  Navigator.pop(sheetContext);
+                  Navigator.pushNamed(context, AppRoutes.chatList);
+                },
+              ),
+              const Divider(height: 16, thickness: 0.8),
+              ListTile(
+                contentPadding: const EdgeInsets.symmetric(horizontal: 8),
+                leading: Container(
+                  width: 44,
+                  height: 44,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFFFEE2E2),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.warning_amber_rounded,
+                    color: Color(0xFFDC2626),
+                  ),
+                ),
+                title: Text(
+                  'Báo động SOS',
+                  style: GoogleFonts.lexend(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 16,
+                    color: const Color(0xFFDC2626),
+                  ),
+                ),
+                subtitle: Text(
+                  'Gửi tín hiệu khẩn cấp đến toàn bộ gia đình',
+                  style: GoogleFonts.beVietnamPro(fontSize: 13),
+                ),
+                trailing: const Icon(Icons.chevron_right_rounded),
+                onTap: () {
+                  Navigator.pop(sheetContext);
+                  _showSosSheet(context);
+                },
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -1177,21 +1617,8 @@ class _SheetHeader extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
       child: Row(
         children: [
-          InkWell(
-            onTap: onBack,
-            borderRadius: BorderRadius.circular(999),
-            child: Container(
-              width: 40,
-              height: 40,
-              decoration: const BoxDecoration(
-                color: Color(0xFFF1F4F6),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.arrow_back_rounded,
-                color: Color(0xFF17233D),
-              ),
-            ),
+          AppBackButton(
+            onPressed: onBack,
           ),
           Expanded(
             child: Text(

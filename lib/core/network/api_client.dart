@@ -146,7 +146,7 @@ class ApiClient {
           throw ApiException(message: 'HTTP method $method is not supported.');
       }
     } on TimeoutException {
-      throw const ApiException(message: 'Request timeout. Vui long thu lai.');
+      throw const ApiException(message: 'Hết thời gian chờ yêu cầu. Vui lòng thử lại.');
     }
 
     final decodedBody = _decodeBody(response.body);

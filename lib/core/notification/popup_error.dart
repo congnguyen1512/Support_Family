@@ -6,8 +6,8 @@ import 'package:flutter/material.dart';
 Future<void> showPopupError(
   BuildContext context, {
   required String message,
-  String title = 'Co loi xay ra',
-  String actionLabel = 'Dong',
+  String title = 'Có lỗi xảy ra',
+  String actionLabel = 'Đóng',
   VoidCallback? onActionPressed,
 }) {
   return showDialog<void>(
@@ -29,7 +29,7 @@ class PopupError extends StatelessWidget {
     super.key,
     required this.title,
     required this.message,
-    this.actionLabel = 'Dong',
+    this.actionLabel = 'Đóng',
     this.onActionPressed,
   });
 

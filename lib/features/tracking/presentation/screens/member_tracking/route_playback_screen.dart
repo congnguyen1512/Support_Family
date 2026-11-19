@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:family_guard/core/constants/app_colors.dart';
 import 'package:family_guard/core/constants/app_routes.dart';
+import 'package:family_guard/core/widgets/buttons/app_back_button.dart';
 import 'package:family_guard/features/tracking/presentation/screens/member_tracking/member_tracking_models.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -411,18 +412,12 @@ class _PlaybackTopBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       height: 56,
-      child: Row(
-        children: [
-          IconButton(
-            onPressed: onBack,
-            splashRadius: 20,
-            icon: const Icon(
-              Icons.arrow_back_ios_new_rounded,
-              color: AppColors.primary,
-              size: 20,
-            ),
-          ),
-          const Spacer(),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: Row(
+          children: [
+            AppBackButton(onPressed: onBack),
+            const Spacer(),
           IconButton(
             onPressed: onPickDate,
             splashRadius: 20,
@@ -433,6 +428,7 @@ class _PlaybackTopBar extends StatelessWidget {
             ),
           ),
         ],
+        ),
       ),
     );
   }

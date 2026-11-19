@@ -277,6 +277,7 @@ export default function MapScreen() {
               {loc?.latitude != null ? (
                 <Button nativeID="map-directions" label="Chỉ đường" icon="navigate-outline" size="sm" variant="secondary" onPress={() => window.open(`https://www.google.com/maps/dir/?api=1&destination=${loc.latitude},${loc.longitude}`, '_blank')} />
               ) : null}
+              <Button label="Lịch sử" icon="time-outline" size="sm" variant="secondary" onPress={() => router.push(`/history?uid=${member.uid}` as any)} />
               {mode === 'live' ? <Button nativeID="map-history" label="Xem lộ trình" icon="git-commit-outline" size="sm" variant="soft" onPress={() => setMode('history')} /> : null}
             </View>
           </View>

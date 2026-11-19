@@ -1,4 +1,4 @@
-# 🛡️ Family Guard - Hệ Sinh Thái Chăm Sóc & Bảo Vệ Gia Đình Thông Minh
+# 🛡️ Support Family - Hệ Sinh Thái Chăm Sóc & Bảo Vệ Gia Đình Thông Minh
 
 <p align="center">
   <img src="https://img.shields.io/badge/Flutter-02569B?style=for-the-badge&logo=flutter&logoColor=white" alt="Flutter" />
@@ -32,7 +32,7 @@
 
 ## 🌟 Giới thiệu
 
-**Family Guard** là giải pháp phần mềm toàn diện giúp các thành viên trong gia đình kết nối, theo dõi vị trí và chăm sóc sức khỏe lẫn nhau. Ứng dụng được thiết kế đặc thù cho các hộ gia đình đa thế hệ, hỗ trợ tối đa việc bảo vệ **Trẻ em** và chăm sóc **Người cao tuổi** thông qua công nghệ định vị GPS thời gian thực, vùng an toàn địa lý (Geofencing), và **trí tuệ nhân tạo (AI/TFLite) phát hiện té ngã ngay trên thiết bị**.
+**Support Family** là giải pháp phần mềm toàn diện giúp các thành viên trong gia đình kết nối, theo dõi vị trí và chăm sóc sức khỏe lẫn nhau. Ứng dụng được thiết kế đặc thù cho các hộ gia đình đa thế hệ, hỗ trợ tối đa việc bảo vệ **Trẻ em** và chăm sóc **Người cao tuổi** thông qua công nghệ định vị GPS thời gian thực, vùng an toàn địa lý (Geofencing), và **trí tuệ nhân tạo (AI/TFLite) phát hiện té ngã ngay trên thiết bị**.
 
 ---
 

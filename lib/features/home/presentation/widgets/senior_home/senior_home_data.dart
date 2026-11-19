@@ -1,5 +1,6 @@
 import 'package:family_guard/core/constants/app_routes.dart';
 import 'package:family_guard/features/calling/presentation/screens/call_flow_models.dart';
+import 'package:family_guard/features/reminder/data/models/reminder_model.dart';
 import 'package:family_guard/features/tracking/presentation/screens/member_tracking/member_tracking_models.dart';
 import 'package:flutter/material.dart';
 
@@ -100,6 +101,8 @@ class SeniorScheduleItem {
     required this.iconColor,
     required this.accent,
     required this.routeName,
+    this.id,
+    this.reminderModel,
   });
 
   final String title;
@@ -109,6 +112,55 @@ class SeniorScheduleItem {
   final Color iconColor;
   final Color accent;
   final String routeName;
+  final int? id;
+  final ReminderModel? reminderModel;
+
+  factory SeniorScheduleItem.fromReminder(ReminderModel reminder) {
+    IconData icon;
+    Color iconColor;
+    Color accent;
+
+    switch (reminder.category) {
+      case 'medicine':
+        icon = Icons.medication_rounded;
+        iconColor = const Color(0xFFE85C63);
+        accent = const Color(0xFFFFF1E6);
+        break;
+      case 'food':
+        icon = Icons.restaurant_rounded;
+        iconColor = const Color(0xFFF4A53A);
+        accent = const Color(0xFFFFF9E6);
+        break;
+      case 'health':
+        icon = Icons.favorite_rounded;
+        iconColor = const Color(0xFF06A8AE);
+        accent = const Color(0xFFE8F8F2);
+        break;
+      default:
+        icon = Icons.alarm_rounded;
+        iconColor = const Color(0xFF06A8AE);
+        accent = const Color(0xFFE9F8F7);
+        break;
+    }
+
+    final subtitle = reminder.subtitle?.trim().isNotEmpty == true
+        ? reminder.subtitle!.trim()
+        : (reminder.scheduleType == 'daily'
+            ? 'Lịch nhắc hàng ngày'
+            : reminder.formattedTime);
+
+    return SeniorScheduleItem(
+      title: reminder.title,
+      subtitle: subtitle,
+      timeLabel: reminder.reminderTime,
+      icon: icon,
+      iconColor: iconColor,
+      accent: accent,
+      routeName: AppRoutes.reminderDetailsView,
+      id: reminder.id,
+      reminderModel: reminder,
+    );
+  }
 }
 
 class SeniorHomeMockData {

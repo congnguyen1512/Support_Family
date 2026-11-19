@@ -120,6 +120,8 @@ export function IconButton({
   color,
   badge,
   active,
+  disabled,
+  loading,
   style,
 }: {
   icon: IconName | string;
@@ -130,6 +132,8 @@ export function IconButton({
   color?: string;
   badge?: number | boolean;
   active?: boolean;
+  disabled?: boolean;
+  loading?: boolean;
   style?: ViewStyle;
 }) {
   const c = useTheme();
@@ -141,7 +145,8 @@ export function IconButton({
   }[variant];
   return (
     <Pressable
-      onPress={onPress}
+      onPress={disabled || loading ? undefined : onPress}
+      disabled={disabled || loading}
       accessibilityRole="button"
       accessibilityLabel={label}
       style={(state) => {
@@ -153,15 +158,20 @@ export function IconButton({
             width: size,
             height: size,
             borderRadius: size / 3.2,
-            backgroundColor: active ? c.primarySoft : hovered ? base.hover : base.bg,
+            backgroundColor: active ? c.primarySoft : hovered && !disabled ? base.hover : base.bg,
             borderColor: base.border,
+            opacity: disabled ? 0.45 : 1,
           },
-          web({ cursor: 'pointer', transform: pressed ? 'scale(0.92)' : 'none' }),
+          web({ cursor: disabled ? 'not-allowed' : 'pointer', transform: pressed && !disabled ? 'scale(0.92)' : 'none' }),
           style,
         ];
       }}
     >
-      <Icon name={icon} size={Math.round(size * 0.5)} color={color ?? (active ? c.primary : base.fg)} />
+      {loading ? (
+        <ActivityIndicator size="small" color={color ?? (active ? c.primary : base.fg)} />
+      ) : (
+        <Icon name={icon} size={Math.round(size * 0.5)} color={color ?? (active ? c.primary : base.fg)} />
+      )}
       {badge ? (
         <View
           style={[

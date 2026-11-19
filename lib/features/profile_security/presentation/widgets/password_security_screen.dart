@@ -1,4 +1,6 @@
 import 'package:family_guard/core/constants/app_routes.dart';
+import 'package:family_guard/core/di/app_dependencies.dart';
+import 'package:family_guard/core/theme/app_colors.dart';
 import 'package:family_guard/core/widgets/app_back_header.dart';
 import 'package:family_guard/core/widgets/app_flow_bottom_nav.dart';
 import 'package:family_guard/features/profile_security/presentation/screens/change_password_detail_screen.dart';
@@ -78,7 +80,7 @@ class _PasswordSecurityScreenState extends State<PasswordSecurityScreen> {
                   const SizedBox(height: 20),
                   const _TrustedDevicesSection(),
                   const SizedBox(height: 20),
-                  _DeleteAccountCard(onTap: () => _showDeleteDialog(context)),
+                  _DeleteAccountCard(onTap: _showDeleteDialog),
                   const SizedBox(height: 16),
                 ],
               ),
@@ -101,24 +103,78 @@ class _PasswordSecurityScreenState extends State<PasswordSecurityScreen> {
     );
   }
 
-  Future<void> _showDeleteDialog(BuildContext context) async {
-    await showDialog<void>(
+  Future<void> _showDeleteDialog() async {
+    final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) {
         return AlertDialog(
-          title: const Text('Xóa tài khoản'),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          title: const Row(
+            children: [
+              Icon(Icons.warning_amber_rounded, color: Color(0xFFEF4444)),
+              SizedBox(width: 8),
+              Text('Xóa tài khoản', style: TextStyle(fontWeight: FontWeight.bold)),
+            ],
+          ),
           content: const Text(
-            'Tính năng này hiện là giao diện mô phỏng và chưa xóa dữ liệu thật.',
+            'Hành động này sẽ xóa vĩnh viễn tài khoản Support Family của bạn, bao gồm mọi dữ liệu quan hệ gia đình và lịch sử. Hành động này không thể hoàn tác.\n\nBạn có chắc chắn muốn xóa?',
+            style: TextStyle(height: 1.5),
           ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.of(dialogContext).pop(),
-              child: const Text('Đóng'),
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+              child: const Text('Hủy', style: TextStyle(color: Color(0xFF64748B))),
+            ),
+            FilledButton(
+              style: FilledButton.styleFrom(
+                backgroundColor: const Color(0xFFEF4444),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+              onPressed: () => Navigator.of(dialogContext).pop(true),
+              child: const Text('Xóa vĩnh viễn'),
             ),
           ],
         );
       },
     );
+
+    if (confirmed != true || !mounted) return;
+
+    try {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (_) => const Center(child: CircularProgressIndicator()),
+      );
+
+      await AppDependencies.instance.apiClient.delete('/auth/delete-account');
+      await AppDependencies.instance.locationTrackingService.stop();
+      AppDependencies.instance.safeZoneService.reset();
+      await AppDependencies.instance.logoutUseCase();
+
+      if (!mounted) return;
+      Navigator.of(context, rootNavigator: true).maybePop(); // dismiss loading
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Tài khoản của bạn đã được xóa thành công.'),
+          backgroundColor: AppColors.primary,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+
+      Navigator.pushNamedAndRemoveUntil(context, AppRoutes.login, (_) => false);
+    } catch (e) {
+      if (!mounted) return;
+      Navigator.of(context, rootNavigator: true).maybePop();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Xóa tài khoản thất bại: $e'),
+          backgroundColor: Colors.redAccent,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
   }
 }
 

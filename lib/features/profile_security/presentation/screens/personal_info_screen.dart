@@ -40,13 +40,13 @@ class PersonalInfoScreen extends StatefulWidget {
 
 class _PersonalInfoScreenState extends State<PersonalInfoScreen>
     with RouteAware {
-  String name = 'Nguyen Thi Loan';
+  String name = 'Nguyễn Thị Loan';
   String email = 'loan@email.com';
   String phone = '0123 456 789';
   String role = 'Người chăm sóc';
   String avatarUrl = '';
-  String emergencyName = 'Le Van Huy';
-  String emergencyRelation = 'Chong';
+  String emergencyName = 'Lê Văn Huy';
+  String emergencyRelation = 'Chồng';
   String emergencyPhone = '0123 456 789';
   DateTime? createdAt;
   String? _lastErrorMessage;
@@ -108,7 +108,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen>
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   AppBackHeaderBar(
-                    title: 'Thong tin ca nhan',
+                    title: 'Thông tin cá nhân',
                     onBack: () => Navigator.maybePop(context),
                     showLeading: widget.showBackButton,
                     padding: EdgeInsets.zero,
@@ -300,7 +300,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen>
         ..hideCurrentSnackBar()
         ..showSnackBar(
           const SnackBar(
-            content: Text('Chi ho tro anh JPG, PNG, WEBP hoac GIF.'),
+            content: Text('Chỉ hỗ trợ ảnh JPG, PNG, WEBP hoặc GIF.'),
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -511,7 +511,7 @@ class _AvatarEditor extends StatelessWidget {
             ),
             const SizedBox(height: 11),
             Text(
-              isSaving ? 'Dang tai anh...' : 'Thay doi anh',
+              isSaving ? 'Đang tải ảnh...' : 'Thay đổi ảnh',
               style: GoogleFonts.beVietnamPro(
                 color: const Color(0xFF0F766E),
                 fontSize: 15,
@@ -552,7 +552,7 @@ class _InfoCard extends StatelessWidget {
     return _InfoSurface(
       child: Column(
         children: [
-          _DataRow(label: 'Ho va ten', value: name, onTap: onTapName),
+          _DataRow(label: 'Họ và tên', value: name, onTap: onTapName),
           const _RowDivider(),
           _DataRow(
             label: 'Email',
@@ -561,7 +561,7 @@ class _InfoCard extends StatelessWidget {
             onTap: onTapEmail,
           ),
           const _RowDivider(),
-          _DataRow(label: 'Dien thoai', value: phone, onTap: onTapPhone),
+          _DataRow(label: 'Điện thoại', value: phone, onTap: onTapPhone),
           const _RowDivider(),
           _RoleRow(value: role, onTap: onTapRole),
         ],
@@ -595,7 +595,7 @@ class _EmergencyContactSection extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Text(
-            'LIEN HE KHAN CAP',
+            'LIÊN HỆ KHẨN CẤP',
             style: GoogleFonts.beVietnamPro(
               color: const Color(0xFF638888),
               fontSize: 13,
@@ -609,15 +609,15 @@ class _EmergencyContactSection extends StatelessWidget {
         _InfoSurface(
           child: Column(
             children: [
-              _DataRow(label: 'Ten', value: name, onTap: onTapName),
+              _DataRow(label: 'Tên', value: name, onTap: onTapName),
               const _RowDivider(),
               _DataRow(
-                label: 'Quan he',
+                label: 'Quan hệ',
                 value: relationship,
                 onTap: onTapRelationship,
               ),
               const _RowDivider(),
-              _DataRow(label: 'Dien thoai', value: phone, onTap: onTapPhone),
+              _DataRow(label: 'Điện thoại', value: phone, onTap: onTapPhone),
             ],
           ),
         ),
@@ -634,8 +634,8 @@ class _MetaInfo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final createdText = createdAt == null
-        ? 'Tai khoan tao ngay 27/10/2025'
-        : 'Tai khoan tao ngay ${_formatDate(createdAt!)}';
+        ? 'Tài khoản tạo ngày 27/10/2025'
+        : 'Tài khoản tạo ngày ${_formatDate(createdAt!)}';
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -652,7 +652,7 @@ class _MetaInfo extends StatelessWidget {
             ),
           ),
           Text(
-            'Da lien ket voi 4 thanh vien',
+            'Đã liên kết với 4 thành viên',
             textAlign: TextAlign.center,
             style: GoogleFonts.beVietnamPro(
               color: const Color(0xFF638888),
@@ -753,7 +753,7 @@ class _RoleRow extends StatelessWidget {
             SizedBox(
               width: 106,
               child: Text(
-                'Vai tro',
+                'Vai trò',
                 style: GoogleFonts.beVietnamPro(
                   color: const Color(0xFF111818),
                   fontSize: 17,

@@ -107,6 +107,19 @@ export function formatDistance(meters?: number | null): string {
   return `${(meters / 1000).toFixed(meters < 10000 ? 2 : 1)} km`;
 }
 
+export function formatDurationSeconds(seconds?: number | null): string {
+  if (seconds == null || seconds < 0) return '—';
+  if (seconds < 60) return 'dưới 1 phút';
+  const mins = Math.floor(seconds / 60);
+  const hours = Math.floor(mins / 60);
+  const days = Math.floor(hours / 24);
+  const remHours = hours % 24;
+  const remMins = mins % 60;
+  if (days > 0) return `${days} ngày ${remHours} giờ ${remMins ? `${remMins} phút` : ''}`.trim();
+  if (hours > 0) return `${hours} giờ ${remMins ? `${remMins} phút` : ''}`.trim();
+  return `${mins} phút`;
+}
+
 export function haversineMeters(lat1: number, lon1: number, lat2: number, lon2: number): number {
   const toRad = (v: number) => (v * Math.PI) / 180;
   const R = 6371000;

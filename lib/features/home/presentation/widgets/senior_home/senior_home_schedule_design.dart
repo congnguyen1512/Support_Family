@@ -8,105 +8,208 @@ class SeniorHomeScheduleDesign extends StatelessWidget {
     required this.items,
     required this.onItemTap,
     required this.onSupportTap,
+    this.isLoading = false,
   });
 
   final List<SeniorScheduleItem> items;
   final ValueChanged<SeniorScheduleItem> onItemTap;
   final VoidCallback onSupportTap;
+  final bool isLoading;
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'L\u1ECBch h\u00F4m nay',
-          style: GoogleFonts.lexend(
-            color: SeniorHomePalette.primaryDark,
-            fontSize: 20,
-            fontWeight: FontWeight.w700,
-          ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Lịch hôm nay',
+              style: GoogleFonts.lexend(
+                color: SeniorHomePalette.primaryDark,
+                fontSize: 20,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            if (items.isNotEmpty)
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: SeniorHomePalette.primarySoft,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  '${items.length} nhắc nhở',
+                  style: GoogleFonts.beVietnamPro(
+                    color: SeniorHomePalette.primaryDark,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+          ],
         ),
         const SizedBox(height: 12),
-        ...items.map(
-          (item) => Padding(
-            padding: const EdgeInsets.only(bottom: 12),
-            child: InkWell(
-              onTap: () => onItemTap(item),
+        if (isLoading)
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: 32),
+            decoration: BoxDecoration(
+              color: Colors.white,
               borderRadius: BorderRadius.circular(24),
-              child: Ink(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: SeniorHomePalette.surface,
-                  borderRadius: BorderRadius.circular(24),
-                  boxShadow: const [
-                    BoxShadow(
-                      color: SeniorHomePalette.cardShadow,
-                      blurRadius: 18,
-                      offset: Offset(0, 8),
-                      spreadRadius: -10,
-                    ),
-                  ],
+              boxShadow: const [
+                BoxShadow(
+                  color: SeniorHomePalette.cardShadow,
+                  blurRadius: 18,
+                  offset: Offset(0, 8),
+                  spreadRadius: -10,
                 ),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 54,
-                      height: 54,
-                      decoration: BoxDecoration(
-                        color: item.accent,
-                        borderRadius: BorderRadius.circular(18),
+              ],
+            ),
+            child: const Center(
+              child: CircularProgressIndicator(
+                color: Color(0xFF00B3B8),
+              ),
+            ),
+          )
+        else if (items.isEmpty)
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+            margin: const EdgeInsets.only(bottom: 12),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(24),
+              boxShadow: const [
+                BoxShadow(
+                  color: SeniorHomePalette.cardShadow,
+                  blurRadius: 18,
+                  offset: Offset(0, 8),
+                  spreadRadius: -10,
+                ),
+              ],
+            ),
+            child: Column(
+              children: [
+                Container(
+                  width: 52,
+                  height: 52,
+                  decoration: BoxDecoration(
+                    color: SeniorHomePalette.primarySoft,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: const Icon(
+                    Icons.event_available_rounded,
+                    color: SeniorHomePalette.primary,
+                    size: 28,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  'Chưa có lịch nhắc hôm nay',
+                  style: GoogleFonts.lexend(
+                    color: SeniorHomePalette.text,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  'Mọi sinh hoạt, uống thuốc và lịch hẹn đều đã ổn định hoặc chưa có lịch mới từ người thân.',
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.beVietnamPro(
+                    color: SeniorHomePalette.muted,
+                    fontSize: 13,
+                    height: 1.45,
+                  ),
+                ),
+              ],
+            ),
+          )
+        else
+          ...items.map(
+            (item) => Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: InkWell(
+                onTap: () => onItemTap(item),
+                borderRadius: BorderRadius.circular(24),
+                child: Ink(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: SeniorHomePalette.surface,
+                    borderRadius: BorderRadius.circular(24),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: SeniorHomePalette.cardShadow,
+                        blurRadius: 18,
+                        offset: Offset(0, 8),
+                        spreadRadius: -10,
                       ),
-                      child: Icon(item.icon, color: item.iconColor, size: 26),
-                    ),
-                    const SizedBox(width: 14),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            item.title,
-                            style: GoogleFonts.lexend(
-                              color: SeniorHomePalette.text,
-                              fontSize: 17,
-                              fontWeight: FontWeight.w700,
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 54,
+                        height: 54,
+                        decoration: BoxDecoration(
+                          color: item.accent,
+                          borderRadius: BorderRadius.circular(18),
+                        ),
+                        child: Icon(item.icon, color: item.iconColor, size: 26),
+                      ),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              item.title,
+                              style: GoogleFonts.lexend(
+                                color: SeniorHomePalette.text,
+                                fontSize: 17,
+                                fontWeight: FontWeight.w700,
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            item.subtitle,
-                            style: GoogleFonts.beVietnamPro(
-                              color: SeniorHomePalette.muted,
-                              fontSize: 14,
+                            const SizedBox(height: 4),
+                            Text(
+                              item.subtitle,
+                              style: GoogleFonts.beVietnamPro(
+                                color: SeniorHomePalette.muted,
+                                fontSize: 13,
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
                             ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 8,
-                      ),
-                      decoration: BoxDecoration(
-                        color: SeniorHomePalette.primarySoft,
-                        borderRadius: BorderRadius.circular(999),
-                      ),
-                      child: Text(
-                        item.timeLabel,
-                        style: GoogleFonts.lexend(
-                          color: SeniorHomePalette.primaryDark,
-                          fontSize: 13,
-                          fontWeight: FontWeight.w700,
+                          ],
                         ),
                       ),
-                    ),
-                  ],
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
+                        decoration: BoxDecoration(
+                          color: SeniorHomePalette.primarySoft,
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                        child: Text(
+                          item.timeLabel,
+                          style: GoogleFonts.lexend(
+                            color: SeniorHomePalette.primaryDark,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
           ),
-        ),
         const SizedBox(height: 4),
         Container(
           width: double.infinity,
@@ -135,7 +238,7 @@ class SeniorHomeScheduleDesign extends StatelessWidget {
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
-                      'C\u1EA7n h\u1ED7 tr\u1EE3 th\u00EAm?',
+                      'Cần hỗ trợ thêm?',
                       style: GoogleFonts.lexend(
                         color: Colors.white,
                         fontSize: 18,
@@ -147,7 +250,7 @@ class SeniorHomeScheduleDesign extends StatelessWidget {
               ),
               const SizedBox(height: 10),
               Text(
-                'M\u1EDF tr\u00F2 chuy\u1EC7n ho\u1EB7c g\u1ECDi ngay cho ng\u01B0\u1EDDi th\u00E2n n\u1EBFu b\u00E0 c\u1EA7n tr\u1EE3 gi\u00FAp.',
+                'Mở trò chuyện hoặc gọi ngay cho người thân nếu bà cần trợ giúp.',
                 style: GoogleFonts.beVietnamPro(
                   color: Colors.white.withValues(alpha: 0.92),
                   fontSize: 14,
@@ -167,7 +270,7 @@ class SeniorHomeScheduleDesign extends StatelessWidget {
                   ),
                 ),
                 child: Text(
-                  'M\u1EDF h\u1ED7 tr\u1EE3 gia \u0111\u00ECnh',
+                  'Mở hỗ trợ gia đình',
                   style: GoogleFonts.lexend(fontWeight: FontWeight.w700),
                 ),
               ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:family_guard/core/widgets/buttons/app_back_button.dart';
 import 'package:family_guard/core/di/app_dependencies.dart';
 import 'package:family_guard/core/fall_detection/data/fall_detection_service.dart';
 import 'package:family_guard/core/network/api_exception.dart';
@@ -97,13 +98,8 @@ class _SignupRoleSelectionScreenState extends State<SignupRoleSelectionScreen> {
                 children: [
                   Align(
                     alignment: Alignment.centerLeft,
-                    child: IconButton(
+                    child: AppBackButton(
                       onPressed: () => Navigator.maybePop(context),
-                      icon: const Icon(
-                        Icons.chevron_left_rounded,
-                        color: _tealColor,
-                        size: 32,
-                      ),
                     ),
                   ),
                   Column(
@@ -118,7 +114,7 @@ class _SignupRoleSelectionScreenState extends State<SignupRoleSelectionScreen> {
                         ),
                       ),
                       Text(
-                        'FamilyGuard!',
+                        'Support Family!',
                         style: GoogleFonts.publicSans(
                           color: _titleColor,
                           fontSize: 13,

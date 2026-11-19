@@ -1,5 +1,6 @@
 import 'package:family_guard/core/constants/app_routes.dart';
 import 'package:family_guard/core/widgets/app_bottom_menu.dart';
+import 'package:family_guard/core/widgets/buttons/app_back_button.dart';
 import 'package:family_guard/features/home/presentation/screens/kid_flow_models.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -103,22 +104,8 @@ class _KidChatConversationScreenState extends State<KidChatConversationScreen> {
       ),
       child: Row(
         children: [
-          InkWell(
-            onTap: () => Navigator.pushNamed(context, AppRoutes.kidChatList),
-            borderRadius: BorderRadius.circular(999),
-            child: Container(
-              width: 40,
-              height: 40,
-              decoration: const BoxDecoration(
-                color: Color(0xFFF1F8FA),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.arrow_back_ios_new_rounded,
-                size: 18,
-                color: _teal,
-              ),
-            ),
+          AppBackButton(
+            onPressed: () => Navigator.pushNamed(context, AppRoutes.kidChatList),
           ),
           const SizedBox(width: 12),
           CircleAvatar(

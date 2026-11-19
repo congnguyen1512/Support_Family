@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:family_guard/core/widgets/buttons/app_back_button.dart';
 
 class FamilyGuardScreen extends StatefulWidget {
   const FamilyGuardScreen({super.key});
@@ -79,8 +80,7 @@ class _FamilyGuardScreenState extends State<FamilyGuardScreen> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          _circleButton(
-            icon: Icons.arrow_back_ios_new,
+          AppBackButton(
             onPressed: () => Navigator.maybePop(context),
           ),
           const SizedBox(width: 12),
@@ -401,7 +401,7 @@ class _FamilyGuardScreenState extends State<FamilyGuardScreen> {
         if (withAvatar)
           const CircleAvatar(
             radius: 10,
-            backgroundImage: NetworkImage('https://placehold.co/80x80/png'),
+            backgroundImage: NetworkImage('https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=80&q=80'),
           ),
       ],
     );

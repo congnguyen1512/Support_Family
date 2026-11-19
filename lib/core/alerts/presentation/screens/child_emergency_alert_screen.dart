@@ -1,5 +1,6 @@
 import 'package:family_guard/core/constants/app_routes.dart';
 import 'package:family_guard/core/alerts/presentation/screens/child_alert_map_screen.dart';
+import 'package:family_guard/core/widgets/buttons/app_back_button.dart';
 import 'package:family_guard/features/calling/presentation/screens/call_flow_models.dart';
 import 'package:family_guard/features/calling/presentation/widgets/call_bottom_sheets.dart';
 import 'package:family_guard/features/tracking/presentation/screens/member_tracking/member_tracking_models.dart';
@@ -241,23 +242,22 @@ class _Header extends StatelessWidget {
     return Container(
       height: 64,
       alignment: Alignment.centerLeft,
-      child: InkWell(
-        onTap: onBack,
-        borderRadius: BorderRadius.circular(12),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.chevron_left_rounded, color: Color(0xFFFF6B6B)),
-            Text(
-              'Cảnh báo khẩn cấp',
-              style: GoogleFonts.beVietnamPro(
-                color: const Color(0xFFFF6B6B),
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-              ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          AppBackButton(
+            onPressed: onBack,
+          ),
+          const SizedBox(width: 12),
+          Text(
+            'Cảnh báo khẩn cấp',
+            style: GoogleFonts.beVietnamPro(
+              color: const Color(0xFFFF6B6B),
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

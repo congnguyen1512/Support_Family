@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { useRouter } from 'expo-router';
 import { useTheme } from '../../theme/ThemeProvider';
 import { shadow, transition, web, type WebPressState } from '../../theme/web';
 import {
@@ -51,6 +52,7 @@ const ZONE_PRESETS = ['Nhà', 'Trường học', 'Công ty', 'Bệnh viện', 'C
 
 export default function SafeZonesScreen() {
   const c = useTheme();
+  const router = useRouter();
   const { isMobile } = useBreakpoint();
   const { members } = useFamilyMembers();
   const { data, isLoading } = useSafeZones();
@@ -223,6 +225,13 @@ export default function SafeZonesScreen() {
               {(data ?? []).filter((z) => z.is_active).length} vùng đang bật cảnh báo
             </T>
           </View>
+          <Button
+            label="Lịch sử"
+            icon="time-outline"
+            size="sm"
+            variant="secondary"
+            onPress={() => router.push(memberFilter ? `/history?uid=${memberFilter}` : '/history')}
+          />
           <Button nativeID="zones-new" label="Thêm" icon="add" size="sm" hint="N" disabled={!members.length} onPress={() => startNew()} />
         </View>
         <SearchInput nativeID="zones-search" value={query} onChangeText={setQuery} placeholder="Tìm vùng..." />

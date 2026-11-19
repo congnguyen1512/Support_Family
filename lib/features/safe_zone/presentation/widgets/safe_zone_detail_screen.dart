@@ -1,6 +1,9 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:family_guard/core/constants/app_routes.dart';
+import 'package:family_guard/core/widgets/buttons/app_back_button.dart';
+import 'package:family_guard/features/safe_zone/data/datasources/safe_zone_service.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class SafeZoneDetailScreen extends StatefulWidget {
@@ -14,13 +17,140 @@ class _SafeZoneDetailScreenState extends State<SafeZoneDetailScreen> {
   double _radius = 100;
   bool _alwaysActive = true;
   bool _instantNotifications = true;
+  bool _initialized = false;
+  String _zoneName = 'Vùng an toàn';
+  String? _zoneId;
+  bool _isSaving = false;
 
-  final List<_Member> _members = [
-    _Member(name: 'Trần Như Kha', role: 'Người lớn', avatarColor: Color(0xFFFED7AA), selected: false),
-    _Member(name: 'Bố Xôi', role: 'Người lớn', avatarColor: Color(0xFFDBEAFE), selected: false),
-    _Member(name: 'Xôi', role: 'Trẻ em', avatarColor: Color(0xFFE0E7FF), selected: false),
-    _Member(name: 'Bà Nội', role: 'Người già', avatarColor: Color(0xFFDCFCE7), selected: true),
-  ];
+  List<_Member> _members = [];
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_initialized) return;
+    _initialized = true;
+
+    final service = SafeZoneProvider.of(context);
+    final argId = ModalRoute.of(context)?.settings.arguments as String?;
+    final zone = (argId != null ? service.getZone(argId) : null) ??
+        (service.zones.isNotEmpty ? service.zones.first : null);
+
+    if (zone != null) {
+      _zoneId = zone.id;
+      _zoneName = zone.name;
+      _radius = zone.radius;
+      _alwaysActive = zone.isActive;
+    }
+
+    if (service.members.isNotEmpty) {
+      _members = service.members.map((m) {
+        final isSelected = zone != null && zone.recipientIds.contains(m.id);
+        return _Member(
+          id: m.id,
+          name: m.name,
+          role: m.role,
+          avatarColor: const Color(0xFFFED7AA),
+          selected: isSelected,
+        );
+      }).toList();
+    } else {
+      _members = const [
+        _Member(name: 'Trần Như Kha', role: 'Người lớn', avatarColor: Color(0xFFFED7AA), selected: false),
+        _Member(name: 'Bố Xôi', role: 'Người lớn', avatarColor: Color(0xFFDBEAFE), selected: false),
+        _Member(name: 'Xôi', role: 'Trẻ em', avatarColor: Color(0xFFE0E7FF), selected: false),
+        _Member(name: 'Bà Nội', role: 'Người già', avatarColor: Color(0xFFDCFCE7), selected: true),
+      ];
+    }
+  }
+
+  Future<void> _handleSave() async {
+    if (_isSaving) return;
+    setState(() => _isSaving = true);
+    try {
+      final service = SafeZoneProvider.read(context);
+      final zone = _zoneId != null
+          ? service.getZone(_zoneId!)
+          : (service.zones.isNotEmpty ? service.zones.first : null);
+      if (zone != null) {
+        final selectedIds = _members
+            .where((m) => m.selected && m.id.isNotEmpty)
+            .map((m) => m.id)
+            .toList();
+        final updated = zone.copyWith(
+          radius: _radius,
+          isActive: _alwaysActive,
+          recipientIds:
+              selectedIds.isNotEmpty ? selectedIds : zone.recipientIds,
+        );
+        await service.updateZone(updated);
+      }
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Đã cập nhật vùng an toàn thành công!'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      Navigator.maybePop(context);
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Lỗi: $e')),
+      );
+    } finally {
+      if (mounted) setState(() => _isSaving = false);
+    }
+  }
+
+  Future<void> _handleDelete() async {
+    final service = SafeZoneProvider.read(context);
+    final zone = _zoneId != null
+        ? service.getZone(_zoneId!)
+        : (service.zones.isNotEmpty ? service.zones.first : null);
+    if (zone == null) {
+      Navigator.maybePop(context);
+      return;
+    }
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: const Text('Xác nhận xóa'),
+          content: Text('Bạn có chắc chắn muốn xóa vùng an toàn "$_zoneName"?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext, false),
+              child: const Text('Hủy'),
+            ),
+            FilledButton(
+              style: FilledButton.styleFrom(
+                backgroundColor: const Color(0xFFEF4444),
+              ),
+              onPressed: () => Navigator.pop(dialogContext, true),
+              child: const Text('Xóa'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmed == true && mounted) {
+      await service.removeZone(zone.id);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Đã xóa vùng an toàn "$_zoneName"'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      Navigator.maybePop(context);
+    }
+  }
+
+  void _handleAddMember() {
+    Navigator.pushNamed(context, AppRoutes.addMember);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +163,12 @@ class _SafeZoneDetailScreenState extends State<SafeZoneDetailScreen> {
         body: SafeArea(
           child: Column(
             children: [
-              _TopBar(onBack: () => Navigator.maybePop(context)),
+              _TopBar(
+                title: _zoneName,
+                onBack: () => Navigator.maybePop(context),
+                onSave: _handleSave,
+                isSaving: _isSaving,
+              ),
               Expanded(
                 child: SingleChildScrollView(
                   padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
@@ -51,7 +186,9 @@ class _SafeZoneDetailScreenState extends State<SafeZoneDetailScreen> {
                         members: _members,
                         onToggle: (index) {
                           setState(() {
-                            _members[index] = _members[index].copyWith(selected: !_members[index].selected);
+                            _members[index] = _members[index].copyWith(
+                              selected: !_members[index].selected,
+                            );
                           });
                         },
                       ),
@@ -59,14 +196,29 @@ class _SafeZoneDetailScreenState extends State<SafeZoneDetailScreen> {
                       _GhostButton(
                         icon: Icons.person_add_alt_1_rounded,
                         label: 'Thêm thành viên',
-                        onPressed: () {},
+                        onPressed: _handleAddMember,
                       ),
                       const SizedBox(height: 24),
                       const _SectionLabel('LỊCH HOẠT ĐỘNG'),
                       const SizedBox(height: 12),
                       _ScheduleCard(
                         alwaysActive: _alwaysActive,
-                        onAlwaysActiveChanged: (value) => setState(() => _alwaysActive = value),
+                        onAlwaysActiveChanged: (value) =>
+                            setState(() => _alwaysActive = value),
+                        onConfigureSchedule: () async {
+                          final res = await Navigator.pushNamed(
+                            context,
+                            AppRoutes.safeZoneTimeRules,
+                          );
+                          if (res != null && context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Đã cập nhật lịch hoạt động vùng an toàn'),
+                                behavior: SnackBarBehavior.floating,
+                              ),
+                            );
+                          }
+                        },
                       ),
                       const SizedBox(height: 20),
                       const _SectionLabel('TRẠNG THÁI'),
@@ -77,13 +229,14 @@ class _SafeZoneDetailScreenState extends State<SafeZoneDetailScreen> {
                       const SizedBox(height: 12),
                       _AdvancedCard(
                         instantNotifications: _instantNotifications,
-                        onNotificationsChanged: (value) => setState(() => _instantNotifications = value),
+                        onNotificationsChanged: (value) =>
+                            setState(() => _instantNotifications = value),
                       ),
                       const SizedBox(height: 20),
                       _DangerButton(
                         icon: Icons.delete_outline,
                         label: 'Xóa Vùng An Toàn',
-                        onPressed: () {},
+                        onPressed: _handleDelete,
                       ),
                     ],
                   ),
@@ -98,9 +251,17 @@ class _SafeZoneDetailScreenState extends State<SafeZoneDetailScreen> {
 }
 
 class _TopBar extends StatelessWidget {
-  const _TopBar({required this.onBack});
+  const _TopBar({
+    required this.title,
+    required this.onBack,
+    required this.onSave,
+    this.isSaving = false,
+  });
 
+  final String title;
   final VoidCallback onBack;
+  final VoidCallback onSave;
+  final bool isSaving;
 
   @override
   Widget build(BuildContext context) {
@@ -115,10 +276,10 @@ class _TopBar extends StatelessWidget {
             child: Stack(
               alignment: Alignment.center,
               children: [
-                const Center(
+                Center(
                   child: Text(
-                    'Nhà Bà Nội',
-                    style: TextStyle(
+                    title,
+                    style: const TextStyle(
                       color: Color(0xFF111818),
                       fontSize: 17,
                       fontWeight: FontWeight.w600,
@@ -127,44 +288,37 @@ class _TopBar extends StatelessWidget {
                 ),
                 Positioned(
                   left: 0,
-                  child: InkWell(
-                    onTap: onBack,
-                    borderRadius: BorderRadius.circular(999),
-                    child: const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 4, vertical: 6),
-                      child: Row(
-                        children: [
-                          Icon(Icons.chevron_left_rounded, color: Color(0xFF17E8E8), size: 20),
-                          SizedBox(width: 2),
-                          Text(
-                            'Vùng An ...',
-                            style: TextStyle(
-                              color: Color(0xFF17E8E8),
-                              fontSize: 17,
-                              fontWeight: FontWeight.w500,
-                              height: 1.45,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                  child: AppBackButton(
+                    onPressed: onBack,
                   ),
                 ),
                 Positioned(
                   right: 0,
-                  child: TextButton(
-                    onPressed: () {},
-                    style: TextButton.styleFrom(
-                      minimumSize: Size.zero,
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      foregroundColor: const Color(0xFF17E8E8),
-                      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
-                    ),
-                    child: const Text(
-                      'Lưu',
-                      style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
-                    ),
-                  ),
+                  child: isSaving
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : TextButton(
+                          onPressed: onSave,
+                          style: TextButton.styleFrom(
+                            minimumSize: Size.zero,
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                            foregroundColor: const Color(0xFF17E8E8),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 4,
+                              vertical: 6,
+                            ),
+                          ),
+                          child: const Text(
+                            'Lưu',
+                            style: TextStyle(
+                              fontSize: 17,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
                 ),
               ],
             ),
@@ -174,6 +328,7 @@ class _TopBar extends StatelessWidget {
     );
   }
 }
+
 
 class _MapRadiusCard extends StatelessWidget {
   const _MapRadiusCard({required this.radius, required this.onChanged});
@@ -469,10 +624,15 @@ class _MemberTile extends StatelessWidget {
 }
 
 class _ScheduleCard extends StatelessWidget {
-  const _ScheduleCard({required this.alwaysActive, required this.onAlwaysActiveChanged});
+  const _ScheduleCard({
+    required this.alwaysActive,
+    required this.onAlwaysActiveChanged,
+    this.onConfigureSchedule,
+  });
 
   final bool alwaysActive;
   final ValueChanged<bool> onAlwaysActiveChanged;
+  final VoidCallback? onConfigureSchedule;
 
   @override
   Widget build(BuildContext context) {
@@ -487,21 +647,25 @@ class _ScheduleCard extends StatelessWidget {
             onChanged: onAlwaysActiveChanged,
           ),
           const SizedBox(height: 16),
-          Container(
-            padding: const EdgeInsets.all(13),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF9FAFB),
-              borderRadius: BorderRadius.circular(32),
-              border: Border.all(color: const Color(0xFFF3F4F6)),
-            ),
-            child: const Row(
-              children: [
-                _TimeChip(label: 'TỪ', value: '8:00 AM'),
-                Spacer(),
-                Icon(Icons.arrow_forward_rounded, color: Color(0xFF638888), size: 16),
-                Spacer(),
-                _TimeChip(label: 'ĐẾN', value: '4:00 PM', alignRight: true),
-              ],
+          InkWell(
+            onTap: onConfigureSchedule,
+            borderRadius: BorderRadius.circular(32),
+            child: Container(
+              padding: const EdgeInsets.all(13),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF9FAFB),
+                borderRadius: BorderRadius.circular(32),
+                border: Border.all(color: const Color(0xFFF3F4F6)),
+              ),
+              child: const Row(
+                children: [
+                  _TimeChip(label: 'TỪ', value: '8:00 AM'),
+                  Spacer(),
+                  Icon(Icons.arrow_forward_rounded, color: Color(0xFF638888), size: 16),
+                  Spacer(),
+                  _TimeChip(label: 'ĐẾN', value: '4:00 PM', alignRight: true),
+                ],
+              ),
             ),
           ),
         ],
@@ -509,6 +673,7 @@ class _ScheduleCard extends StatelessWidget {
     );
   }
 }
+
 
 class _TimeChip extends StatelessWidget {
   const _TimeChip({required this.label, required this.value, this.alignRight = false});
@@ -697,7 +862,7 @@ class _SwitchRow extends StatelessWidget {
         Switch.adaptive(
           value: value,
           onChanged: onChanged,
-          activeColor: Colors.white,
+          activeThumbColor: Colors.white,
           activeTrackColor: const Color(0xFF17E8E8),
           inactiveTrackColor: const Color(0xFFE5E7EB),
         ),
@@ -858,24 +1023,28 @@ class _MapGridPainter extends CustomPainter {
 
 class _Member {
   const _Member({
+    this.id = '',
     required this.name,
     required this.role,
     required this.avatarColor,
     required this.selected,
   });
 
+  final String id;
   final String name;
   final String role;
   final Color avatarColor;
   final bool selected;
 
   _Member copyWith({
+    String? id,
     String? name,
     String? role,
     Color? avatarColor,
     bool? selected,
   }) {
     return _Member(
+      id: id ?? this.id,
       name: name ?? this.name,
       role: role ?? this.role,
       avatarColor: avatarColor ?? this.avatarColor,
@@ -883,3 +1052,4 @@ class _Member {
     );
   }
 }
+

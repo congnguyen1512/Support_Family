@@ -84,7 +84,7 @@ class _SafeZoneMemberScreenState extends State<SafeZoneMemberScreen> {
             return;
           }
           if (created == null) {
-            _toast(service.lastErrorMessage ?? 'Khong tao duoc vung an toan');
+            _toast(service.lastErrorMessage ?? 'Không tạo được vùng an toàn');
             return;
           }
         },

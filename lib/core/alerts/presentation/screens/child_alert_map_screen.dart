@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:family_guard/core/widgets/buttons/app_back_button.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:latlong2/latlong.dart';
@@ -148,29 +149,8 @@ class _AlertMapOverlay extends StatelessWidget {
           top: MediaQuery.of(context).padding.top + 14,
           child: Row(
             children: [
-              InkWell(
-                onTap: () => Navigator.maybePop(context),
-                borderRadius: BorderRadius.circular(999),
-                child: Container(
-                  width: 46,
-                  height: 46,
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.92),
-                    shape: BoxShape.circle,
-                    boxShadow: const [
-                      BoxShadow(
-                        color: Color(0x14000000),
-                        blurRadius: 14,
-                        offset: Offset(0, 6),
-                      ),
-                    ],
-                  ),
-                  child: const Icon(
-                    Icons.chevron_left_rounded,
-                    color: Color(0xFF0F172A),
-                    size: 28,
-                  ),
-                ),
+              AppBackButton(
+                onPressed: () => Navigator.maybePop(context),
               ),
               const SizedBox(width: 12),
               Expanded(

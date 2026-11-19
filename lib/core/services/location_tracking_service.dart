@@ -117,7 +117,7 @@ class LocationTrackingService extends ChangeNotifier {
   Future<Position> _getCurrentPosition() async {
     final serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
-      throw Exception('Dich vu GPS dang tat. Vui long bat vi tri de tiep tuc.');
+      throw Exception('Dịch vụ GPS đang tắt. Vui lòng bật vị trí để tiếp tục.');
     }
 
     var permission = await Geolocator.checkPermission();
@@ -126,11 +126,11 @@ class LocationTrackingService extends ChangeNotifier {
     }
 
     if (permission == LocationPermission.denied) {
-      throw Exception('Quyen vi tri bi tu choi. Vui long cap quyen de theo doi vi tri.');
+      throw Exception('Quyền vị trí bị từ chối. Vui lòng cấp quyền để theo dõi vị trí.');
     }
 
     if (permission == LocationPermission.deniedForever) {
-      throw Exception('Quyen vi tri bi tu choi vinh vien. Hay mo cai dat de cap quyen.');
+      throw Exception('Quyền vị trí bị từ chối vĩnh viễn. Hãy mở cài đặt để cấp quyền.');
     }
 
     return Geolocator.getCurrentPosition(

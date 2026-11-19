@@ -1,11 +1,13 @@
 import 'package:family_guard/core/di/app_dependencies.dart';
 import 'package:family_guard/core/routes/app_routes.dart';
+import 'package:family_guard/core/widgets/buttons/app_back_button.dart';
 import 'package:family_guard/core/theme/app_colors.dart';
 import 'package:family_guard/core/utils/responsive/responsive.dart';
 import 'package:family_guard/features/member_management/domain/entities/relationship.dart';
-import 'package:family_guard/features/reminder/presentation/widgets/reminder_list_screen.dart';
+import 'package:family_guard/features/checkin_reminder/presentation/screens/checkin_reminder_kid_reminder_screen.dart';
 import 'package:family_guard/features/medical/presentation/screens/medical_appointment_screen.dart';
 import 'package:family_guard/features/physical/presentation/screens/physical_activity_screen.dart';
+import 'package:family_guard/features/reminder/presentation/widgets/reminder_list_screen.dart';
 import 'package:family_guard/features/tracking/presentation/widgets/activity_report_screen.dart';
 import 'package:flutter/material.dart';
 
@@ -13,7 +15,7 @@ class CheckinReminderMemberListScreen extends StatelessWidget {
   const CheckinReminderMemberListScreen({super.key});
 
   static const _fallbackMemberAvatarUrl =
-      'https://www.figma.com/api/mcp/asset/09129163-8902-4a06-b810-2bec557a806e';
+      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&q=80';
 
   Future<List<_MemberItem>> _loadMembers() async {
     final relationships =
@@ -173,15 +175,26 @@ class CheckinReminderMemberListScreen extends StatelessWidget {
           Navigator.of(context).pop();
           switch (feature) {
             case _ReminderFeature.medicine:
-              Navigator.of(context).pushNamed(
-                AppRoutes.reminderList,
-                arguments: ReminderListArgs(
-                  memberId: member.id,
-                  memberName: member.name,
-                  avatarUrl: member.imageUrl,
-                  roleLabel: member.roleLabel,
-                ),
-              );
+              if (member.role == _MemberRole.child) {
+                Navigator.of(context).pushNamed(
+                  AppRoutes.checkinReminderKid,
+                  arguments: CheckinReminderKidReminderArgs(
+                    memberId: member.id,
+                    memberName: member.name,
+                    avatarUrl: member.imageUrl,
+                  ),
+                );
+              } else {
+                Navigator.of(context).pushNamed(
+                  AppRoutes.reminderList,
+                  arguments: ReminderListArgs(
+                    memberId: member.id,
+                    memberName: member.name,
+                    avatarUrl: member.imageUrl,
+                    roleLabel: member.roleLabel,
+                  ),
+                );
+              }
               break;
             case _ReminderFeature.appointment:
               Navigator.of(context).pushNamed(
@@ -242,28 +255,8 @@ class CheckinReminderMemberListScreen extends StatelessWidget {
                 ),
                 child: Row(
                   children: [
-                    GestureDetector(
-                      onTap: () => Navigator.of(context).pop(),
-                      child: Container(
-                        width: 40,
-                        height: 40,
-                        decoration: const BoxDecoration(
-                          color: Colors.white,
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: Color(0x0C000000),
-                              blurRadius: 2,
-                              offset: Offset(0, 1),
-                            ),
-                          ],
-                        ),
-                        child: const Icon(
-                          Icons.arrow_back_ios_new_rounded,
-                          size: 18,
-                          color: Color(0xFF00ACB2),
-                        ),
-                      ),
+                    AppBackButton(
+                      onPressed: () => Navigator.of(context).pop(),
                     ),
                     const SizedBox(width: 12),
                     Text(

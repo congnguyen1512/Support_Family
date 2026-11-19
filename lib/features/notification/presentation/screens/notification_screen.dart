@@ -2,6 +2,7 @@
 
 import 'package:family_guard/core/constants/app_routes.dart';
 import 'package:family_guard/core/di/app_dependencies.dart';
+import 'package:family_guard/core/widgets/buttons/app_back_button.dart';
 import 'package:family_guard/core/routes/app_route_observer.dart';
 import 'package:family_guard/core/widgets/app_flow_bottom_nav.dart';
 import 'package:family_guard/features/notification/domain/entities/app_notification.dart';
@@ -391,16 +392,12 @@ class _Header extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          if (showBackButton)
-            IconButton(
+          if (showBackButton) ...[
+            AppBackButton(
               onPressed: onBack,
-              icon: const Icon(
-                Icons.arrow_back_ios_new_rounded,
-                color: Color(0xFF334155),
-                size: 20,
-              ),
-              tooltip: 'Quay lại',
             ),
+            const SizedBox(width: 12),
+          ],
           Expanded(
             child: Text(
               'Thông báo',

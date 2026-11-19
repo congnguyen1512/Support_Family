@@ -18,28 +18,19 @@ class HomePage extends StatelessWidget {
 
   static const _backgroundColor = Color(0xFFF0F8F7);
   static const _primaryColor = Color(0xFF00ACB2);
-  static const _secondaryColor = Color(0xFF87E4DB);
   static const _headerAvatarUrl =
-      'https://www.figma.com/api/mcp/asset/2f585926-b307-4889-9fd8-50f79d086344';
+      'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&q=80';
   static const _fallbackMemberAvatarUrl =
-      'https://www.figma.com/api/mcp/asset/09129163-8902-4a06-b810-2bec557a806e';
+      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&q=80';
 
   static final List<_QuickActionData> _quickActions = [
     _QuickActionData(
       title: 'Thành viên',
       subtitle: 'Quản lí thành viên',
-      icon: Icons.home_rounded,
+      icon: Icons.people_alt_rounded,
       iconColor: const Color(0xFF0EA5A8),
       glowColor: const Color(0x3387E4DB),
       onTapRouteName: AppRoutes.memberList,
-    ),
-    _QuickActionData(
-      title: 'Tâm trạng',
-      subtitle: 'Nhật ký hôm nay',
-      icon: Icons.sentiment_satisfied_alt_rounded,
-      iconColor: const Color(0xFFF97316),
-      glowColor: const Color(0x33FED7AA),
-      onTapRouteName: AppRoutes.emotionJournal,
     ),
     _QuickActionData(
       title: 'An toàn',
@@ -66,14 +57,6 @@ class HomePage extends StatelessWidget {
       onTap: _showCameraComingSoon,
     ),
     _QuickActionData(
-      title: 'Nhịp tim',
-      subtitle: 'Theo dõi chỉ số tim',
-      icon: Icons.monitor_heart_rounded,
-      iconColor: const Color(0xFFEF4444),
-      glowColor: const Color(0x33FECACA),
-      onTapRouteName: AppRoutes.emotionPulse,
-    ),
-    _QuickActionData(
       title: 'Quản Lí Ứng Dụng',
       subtitle: 'Thời gian, khu vực,...',
       icon: Icons.tune_rounded,
@@ -84,7 +67,7 @@ class HomePage extends StatelessWidget {
     _QuickActionData(
       title: 'Tin nhắn',
       subtitle: 'Trò chuyện',
-      icon: Icons.message_rounded,
+      icon: Icons.chat_bubble_rounded,
       iconColor: const Color(0xFF6366F1),
       glowColor: const Color(0x33C7D2FE),
       onTapRouteName: AppRoutes.chatList,
@@ -127,14 +110,50 @@ class HomePage extends StatelessWidget {
                         const SizedBox(height: 26),
                         _buildMembersSection(),
                         const SizedBox(height: 22),
-                        Text(
-                          'Tiện ích',
-                          style: GoogleFonts.publicSans(
-                            color: _primaryColor,
-                            fontSize: 18,
-                            fontWeight: FontWeight.w700,
-                            height: 28 / 18,
-                          ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Row(
+                              children: [
+                                Container(
+                                  width: 4,
+                                  height: 18,
+                                  decoration: BoxDecoration(
+                                    color: _primaryColor,
+                                    borderRadius: BorderRadius.circular(2),
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'Tiện ích',
+                                  style: GoogleFonts.publicSans(
+                                    color: const Color(0xFF0F172A),
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w700,
+                                    letterSpacing: -0.3,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: _primaryColor.withValues(alpha: 0.1),
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Text(
+                                '${_quickActions.length} chức năng',
+                                style: GoogleFonts.publicSans(
+                                  color: _primaryColor,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                         const SizedBox(height: 16),
                         _QuickActionsGrid(actions: _quickActions),
@@ -1260,9 +1279,9 @@ class _QuickActionsGrid extends StatelessWidget {
       physics: const NeverScrollableScrollPhysics(),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
-        crossAxisSpacing: 24,
-        mainAxisSpacing: 24,
-        childAspectRatio: 165 / 188,
+        crossAxisSpacing: 14,
+        mainAxisSpacing: 14,
+        childAspectRatio: 1.15,
       ),
       itemBuilder: (context, index) {
         final item = actions[index];
@@ -1279,55 +1298,81 @@ class _QuickActionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      borderRadius: BorderRadius.circular(40),
-      onTap: () {
-        final onTap = data.onTap;
-        if (onTap != null) {
-          onTap(context);
-          return;
-        }
-        if (data.onTapRouteName != null) {
-          Navigator.pushNamed(context, data.onTapRouteName!);
-          return;
-        }
-        final builder = data.builder;
-        if (builder != null) {
-          Navigator.of(
-            context,
-          ).push(MaterialPageRoute(builder: (_) => builder()));
-        }
-      },
-      child: Container(
-        padding: const EdgeInsets.fromLTRB(20, 18, 20, 18),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(40),
-          border: Border.all(color: HomePage._secondaryColor, width: 2),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              width: 46,
-              height: 46,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.white,
-                border: Border.all(color: HomePage._secondaryColor),
-                boxShadow: [
-                  BoxShadow(
-                    color: data.glowColor,
-                    blurRadius: 14,
-                    spreadRadius: 2,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(20),
+        onTap: () {
+          final onTap = data.onTap;
+          if (onTap != null) {
+            onTap(context);
+            return;
+          }
+          if (data.onTapRouteName != null) {
+            Navigator.pushNamed(context, data.onTapRouteName!);
+            return;
+          }
+          final builder = data.builder;
+          if (builder != null) {
+            Navigator.of(
+              context,
+            ).push(MaterialPageRoute(builder: (_) => builder()));
+          }
+        },
+        child: Ink(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: const Color(0xFFE2E8F0),
+              width: 1,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF0F172A).withValues(alpha: 0.04),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
+              ),
+              BoxShadow(
+                color: data.iconColor.withValues(alpha: 0.05),
+                blurRadius: 16,
+                offset: const Offset(0, 6),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Container(
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: data.iconColor.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: Icon(data.icon, color: data.iconColor, size: 24),
+                  ),
+                  Container(
+                    width: 24,
+                    height: 24,
+                    decoration: const BoxDecoration(
+                      color: Color(0xFFF8FAFC),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.arrow_forward_ios_rounded,
+                      size: 10,
+                      color: Color(0xFF94A3B8),
+                    ),
                   ),
                 ],
               ),
-              child: Icon(data.icon, color: data.iconColor, size: 22),
-            ),
-            const SizedBox(height: 12),
-            Expanded(
-              child: Column(
+              Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -1336,28 +1381,28 @@ class _QuickActionCard extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: GoogleFonts.publicSans(
-                      color: const Color(0xFF1F2937),
+                      color: const Color(0xFF0F172A),
                       fontSize: 15,
                       fontWeight: FontWeight.w700,
-                      height: 22 / 15,
+                      height: 1.25,
                     ),
                   ),
-                  const SizedBox(height: 2),
+                  const SizedBox(height: 3),
                   Text(
                     data.subtitle,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: GoogleFonts.publicSans(
-                      color: const Color(0xFF6B7280),
-                      fontSize: 11,
-                      fontWeight: FontWeight.w400,
-                      height: 15 / 11,
+                      color: const Color(0xFF64748B),
+                      fontSize: 11.5,
+                      fontWeight: FontWeight.w500,
+                      height: 1.2,
                     ),
                   ),
                 ],
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

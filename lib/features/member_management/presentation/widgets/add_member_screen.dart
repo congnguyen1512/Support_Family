@@ -1,4 +1,5 @@
 import 'package:family_guard/core/di/app_dependencies.dart';
+import 'package:family_guard/core/widgets/buttons/app_back_button.dart';
 import 'package:family_guard/features/member_management/presentation/cubit/member_management_cubit.dart';
 import 'package:family_guard/features/member_management/presentation/models/member_management_demo_data.dart';
 import 'package:flutter/material.dart';
@@ -360,18 +361,10 @@ class _TopAppBar extends StatelessWidget {
       ),
       child: Row(
         children: [
-          IconButton(
+          AppBackButton(
             onPressed: () => Navigator.maybePop(context),
-            icon: const Icon(
-              Icons.arrow_back_ios_new_rounded,
-              size: 20,
-              color: Color(0xFF0D9488),
-            ),
-            splashRadius: 20,
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints.tightFor(width: 28, height: 28),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 12),
           Text(
             title,
             style: GoogleFonts.beVietnamPro(

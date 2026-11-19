@@ -19,14 +19,8 @@ class KidDashboardHeader extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Row(
         children: [
-          IconButton(
+          AppBackButton(
             onPressed: onBack,
-            splashRadius: 20,
-            icon: const Icon(
-              Icons.arrow_back_ios_new_rounded,
-              size: 20,
-              color: Color(0xFF01ADB2),
-            ),
           ),
           Expanded(
             child: Text(

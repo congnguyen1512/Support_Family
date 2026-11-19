@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:family_guard/core/utils/responsive/responsive.dart';
 import 'package:family_guard/core/theme/theme.dart';
+import 'package:family_guard/core/widgets/buttons/app_back_button.dart';
+import 'package:family_guard/core/di/app_dependencies.dart';
 
 class HistoryStatisticsScreen extends StatefulWidget {
   const HistoryStatisticsScreen({super.key});
@@ -10,19 +12,48 @@ class HistoryStatisticsScreen extends StatefulWidget {
 }
 
 class _HistoryStatisticsScreenState extends State<HistoryStatisticsScreen> {
-  static const _members = ['Bà Lan', 'Ông Hùng', 'Bé Bo'];
+  List<String> _members = ['Bà Lan', 'Ông Hùng', 'Bé Bo'];
   static const _months = [
     'Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4',
     'Tháng 5', 'Tháng 6', 'Tháng 7', 'Tháng 8',
     'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12',
   ];
 
-  String selectedMember = 'Bà Lan';
-  int _selectedMonthIndex = 9; // Tháng 10
-  int _selectedYear = 2023;
-  int currentDay = 5;
+  late String selectedMember;
+  late int _selectedMonthIndex;
+  late int _selectedYear;
+  late int currentDay;
 
   String get selectedMonth => '${_months[_selectedMonthIndex]}, $_selectedYear';
+
+  @override
+  void initState() {
+    super.initState();
+    final now = DateTime.now();
+    _selectedMonthIndex = now.month - 1;
+    _selectedYear = now.year;
+    currentDay = now.day;
+    selectedMember = _members.first;
+    _loadRealMembers();
+  }
+
+  Future<void> _loadRealMembers() async {
+    try {
+      final relationships = await AppDependencies.instance.getRelationshipsUseCase();
+      final names = relationships
+          .map((r) => r.relationUser?.name.trim())
+          .whereType<String>()
+          .where((n) => n.isNotEmpty)
+          .toSet()
+          .toList();
+      if (names.isNotEmpty && mounted) {
+        setState(() {
+          _members = names;
+          selectedMember = names.first;
+        });
+      }
+    } catch (_) {}
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -71,31 +102,8 @@ class _HistoryStatisticsScreenState extends State<HistoryStatisticsScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          GestureDetector(
-            onTap: () => Navigator.pop(context),
-            child: Container(
-              width: 40,
-              height: 40,
-              decoration: ShapeDecoration(
-                color: Colors.white.withValues(alpha: 0.80),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(9999),
-                ),
-                shadows: const [
-                  BoxShadow(
-                    color: Color(0x0C000000),
-                    blurRadius: 2,
-                    offset: Offset(0, 1),
-                    spreadRadius: 0,
-                  ),
-                ],
-              ),
-              child: const Icon(
-                Icons.arrow_back,
-                color: Color(0xFF0C1D1A),
-                size: 24,
-              ),
-            ),
+          AppBackButton(
+            onPressed: () => Navigator.maybePop(context),
           ),
           Expanded(
             child: Padding(
@@ -149,16 +157,15 @@ class _HistoryStatisticsScreenState extends State<HistoryStatisticsScreen> {
                 ),
                 child: Row(
                   children: [
-                    Container(
-                      width: 32,
-                      height: 32,
-                      decoration: ShapeDecoration(
-                        image: const DecorationImage(
-                          image: NetworkImage("https://placehold.co/32x32"),
-                          fit: BoxFit.cover,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(9999),
+                    CircleAvatar(
+                      radius: 16,
+                      backgroundColor: AppColors.primary.withValues(alpha: 0.15),
+                      child: Text(
+                        selectedMember.isNotEmpty ? selectedMember[0] : 'U',
+                        style: const TextStyle(
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
                         ),
                       ),
                     ),

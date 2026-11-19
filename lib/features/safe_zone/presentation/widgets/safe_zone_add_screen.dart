@@ -109,7 +109,7 @@ class _SafeZoneAddScreenState extends State<SafeZoneAddScreen>
     } else {
       final selectedContact = _selectedContact;
       if (selectedContact == null) {
-        _showMessage('Vui long chon thanh vien de ap dung vung an toan.');
+        _showMessage('Vui lòng chọn thành viên để áp dụng vùng an toàn.');
         return;
       }
 
@@ -144,10 +144,10 @@ class _SafeZoneAddScreenState extends State<SafeZoneAddScreen>
         return;
       }
       if (created == null) {
-        _showMessage(service.lastErrorMessage ?? 'Khong tao duoc vung an toan.');
+        _showMessage(service.lastErrorMessage ?? 'Không tạo được vùng an toàn.');
         return;
       }
-      _showMessage('Da them vung an toan "${created.name}".');
+      _showMessage('Đã thêm vùng an toàn "${created.name}".');
       Navigator.of(context).maybePop();
     }
   }
@@ -1331,7 +1331,7 @@ class _SafeZoneAddScreenState extends State<SafeZoneAddScreen>
           ),
         ),
         child: const Text(
-          'Chua co thanh vien da xac nhan de ap dung vung an toan.',
+          'Chưa có thành viên đã xác nhận để áp dụng vùng an toàn.',
           style: TextStyle(
             color: Color(0xFF6B7280),
             fontSize: 14,

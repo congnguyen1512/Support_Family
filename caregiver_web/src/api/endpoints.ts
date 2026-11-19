@@ -21,6 +21,7 @@ import type {
   Reminder,
   ReminderInput,
   SafeZone,
+  SafeZoneEvent,
   SafeZoneInput,
   SearchUser,
   UserProfile,
@@ -74,6 +75,8 @@ export const locationApi = {
 /* ── Vùng an toàn ─────────────────────────────────────────── */
 export const safeZoneApi = {
   list: () => api.get<SafeZone[]>('/safe-zones'),
+  events: (params: { member_uid: string; from?: string; to?: string; type?: 'enter' | 'leave'; limit?: number }) =>
+    api.get<SafeZoneEvent[]>('/safe-zones/events', params),
   create: (payload: SafeZoneInput) => api.post<SafeZone>('/safe-zones', payload),
   update: (id: number, payload: Partial<SafeZoneInput>) => api.put<SafeZone>(`/safe-zones/${id}`, payload),
   remove: (id: number) => api.delete(`/safe-zones/${id}`),

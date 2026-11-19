@@ -3,6 +3,7 @@ import 'package:family_guard/core/utils/responsive/responsive.dart';
 import 'dart:math' as math;
 import 'package:family_guard/core/theme/theme.dart';
 import 'package:family_guard/core/routes/app_routes.dart';
+import 'package:family_guard/core/widgets/buttons/app_back_button.dart';
 
 import 'package:family_guard/features/tracking/data/datasources/health_tracking_remote_data_source.dart';
 import 'package:family_guard/features/tracking/data/models/health_report_model.dart';
@@ -136,16 +137,8 @@ class _ActivityReportScreenState extends State<ActivityReportScreen> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                GestureDetector(
-                  onTap: () => Navigator.pop(context),
-                  child: Container(
-                    padding: const EdgeInsets.all(8),
-                    child: const Icon(
-                      Icons.arrow_back,
-                      color: AppColors.primary,
-                      size: 24,
-                    ),
-                  ),
+                AppBackButton(
+                  onPressed: () => Navigator.pop(context),
                 ),
                 Expanded(
                   child: Text(

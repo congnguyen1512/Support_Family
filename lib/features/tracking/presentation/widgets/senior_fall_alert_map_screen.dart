@@ -1,5 +1,6 @@
 import 'package:family_guard/core/constants/app_routes.dart';
 import 'package:family_guard/core/widgets/app_bottom_menu.dart';
+import 'package:family_guard/core/widgets/buttons/app_back_button.dart';
 import 'package:family_guard/features/calling/presentation/screens/call_flow_models.dart';
 import 'package:family_guard/features/tracking/presentation/screens/member_tracking/member_tracking_models.dart';
 import 'package:flutter/material.dart';
@@ -61,24 +62,8 @@ class _SeniorFallAlertMapScreenState extends State<SeniorFallAlertMapScreen> {
                 Positioned(
                   top: 16,
                   left: 16,
-                  child: Material(
-                    color: Colors.white,
-                    shape: const CircleBorder(),
-                    elevation: 4,
-                    shadowColor: Colors.black26,
-                    child: InkWell(
-                      customBorder: const CircleBorder(),
-                      onTap: () => Navigator.maybePop(context),
-                      child: const SizedBox(
-                        width: 44,
-                        height: 44,
-                        child: Icon(
-                          Icons.arrow_back_ios_new_rounded,
-                          color: Color(0xFF1E293B),
-                          size: 20,
-                        ),
-                      ),
-                    ),
+                  child: AppBackButton(
+                    onPressed: () => Navigator.maybePop(context),
                   ),
                 ),
                 Positioned(

@@ -3,6 +3,7 @@ import 'package:family_guard/core/utils/responsive/responsive.dart';
 import 'package:family_guard/core/routes/app_routes.dart';
 import 'package:family_guard/core/theme/app_colors.dart';
 import 'package:family_guard/core/widgets/app_back_header.dart';
+import 'package:family_guard/features/safe_zone/data/datasources/safe_zone_service.dart';
 
 /// ============================================================
 /// SAFE ZONE ALERT SETTINGS SCREEN - Cài đặt cảnh báo vùng an toàn
@@ -482,21 +483,21 @@ class _SafeZoneAlertSettingsScreenState
               const SizedBox(height: 8),
 
               // Nút thêm người nhận
-              OutlinedButton.icon(
-                onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Tính năng thêm người nhận sẽ được cập nhật'),
-                      duration: Duration(seconds: 2),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: () => _showAddRecipientBottomSheet(context),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: const Color(0xFF00ACB2),
+                    side: const BorderSide(width: 1.5, color: Color(0xFF00ACB2)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                  );
-                },
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: const Color(0xFF00ACB2),
-                  side: const BorderSide(width: 2, color: Color(0x4C00ACB2)),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                  icon: const Icon(Icons.person_add_rounded, size: 20),
+                  label: const Text('Thêm người nhận', style: TextStyle(fontWeight: FontWeight.w600)),
                 ),
-                icon: const Icon(Icons.add_circle_outline_rounded, size: 20),
-                label: const Text('Thêm người nhận'),
               ),
             ],
           ),
@@ -505,10 +506,104 @@ class _SafeZoneAlertSettingsScreenState
     );
   }
 
+  void _showAddRecipientBottomSheet(BuildContext context) {
+    final members = SafeZoneProvider.of(context).members;
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (bottomSheetCtx, setSheetState) {
+            return SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          'Chọn người nhận cảnh báo',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF1E293B),
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.close_rounded),
+                          onPressed: () => Navigator.pop(ctx),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    if (members.isEmpty)
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 24),
+                        child: Center(
+                          child: Text('Không có thành viên nào khác trong gia đình'),
+                        ),
+                      )
+                    else
+                      ...members.map((m) {
+                        final isAlreadyAdded = _recipients.any((r) => r.name == m.name);
+                        return ListTile(
+                          contentPadding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                          leading: CircleAvatar(
+                            backgroundColor: m.badgeColor.withValues(alpha: 0.2),
+                            child: Text(
+                              m.name.isNotEmpty ? m.name.characters.first : '?',
+                              style: TextStyle(color: m.badgeColor, fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                          title: Text(
+                            m.name,
+                            style: const TextStyle(fontWeight: FontWeight.w600),
+                          ),
+                          subtitle: Text(m.ageGroup, style: const TextStyle(fontSize: 12, color: Color(0xFF64748B))),
+                          trailing: isAlreadyAdded
+                              ? const Icon(Icons.check_circle_rounded, color: Color(0xFF00ACB2))
+                              : const Icon(Icons.add_circle_outline_rounded, color: Color(0xFF94A3B8)),
+                          onTap: () {
+                            setState(() {
+                              if (isAlreadyAdded) {
+                                if (_recipients.length > 1) {
+                                  _recipients.removeWhere((r) => r.name == m.name);
+                                }
+                              } else {
+                                final initials = m.name.split(' ').where((w) => w.isNotEmpty).map((w) => w[0]).take(2).join().toUpperCase();
+                                _recipients.add(_AlertRecipient(
+                                  name: m.name,
+                                  role: m.ageGroup,
+                                  initials: initials.isEmpty ? 'TV' : initials,
+                                  color: m.badgeColor,
+                                ));
+                              }
+                            });
+                            Navigator.pop(ctx);
+                          },
+                        );
+                      }),
+                    const SizedBox(height: 12),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
   // ── Row người nhận ────────────────────────────────────────────────
   Widget _buildRecipientRow(_AlertRecipient recipient) {
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: 4, horizontal: 4),
+      padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 4),
       child: Row(
         children: [
           // Avatar (dùng CustomPainter thay NetworkImage)
@@ -538,7 +633,7 @@ class _SafeZoneAlertSettingsScreenState
                 Text(
                   recipient.name,
                   style: TextStyle(
-                    color: Color(0xFF1E293B),
+                    color: const Color(0xFF1E293B),
                     fontSize: ResponsiveHelper.sp(context, 16),
                     fontFamily: 'Lexend',
                     fontWeight: FontWeight.w400,
@@ -548,7 +643,7 @@ class _SafeZoneAlertSettingsScreenState
                 Text(
                   recipient.role,
                   style: TextStyle(
-                    color: Color(0xFF64748B),
+                    color: const Color(0xFF64748B),
                     fontSize: ResponsiveHelper.sp(context, 12),
                     fontFamily: 'Lexend',
                     fontWeight: FontWeight.w400,
@@ -559,22 +654,33 @@ class _SafeZoneAlertSettingsScreenState
             ),
           ),
 
-          // Nút check (đã chọn = teal)
-          Container(
-            width: 26,
-            height: 26,
-            decoration: const ShapeDecoration(
-              color: Color(0xFF00ACB2),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(Radius.circular(9999)),
+          // Nút check hoặc nút xóa
+          if (_recipients.length > 1)
+            IconButton(
+              icon: const Icon(Icons.remove_circle_outline_rounded, color: Color(0xFFEF4444), size: 22),
+              tooltip: 'Gỡ người nhận',
+              onPressed: () {
+                setState(() {
+                  _recipients.remove(recipient);
+                });
+              },
+            )
+          else
+            Container(
+              width: 26,
+              height: 26,
+              decoration: const ShapeDecoration(
+                color: Color(0xFF00ACB2),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(9999)),
+                ),
+              ),
+              child: const Icon(
+                Icons.check_rounded,
+                color: Colors.white,
+                size: 16,
               ),
             ),
-            child: const Icon(
-              Icons.check_rounded,
-              color: Colors.white,
-              size: 16,
-            ),
-          ),
         ],
       ),
     );
@@ -605,13 +711,13 @@ class _SafeZoneAlertSettingsScreenState
               'Xem trước thông báo',
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: Color(0xFF00ACB2),
+                color: const Color(0xFF00ACB2),
                 fontSize: ResponsiveHelper.sp(context, 14),
                 fontFamily: 'Lexend',
                 fontWeight: FontWeight.w400,
                 height: 1.43,
                 decoration: TextDecoration.underline,
-                decorationColor: Color(0xFF00ACB2),
+                decorationColor: const Color(0xFF00ACB2),
               ),
             ),
           ),
@@ -619,6 +725,20 @@ class _SafeZoneAlertSettingsScreenState
           // Nút "Lưu cài đặt"
           ElevatedButton(
             onPressed: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: const Row(
+                    children: [
+                      Icon(Icons.check_circle_rounded, color: Colors.white),
+                      SizedBox(width: 8),
+                      Text('Đã lưu cài đặt cảnh báo thành công'),
+                    ],
+                  ),
+                  backgroundColor: AppColors.primary,
+                  behavior: SnackBarBehavior.floating,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+              );
               Navigator.of(context).maybePop();
             },
             child: const Text('Lưu cài đặt'),

@@ -50,16 +50,55 @@ class _SafeZoneOverviewScreenState extends State<SafeZoneOverviewScreen> {
       backgroundColor: const Color(0xFFF0F8F7),
       appBar: AppBackHeaderBar(
         title: 'Quản lý vùng an toàn',
-        trailingAreaWidth: 88,
-        trailing: TextButton(
-          onPressed: () => Navigator.pushNamed(context, AppRoutes.safeZoneEditActive),
-          child: const Text(
-            'Xem tất cả',
-            style: TextStyle(
-              color: Color(0xCC00ACB2),
-              fontSize: 14,
-              fontFamily: 'Lexend',
-              fontWeight: FontWeight.w500,
+        trailingAreaWidth: 116,
+        trailing: Padding(
+          padding: const EdgeInsets.only(right: 16),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: () => Navigator.pushNamed(context, AppRoutes.safeZoneEditActive),
+              borderRadius: BorderRadius.circular(20),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 6.5),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: const Color(0x3300ACB2),
+                    width: 1.2,
+                  ),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Color(0x0C000000),
+                      blurRadius: 4,
+                      offset: Offset(0, 1.5),
+                    ),
+                  ],
+                ),
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'Xem tất cả',
+                      maxLines: 1,
+                      softWrap: false,
+                      style: TextStyle(
+                        color: Color(0xFF009EA4),
+                        fontSize: 12,
+                        fontFamily: 'Lexend',
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: -0.2,
+                      ),
+                    ),
+                    SizedBox(width: 4),
+                    Icon(
+                      Icons.arrow_forward_ios_rounded,
+                      color: Color(0xFF009EA4),
+                      size: 10,
+                    ),
+                  ],
+                ),
+              ),
             ),
           ),
         ),
@@ -79,7 +118,7 @@ class _SafeZoneOverviewScreenState extends State<SafeZoneOverviewScreen> {
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 16),
               child: Text(
-                'THANH VIEN GIA DINH',
+                'THÀNH VIÊN GIA ĐÌNH',
                 style: TextStyle(
                   color: Color(0x9900ACB2),
                   fontSize: 13,
@@ -94,7 +133,7 @@ class _SafeZoneOverviewScreenState extends State<SafeZoneOverviewScreen> {
               const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 16),
                 child: _EmptyCard(
-                  message: 'Chua co thanh vien da xac nhan de ap dung vung an toan.',
+                  message: 'Chưa có thành viên đã xác nhận để áp dụng vùng an toàn.',
                 ),
               )
             else
@@ -146,7 +185,7 @@ class _SafeZoneOverviewScreenState extends State<SafeZoneOverviewScreen> {
                 children: [
                   _ActionCard(
                     icon: Icons.add_location_alt_outlined,
-                    label: 'Them vung moi',
+                    label: 'Thêm vùng mới',
                     onTap: () {
                       if (members.isEmpty) return;
                       Navigator.of(context).push(
@@ -171,17 +210,17 @@ class _SafeZoneOverviewScreenState extends State<SafeZoneOverviewScreen> {
                   ),
                   _ActionCard(
                     icon: Icons.history_toggle_off_rounded,
-                    label: 'Lich su di chuyen',
+                    label: 'Lịch sử di chuyển',
                     onTap: () => Navigator.pushNamed(context, AppRoutes.activityHistory),
                   ),
                   _ActionCard(
                     icon: Icons.notifications_active_outlined,
-                    label: 'Canh bao',
+                    label: 'Cảnh báo',
                     onTap: () => Navigator.pushNamed(context, AppRoutes.safeZoneAlert),
                   ),
                   _ActionCard(
                     icon: Icons.settings_outlined,
-                    label: 'Cai dat',
+                    label: 'Cài đặt',
                     onTap: () => Navigator.pushNamed(context, AppRoutes.safeZoneAlertSettings),
                   ),
                 ],
@@ -378,7 +417,7 @@ class _MemberCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    '${member.zoneCount} vung an toan',
+                    '${member.zoneCount} vùng an toàn',
                     style: const TextStyle(
                       color: Color(0xFF00ACB2),
                       fontSize: 12,

@@ -71,7 +71,7 @@ class UserLocation {
     return '${latitude!.toStringAsFixed(5)}, ${longitude!.toStringAsFixed(5)}';
   }
 
-  String get addressOrCoordinates => formattedAddress ?? coordinateLabel ?? 'Chua co vi tri';
+  String get addressOrCoordinates => formattedAddress ?? coordinateLabel ?? 'Chưa có vị trí';
 
   UserLocation copyWith({
     String? uid,

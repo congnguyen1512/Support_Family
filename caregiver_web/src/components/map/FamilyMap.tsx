@@ -54,6 +54,23 @@ const centerIcon = L.divIcon({
   html: `<div class="fg-dot" style="width:22px;height:22px;background:#7C5CFF"></div>`,
 });
 
+function eventPinIcon(type: 'enter' | 'leave' = 'enter') {
+  const isEnter = type === 'enter';
+  const color = isEnter ? '#12B76A' : '#EF4444';
+  const icon = isEnter ? 'arrow-down' : 'arrow-up';
+  return L.divIcon({
+    className: '',
+    iconSize: [38, 48],
+    iconAnchor: [19, 46],
+    tooltipAnchor: [0, -42],
+    html: `<div class="fg-marker fg-marker--selected">
+      <div class="fg-marker__pin" style="background:${color};color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px">
+        ${isEnter ? '📥' : '📤'}
+      </div>
+    </div>`,
+  });
+}
+
 /* ── Helpers bên trong map ─────────────────────────────────── */
 function AutoResize() {
   const map = useMap();
@@ -114,6 +131,7 @@ export interface FamilyMapProps {
   playheadIndex?: number;
   alerts?: { id: number; lat: number; lng: number; label: string }[];
   editZone?: { lat: number; lng: number; radius: number } | null;
+  eventPin?: { lat: number; lng: number; label?: string; type?: 'enter' | 'leave' } | null;
   onMapClick?: (lat: number, lng: number) => void;
   focus?: [number, number] | null;
   fitKey?: string;
@@ -131,6 +149,7 @@ export default function FamilyMap({
   playheadIndex,
   alerts = [],
   editZone,
+  eventPin,
   onMapClick,
   focus,
   fitKey,
@@ -145,13 +164,17 @@ export default function FamilyMap({
   );
 
   const points = useMemo<[number, number][]>(() => {
+    if (eventPin && safeZones.length > 0) {
+      return [[eventPin.lat, eventPin.lng], ...safeZones.map((z): [number, number] => [z.center_latitude, z.center_longitude])];
+    }
+    if (eventPin) return [[eventPin.lat, eventPin.lng]];
     if (editZone) return [[editZone.lat, editZone.lng]];
     if (route && route.length) return route.map((p) => [p.latitude, p.longitude]);
     const pts: [number, number][] = located.map((m) => [m.location!.latitude!, m.location!.longitude!]);
     alerts.forEach((a) => pts.push([a.lat, a.lng]));
     safeZones.forEach((z) => pts.push([z.center_latitude, z.center_longitude]));
     return pts;
-  }, [located, alerts, safeZones, route, editZone]);
+  }, [located, alerts, safeZones, route, editZone, eventPin]);
 
   const autoKey = fitKey ?? `${located.length}-${safeZones.length}-${alerts.length}-${route?.length ?? 0}`;
   const playhead = route && playheadIndex != null ? route[Math.min(playheadIndex, route.length - 1)] : null;
@@ -248,6 +271,16 @@ export default function FamilyMap({
             </Tooltip>
           </Marker>
         ))}
+
+        {eventPin ? (
+          <Marker position={[eventPin.lat, eventPin.lng]} icon={eventPinIcon(eventPin.type)} zIndexOffset={2500}>
+            {eventPin.label ? (
+              <Tooltip className="fg-tooltip" direction="top" permanent>
+                {eventPin.label}
+              </Tooltip>
+            ) : null}
+          </Marker>
+        ) : null}
       </MapContainer>
     </div>
   );

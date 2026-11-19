@@ -2,30 +2,34 @@ import 'dart:async';
 
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
-class KidReminderNotification {
-  const KidReminderNotification({
+class ReminderNotificationItem {
+  const ReminderNotificationItem({
     required this.id,
     required this.title,
     required this.reminderTime,
+    this.subtitle,
   });
 
   final int id;
   final String title;
   final String reminderTime;
+  final String? subtitle;
 }
 
-class KidReminderNotificationScheduler {
-  KidReminderNotificationScheduler._();
+typedef KidReminderNotification = ReminderNotificationItem;
 
-  static final KidReminderNotificationScheduler instance =
-      KidReminderNotificationScheduler._();
+class ReminderNotificationScheduler {
+  ReminderNotificationScheduler._();
+
+  static final ReminderNotificationScheduler instance =
+      ReminderNotificationScheduler._();
 
   final FlutterLocalNotificationsPlugin _plugin =
       FlutterLocalNotificationsPlugin();
   final List<Timer> _timers = [];
   bool _initialized = false;
 
-  Future<void> scheduleToday(List<KidReminderNotification> reminders) async {
+  Future<void> scheduleToday(List<ReminderNotificationItem> reminders) async {
     try {
       await _ensureInitialized();
     } catch (_) {
@@ -63,9 +67,9 @@ class KidReminderNotificationScheduler {
     await _plugin.initialize(settings);
 
     const channel = AndroidNotificationChannel(
-      'family_guard_kid_reminders',
+      'family_guard_reminders',
       'Support Family Reminders',
-      description: 'Kid reminder notifications',
+      description: 'Nhắc nhở thuốc men, lịch hẹn và sinh hoạt gia đình',
       importance: Importance.max,
     );
 
@@ -78,20 +82,30 @@ class KidReminderNotificationScheduler {
     _initialized = true;
   }
 
-  Future<void> _showReminder(KidReminderNotification reminder) {
+  Future<void> _showReminder(ReminderNotificationItem reminder) {
+    final body = reminder.subtitle?.trim().isNotEmpty == true
+        ? reminder.subtitle!.trim()
+        : 'Đã đến giờ nhắc nhở của bạn (${reminder.reminderTime})';
+
     return _plugin.show(
       reminder.id,
-      'Nh\u1EAFc nh\u1EDF',
-      reminder.title,
+      'Nhắc nhở: ${reminder.title}',
+      body,
       const NotificationDetails(
         android: AndroidNotificationDetails(
-          'family_guard_kid_reminders',
+          'family_guard_reminders',
           'Support Family Reminders',
-          channelDescription: 'Kid reminder notifications',
+          channelDescription: 'Nhắc nhở thuốc men, lịch hẹn và sinh hoạt gia đình',
           importance: Importance.max,
           priority: Priority.high,
+          playSound: true,
+          enableVibration: true,
         ),
-        iOS: DarwinNotificationDetails(),
+        iOS: DarwinNotificationDetails(
+          presentAlert: true,
+          presentBadge: true,
+          presentSound: true,
+        ),
       ),
     );
   }
@@ -120,3 +134,5 @@ class KidReminderNotificationScheduler {
     _timers.clear();
   }
 }
+
+typedef KidReminderNotificationScheduler = ReminderNotificationScheduler;

@@ -68,7 +68,7 @@ class ProfileCubit extends ChangeNotifier {
         isSaving: false,
         clearError: true,
         profile: profile,
-        successMessage: 'Cap nhat thong tin thanh cong.',
+        successMessage: 'Cập nhật thông tin thành công.',
       );
       notifyListeners();
       return profile;
@@ -136,7 +136,7 @@ class ProfileCubit extends ChangeNotifier {
         isSaving: false,
         clearError: true,
         profile: profile,
-        successMessage: 'Cap nhat anh dai dien thanh cong.',
+        successMessage: 'Cập nhật ảnh đại diện thành công.',
       );
       notifyListeners();
       return profile;

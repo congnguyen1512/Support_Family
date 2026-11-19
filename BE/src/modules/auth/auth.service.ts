@@ -302,4 +302,72 @@ export class AuthService {
       ...extra,
     };
   }
+
+  async changePassword(uid: string, currentPassword: string, newPassword: string) {
+    const { data: userRecord, error: userError } =
+      await supabaseAdmin.auth.admin.getUserById(uid);
+    if (userError || !userRecord?.user?.email) {
+      throw new Error('Không tìm thấy tài khoản người dùng');
+    }
+
+    const { error: verifyError } = await supabase.auth.signInWithPassword({
+      email: userRecord.user.email,
+      password: currentPassword,
+    });
+    if (verifyError) {
+      throw new Error('Mật khẩu hiện tại không chính xác');
+    }
+
+    const { error: updateError } =
+      await supabaseAdmin.auth.admin.updateUserById(uid, {
+        password: newPassword,
+      });
+    if (updateError) {
+      throw new Error(updateError.message || 'Không thể cập nhật mật khẩu');
+    }
+
+    return { success: true, message: 'Đổi mật khẩu thành công' };
+  }
+
+  async forgotPassword(identifier: string) {
+    let emailToAuth = identifier.trim();
+    if (!emailToAuth.includes('@')) {
+      const { data: userByPhone } = await supabaseAdmin
+        .from('user_info')
+        .select('email')
+        .eq('phone', emailToAuth)
+        .maybeSingle();
+
+      if (userByPhone?.email) {
+        emailToAuth = userByPhone.email;
+      }
+    }
+
+    if (!emailToAuth.includes('@')) {
+      throw new Error('Không tìm thấy tài khoản với thông tin đã cung cấp');
+    }
+
+    const { error } = await supabase.auth.resetPasswordForEmail(emailToAuth);
+    if (error) {
+      throw new Error(error.message || 'Không thể gửi email khôi phục mật khẩu');
+    }
+
+    return {
+      success: true,
+      message: 'Đã gửi hướng dẫn khôi phục mật khẩu về email của bạn',
+    };
+  }
+
+  async deleteAccount(uid: string) {
+    await supabaseAdmin.from('relationships').delete().or(`owner_uid.eq.${uid},relation_uid.eq.${uid}`);
+    await supabaseAdmin.from('safe_zones').delete().or(`owner_uid.eq.${uid},target_uid.eq.${uid}`);
+    await supabaseAdmin.from('user_info').delete().eq('uid', uid);
+
+    const { error } = await supabaseAdmin.auth.admin.deleteUser(uid);
+    if (error) {
+      throw new Error(error.message || 'Không thể xóa tài khoản xác thực');
+    }
+
+    return { success: true, message: 'Đã xóa tài khoản thành công' };
+  }
 }

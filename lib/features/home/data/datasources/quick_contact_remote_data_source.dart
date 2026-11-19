@@ -17,9 +17,12 @@ class QuickContactRemoteDataSourceImpl implements QuickContactRemoteDataSource {
   @override
   Future<QuickContact?> getQuickContact() async {
     final response = await _apiClient.get(ApiEndpoints.quickContacts);
-    if (response is Map<String, dynamic>) {
-      final data = response['data'];
-      if (data != null && data is Map<String, dynamic>) {
+    if (response is Map) {
+      final map = Map<String, dynamic>.from(response);
+      final data = map['data'] is Map
+          ? Map<String, dynamic>.from(map['data'] as Map)
+          : map;
+      if (data.containsKey('name') || data.containsKey('phone')) {
         return QuickContact.fromJson(data);
       }
     }
@@ -32,9 +35,12 @@ class QuickContactRemoteDataSourceImpl implements QuickContactRemoteDataSource {
       ApiEndpoints.quickContacts,
       body: contact.toJson(),
     );
-    if (response is Map<String, dynamic>) {
-      final data = response['data'];
-      if (data != null && data is Map<String, dynamic>) {
+    if (response is Map) {
+      final map = Map<String, dynamic>.from(response);
+      final data = map['data'] is Map
+          ? Map<String, dynamic>.from(map['data'] as Map)
+          : map;
+      if (data.containsKey('name') || data.containsKey('phone')) {
         return QuickContact.fromJson(data);
       }
     }

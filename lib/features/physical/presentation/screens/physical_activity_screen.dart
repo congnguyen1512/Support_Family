@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:family_guard/core/widgets/app_dialog.dart';
+import 'package:family_guard/core/widgets/buttons/app_back_button.dart';
 import 'package:family_guard/core/theme/app_colors.dart';
 import 'package:family_guard/core/utils/responsive/responsive_helper.dart';
 
@@ -491,25 +492,8 @@ class _PhysicalActivityScreenState extends State<PhysicalActivityScreen>
         ),
       ),
       child: Row(children: [
-        GestureDetector(
-          onTap: () => Navigator.pop(context),
-          child: Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              shape: BoxShape.circle,
-              border: Border.all(color: AppColors.borderLight),
-              boxShadow: const [
-                BoxShadow(
-                    color: AppColors.shadowPrimary,
-                    blurRadius: 8,
-                    offset: Offset(0, 2)),
-              ],
-            ),
-            child: const Icon(Icons.arrow_back_ios_new_rounded,
-                size: 16, color: AppColors.primaryDark),
-          ),
+        AppBackButton(
+          onPressed: () => Navigator.pop(context),
         ),
         const SizedBox(width: 12),
         Expanded(

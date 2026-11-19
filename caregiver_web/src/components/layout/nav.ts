@@ -18,7 +18,8 @@ export const NAV_GROUPS: NavGroup[] = [
     title: 'Giám sát',
     items: [
       { key: 'dashboard', label: 'Tổng quan', href: '/', icon: 'grid-outline', iconActive: 'grid', shortcut: '1', description: 'Tình hình gia đình hôm nay' },
-      { key: 'map', label: 'Bản đồ trực tiếp', href: '/map', icon: 'map-outline', iconActive: 'map', shortcut: '2', description: 'Vị trí & lộ trình di chuyển' },
+      { key: 'map', label: 'Bản đồ trực tiếp', href: '/map', icon: 'map-outline', iconActive: 'map', shortcut: '2', description: 'Vị trí trực tiếp của gia đình' },
+      { key: 'history', label: 'Lịch sử di chuyển', href: '/history', icon: 'time-outline', iconActive: 'time', shortcut: 'h', description: 'Nhật ký vào/rời vùng & lộ trình' },
       { key: 'notifications', label: 'Thông báo', href: '/notifications', icon: 'notifications-outline', iconActive: 'notifications', shortcut: '0', description: 'Cảnh báo, lời mời, vùng an toàn' },
     ],
   },

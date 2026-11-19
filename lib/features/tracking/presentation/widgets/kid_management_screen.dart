@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:family_guard/core/widgets/buttons/app_back_button.dart';
 import 'package:family_guard/core/widgets/buttons/app_button.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -50,11 +51,8 @@ class _KidHeader extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          IconButton(
+          AppBackButton(
             onPressed: () => Navigator.maybePop(context),
-            icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
-            color: const Color(0xFF1F2937),
-            splashRadius: 20,
           ),
           Text(
             'Xôi',

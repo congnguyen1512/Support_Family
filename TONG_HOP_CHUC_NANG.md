@@ -1,4 +1,4 @@
-# Tổng hợp chức năng hiện có - Family Guard
+# Tổng hợp chức năng hiện có - Support Family
 
 Tài liệu này tổng hợp các chức năng đã được khai báo và đang có sẵn trong ứng dụng (dựa trên module trong `lib/features` và danh sách route trong `lib/core/constants/app_routes.dart` + `lib/core/routes/app_router.dart`).
 

@@ -1,4 +1,5 @@
 import 'package:family_guard/core/constants/app_routes.dart';
+import 'package:family_guard/core/widgets/buttons/app_back_button.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -384,18 +385,10 @@ class _FlowTopAppBar extends StatelessWidget {
       ),
       child: Row(
         children: [
-          IconButton(
+          AppBackButton(
             onPressed: () => Navigator.maybePop(context),
-            icon: const Icon(
-              Icons.arrow_back_ios_new_rounded,
-              size: 20,
-              color: Color(0xFF0D9488),
-            ),
-            splashRadius: 20,
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints.tightFor(width: 28, height: 28),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 12),
           Text(
             title,
             style: GoogleFonts.beVietnamPro(

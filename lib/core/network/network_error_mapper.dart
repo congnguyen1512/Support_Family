@@ -5,7 +5,7 @@ import 'package:family_guard/core/network/api_exception.dart';
 
 String mapNetworkErrorMessage(
   Object error, {
-  String fallback = 'Co loi xay ra. Vui long thu lai.',
+  String fallback = 'Có lỗi xảy ra. Vui lòng thử lại.',
 }) {
   if (error is ApiException) {
     return error.message;
@@ -20,7 +20,7 @@ String mapNetworkErrorMessage(
   }
 
   if (error is FormatException) {
-    return 'Du lieu tra ve khong hop le.';
+    return 'Dữ liệu trả về không hợp lệ.';
   }
 
   return fallback;

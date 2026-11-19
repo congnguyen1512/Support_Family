@@ -3,6 +3,8 @@ import 'package:family_guard/core/theme/app_colors.dart';
 import 'package:family_guard/core/utils/responsive/responsive.dart';
 import 'package:family_guard/core/widgets/app_back_header.dart';
 import 'package:family_guard/core/widgets/app_dialog.dart';
+import 'package:family_guard/features/reminder/data/datasources/reminder_remote_data_source.dart';
+import 'package:family_guard/features/reminder/data/models/reminder_model.dart';
 import 'package:flutter/material.dart';
 
 class ReminderListEditableScreen extends StatefulWidget {
@@ -14,32 +16,86 @@ class ReminderListEditableScreen extends StatefulWidget {
 }
 
 class _ReminderListEditableScreenState extends State<ReminderListEditableScreen> {
-  final List<ReminderItemEditable> _reminders = [
-    ReminderItemEditable(
-      id: '1',
-      title: 'U\u1ED1ng thu\u1ED1c huy\u1EBFt \u00E1p',
-      time: '08:00 - M\u1ED7i ng\u00E0y',
-      iconColor: const Color(0x33FF85A1),
-      icon: Icons.medication,
-      isActive: true,
-    ),
-    ReminderItemEditable(
-      id: '2',
-      title: '\u0102n s\u00E1ng',
-      time: '07:00 - M\u1ED7i ng\u00E0y',
-      iconColor: const Color(0x33FFD166),
-      icon: Icons.restaurant,
-      isActive: true,
-    ),
-    ReminderItemEditable(
-      id: '3',
-      title: '\u0110o huy\u1EBFt \u00E1p',
-      time: '09:00, 16:00 - M\u1ED7i ng\u00E0y',
-      iconColor: const Color(0x33118AB2),
-      icon: Icons.favorite,
-      isActive: true,
-    ),
-  ];
+  late final ReminderRemoteDataSource _dataSource;
+  List<ReminderModel> _reminders = [];
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _dataSource = ReminderRemoteDataSourceImpl();
+    _loadReminders();
+  }
+
+  Future<void> _loadReminders() async {
+    setState(() => _isLoading = true);
+    try {
+      final list = await _dataSource.getReminders();
+      if (!mounted) return;
+      setState(() {
+        _reminders = list;
+        _isLoading = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _reminders = [
+          ReminderModel(
+            id: 1,
+            ownerUid: '',
+            memberUid: '',
+            title: 'Uống thuốc huyết áp',
+            category: 'medicine',
+            reminderTime: '08:00',
+            scheduleType: 'daily',
+            weekdays: [],
+            isActive: true,
+          ),
+          ReminderModel(
+            id: 2,
+            ownerUid: '',
+            memberUid: '',
+            title: 'Ăn sáng',
+            category: 'food',
+            reminderTime: '07:00',
+            scheduleType: 'daily',
+            weekdays: [],
+            isActive: true,
+          ),
+          ReminderModel(
+            id: 3,
+            ownerUid: '',
+            memberUid: '',
+            title: 'Đo huyết áp',
+            category: 'health',
+            reminderTime: '09:00',
+            scheduleType: 'daily',
+            weekdays: [],
+            isActive: true,
+          ),
+        ];
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _handleToggle(ReminderModel reminder) async {
+    final nextState = !reminder.isActive;
+    setState(() => reminder.isActive = nextState);
+    try {
+      await _dataSource.toggleReminder(reminder.id, nextState);
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => reminder.isActive = !nextState);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Không thể cập nhật: $e'),
+          backgroundColor: Colors.redAccent,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -59,12 +115,12 @@ class _ReminderListEditableScreenState extends State<ReminderListEditableScreen>
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const AppBackHeaderBar(title: 'L\u1ECBch nh\u1EAFc \u0111\u00E3 t\u1EA1o'),
+              const AppBackHeaderBar(title: 'Lịch nhắc đã tạo'),
               _buildMemberCard(hPad),
               Padding(
                 padding: EdgeInsets.fromLTRB(hPad, 8, hPad, 0),
                 child: Text(
-                  'L\u1ECBch nh\u1EAFc \u0111\u00E3 t\u1EA1o',
+                  'Lịch nhắc đã tạo',
                   style: TextStyle(
                     color: const Color(0xFF0C1D1A),
                     fontSize: ResponsiveHelper.sp(context, 24),
@@ -76,20 +132,22 @@ class _ReminderListEditableScreenState extends State<ReminderListEditableScreen>
                 ),
               ),
               Expanded(
-                child: SingleChildScrollView(
-                  padding: EdgeInsets.fromLTRB(hPad, 16, hPad, 24),
-                  child: Column(
-                    children: [
-                      ..._reminders.map(
-                        (reminder) => Padding(
-                          padding: const EdgeInsets.only(bottom: 16),
-                          child: _buildSwipeableReminderCard(reminder),
+                child: _isLoading
+                    ? const Center(child: CircularProgressIndicator())
+                    : SingleChildScrollView(
+                        padding: EdgeInsets.fromLTRB(hPad, 16, hPad, 24),
+                        child: Column(
+                          children: [
+                            ..._reminders.map(
+                              (reminder) => Padding(
+                                padding: const EdgeInsets.only(bottom: 16),
+                                child: _buildSwipeableReminderCard(reminder),
+                              ),
+                            ),
+                            _buildAddButton(),
+                          ],
                         ),
                       ),
-                      _buildAddButton(),
-                    ],
-                  ),
-                ),
               ),
             ],
           ),
@@ -120,39 +178,10 @@ class _ReminderListEditableScreenState extends State<ReminderListEditableScreen>
         ),
         child: Row(
           children: [
-            Stack(
-              children: [
-                Container(
-                  width: 56,
-                  height: 56,
-                  clipBehavior: Clip.antiAlias,
-                  decoration: ShapeDecoration(
-                    image: const DecorationImage(
-                      image: NetworkImage('https://i.pravatar.cc/150?img=47'),
-                      fit: BoxFit.cover,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      side: const BorderSide(width: 2, color: Color(0x3300ACB2)),
-                      borderRadius: BorderRadius.circular(9999),
-                    ),
-                  ),
-                ),
-                Positioned(
-                  right: 0,
-                  bottom: 0,
-                  child: Container(
-                    width: 16,
-                    height: 16,
-                    decoration: ShapeDecoration(
-                      color: const Color(0xFF22C55E),
-                      shape: RoundedRectangleBorder(
-                        side: const BorderSide(width: 2, color: Colors.white),
-                        borderRadius: BorderRadius.circular(9999),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+            CircleAvatar(
+              radius: 28,
+              backgroundColor: AppColors.primary.withValues(alpha: 0.15),
+              child: const Icon(Icons.person, color: AppColors.primary, size: 30),
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -160,7 +189,7 @@ class _ReminderListEditableScreenState extends State<ReminderListEditableScreen>
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'B\u00E0 Lan',
+                    'Thành viên gia đình',
                     style: TextStyle(
                       color: const Color(0xFF0F172A),
                       fontSize: ResponsiveHelper.sp(context, 18),
@@ -178,7 +207,7 @@ class _ReminderListEditableScreenState extends State<ReminderListEditableScreen>
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        '\u0110ang \u1EDF nh\u00E0',
+                        'Đang ở nhà',
                         style: TextStyle(
                           color: const Color(0xFF00ACB2),
                           fontSize: ResponsiveHelper.sp(context, 14),
@@ -192,61 +221,15 @@ class _ReminderListEditableScreenState extends State<ReminderListEditableScreen>
                 ],
               ),
             ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Row(
-                  children: [
-                    const Icon(
-                      Icons.location_on_rounded,
-                      size: 12,
-                      color: Color(0xFF94A3B8),
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      'Qu\u1EADn 7',
-                      style: TextStyle(
-                        color: const Color(0xFF94A3B8),
-                        fontSize: ResponsiveHelper.sp(context, 12),
-                        fontFamily: 'Lexend',
-                        fontWeight: FontWeight.w400,
-                        height: 1.33,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 4),
-                Row(
-                  children: [
-                    const Icon(
-                      Icons.battery_charging_full_rounded,
-                      size: 12,
-                      color: Color(0xFF64748B),
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      '85%',
-                      style: TextStyle(
-                        color: const Color(0xFF64748B),
-                        fontSize: ResponsiveHelper.sp(context, 12),
-                        fontFamily: 'Lexend',
-                        fontWeight: FontWeight.w700,
-                        height: 1.33,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildSwipeableReminderCard(ReminderItemEditable reminder) {
+  Widget _buildSwipeableReminderCard(ReminderModel reminder) {
     return Dismissible(
-      key: Key(reminder.id),
+      key: Key('reminder_${reminder.id}'),
       direction: DismissDirection.endToStart,
       confirmDismiss: (_) async => false,
       background: _buildSwipeBackground(reminder),
@@ -254,7 +237,7 @@ class _ReminderListEditableScreenState extends State<ReminderListEditableScreen>
     );
   }
 
-  Widget _buildSwipeBackground(ReminderItemEditable reminder) {
+  Widget _buildSwipeBackground(ReminderModel reminder) {
     return Container(
       padding: const EdgeInsets.only(right: 16),
       decoration: ShapeDecoration(
@@ -300,9 +283,9 @@ class _ReminderListEditableScreenState extends State<ReminderListEditableScreen>
     );
   }
 
-  Widget _buildReminderCard(ReminderItemEditable reminder) {
+  Widget _buildReminderCard(ReminderModel reminder) {
     return GestureDetector(
-      onTap: () => Navigator.pushNamed(context, AppRoutes.reminderDetail),
+      onTap: () => _handleEdit(reminder),
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: ShapeDecoration(
@@ -326,14 +309,14 @@ class _ReminderListEditableScreenState extends State<ReminderListEditableScreen>
               width: 48,
               height: 48,
               decoration: ShapeDecoration(
-                color: reminder.iconColor,
+                color: reminder.iconBgColor,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(9999),
                 ),
               ),
               child: Icon(
                 reminder.icon,
-                color: _getIconColor(reminder.iconColor),
+                color: reminder.iconColor,
                 size: 24,
               ),
             ),
@@ -353,7 +336,7 @@ class _ReminderListEditableScreenState extends State<ReminderListEditableScreen>
                     ),
                   ),
                   Text(
-                    reminder.time,
+                    reminder.formattedTime,
                     style: TextStyle(
                       color: const Color(0xFF64748B),
                       fontSize: ResponsiveHelper.sp(context, 14),
@@ -366,11 +349,7 @@ class _ReminderListEditableScreenState extends State<ReminderListEditableScreen>
               ),
             ),
             GestureDetector(
-              onTap: () {
-                setState(() {
-                  reminder.isActive = !reminder.isActive;
-                });
-              },
+              onTap: () => _handleToggle(reminder),
               child: _buildToggleSwitch(reminder.isActive),
             ),
           ],
@@ -418,65 +397,53 @@ class _ReminderListEditableScreenState extends State<ReminderListEditableScreen>
 
   Widget _buildAddButton() {
     return OutlinedButton.icon(
-      onPressed: () => Navigator.pushNamed(context, AppRoutes.createReminder),
+      onPressed: () async {
+        final res = await Navigator.pushNamed(context, AppRoutes.createReminder);
+        if (res == true || res != null) {
+          _loadReminders();
+        }
+      },
       style: OutlinedButton.styleFrom(
         foregroundColor: const Color(0xFF00ACB2),
         side: const BorderSide(width: 2, color: Color(0x4C00ACB2)),
       ),
       icon: const Icon(Icons.add_circle_outline, size: 24),
-      label: const Text('Th\u00EAm nh\u1EAFc nh\u1EDF m\u1EDBi'),
+      label: const Text('Thêm nhắc nhở mới'),
     );
   }
 
-  Color _getIconColor(Color bgColor) {
-    if (bgColor == const Color(0x33FF85A1)) return const Color(0xFFFF85A1);
-    if (bgColor == const Color(0x33FFD166)) return const Color(0xFFFFD166);
-    if (bgColor == const Color(0x33118AB2)) return const Color(0xFF118AB2);
-    return AppColors.primary;
+  Future<void> _handleEdit(ReminderModel reminder) async {
+    final res = await Navigator.pushNamed(context, AppRoutes.reminderDetail);
+    if (res != null) {
+      _loadReminders();
+    }
   }
 
-  void _handleEdit(ReminderItemEditable reminder) {
-    Navigator.pushNamed(context, AppRoutes.reminderDetail);
-  }
-
-  void _handleDelete(ReminderItemEditable reminder) {
+  void _handleDelete(ReminderModel reminder) {
     AppDialog.show(
       context: context,
       type: AppDialogType.delete,
-      title: 'X\u00E1c nh\u1EADn x\u00F3a',
-      content:
-          'B\u1EA1n c\u00F3 ch\u1EAFc ch\u1EAFn mu\u1ED1n x\u00F3a l\u1ECBch nh\u1EAFc n\u00E0y?',
-      confirmText: 'X\u00F3a',
+      title: 'Xác nhận xóa',
+      content: 'Bạn có chắc chắn muốn xóa lịch nhắc này?',
+      confirmText: 'Xóa',
       icon: Icons.delete_outline_rounded,
-      onConfirm: () {
+      onConfirm: () async {
+        try {
+          await _dataSource.deleteReminder(reminder.id);
+        } catch (_) {}
+
+        if (!mounted) return;
         setState(() {
           _reminders.removeWhere((item) => item.id == reminder.id);
         });
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('\u0110\u00E3 x\u00F3a l\u1ECBch nh\u1EAFc'),
+            content: Text('Đã xóa lịch nhắc'),
             backgroundColor: Color(0xFFEF4444),
+            behavior: SnackBarBehavior.floating,
           ),
         );
       },
     );
   }
-}
-
-class ReminderItemEditable {
-  ReminderItemEditable({
-    required this.id,
-    required this.title,
-    required this.time,
-    required this.iconColor,
-    required this.icon,
-    required this.isActive,
-  });
-
-  final String id;
-  final String title;
-  final String time;
-  final Color iconColor;
-  final IconData icon;
-  bool isActive;
 }

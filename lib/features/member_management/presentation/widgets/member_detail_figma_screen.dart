@@ -1,5 +1,6 @@
 import 'package:family_guard/core/constants/app_routes.dart';
 import 'package:family_guard/core/di/app_dependencies.dart';
+import 'package:family_guard/core/widgets/buttons/app_back_button.dart';
 import 'package:family_guard/features/member_management/presentation/cubit/member_management_cubit.dart';
 import 'package:family_guard/features/member_management/presentation/models/member_management_demo_data.dart';
 import 'package:family_guard/features/tracking/presentation/screens/member_tracking/member_tracking_models.dart';
@@ -471,15 +472,8 @@ class _TopBar extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 24),
         child: Row(
           children: [
-            IconButton(
+            AppBackButton(
               onPressed: onBack,
-              icon: const Icon(
-                Icons.arrow_back_ios_new_rounded,
-                color: Color(0xFF00A5AB),
-                size: 20,
-              ),
-              padding: EdgeInsets.zero,
-              splashRadius: 20,
             ),
             const Spacer(),
             InkWell(

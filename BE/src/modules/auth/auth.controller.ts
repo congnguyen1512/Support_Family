@@ -1,6 +1,11 @@
 import { Request, Response } from 'express';
 import { AuthService } from './auth.service';
-import { loginSchema, registerSchema } from './auth.validation';
+import {
+  changePasswordSchema,
+  forgotPasswordSchema,
+  loginSchema,
+  registerSchema,
+} from './auth.validation';
 
 const authService = new AuthService();
 
@@ -100,4 +105,81 @@ export class AuthController {
       });
     }
   }
-}
+
+  async changePassword(req: Request, res: Response) {
+    try {
+      if (!req.userId) {
+        return res.status(401).json({
+          message: 'Người dùng chưa được xác thực',
+        });
+      }
+
+      const parsed = changePasswordSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({
+          message: 'Dữ liệu đổi mật khẩu không hợp lệ',
+          errors: parsed.error.flatten(),
+        });
+      }
+
+      const data = await authService.changePassword(
+        req.userId,
+        parsed.data.currentPassword,
+        parsed.data.newPassword,
+      );
+
+      return res.status(200).json({
+        message: 'Đổi mật khẩu thành công',
+        data,
+      });
+    } catch (error: any) {
+      return res.status(400).json({
+        message: error?.message || 'Đổi mật khẩu thất bại',
+      });
+    }
+  }
+
+  async forgotPassword(req: Request, res: Response) {
+    try {
+      const parsed = forgotPasswordSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({
+          message: 'Dữ liệu không hợp lệ',
+          errors: parsed.error.flatten(),
+        });
+      }
+
+      const data = await authService.forgotPassword(parsed.data.identifier);
+
+      return res.status(200).json({
+        message: 'Yêu cầu khôi phục mật khẩu đã được tiếp nhận',
+        data,
+      });
+    } catch (error: any) {
+      return res.status(400).json({
+        message: error?.message || 'Khôi phục mật khẩu thất bại',
+      });
+    }
+  }
+
+  async deleteAccount(req: Request, res: Response) {
+    try {
+      if (!req.userId) {
+        return res.status(401).json({
+          message: 'Người dùng chưa được xác thực',
+        });
+      }
+
+      const data = await authService.deleteAccount(req.userId);
+
+      return res.status(200).json({
+        message: 'Xóa tài khoản thành công',
+        data,
+      });
+    } catch (error: any) {
+      return res.status(400).json({
+        message: error?.message || 'Xóa tài khoản thất bại',
+      });
+    }
+  }
+}

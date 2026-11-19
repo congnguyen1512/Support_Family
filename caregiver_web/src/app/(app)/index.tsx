@@ -124,7 +124,7 @@ export default function Dashboard() {
             </T>
           </View>
           <View style={styles.quickRow}>
-            {QUICK_ACTIONS.slice(0, 4).map((a) => (
+            {QUICK_ACTIONS.slice(0, 5).map((a) => (
               <Pressable
                 key={a.key}
                 nativeID={`dash-quick-${a.key}`}
@@ -166,6 +166,7 @@ export default function Dashboard() {
                 icon="map"
                 right={
                   <View style={{ flexDirection: 'row', gap: 6 }}>
+                    <Button label="Lịch sử" icon="time-outline" size="sm" variant="secondary" onPress={() => router.push((selected ? `/history?uid=${selected}` : '/history') as any)} />
                     <IconButton icon="refresh" label="Làm mới" variant="secondary" onPress={refetch} />
                     <Button nativeID="dash-open-map" label="Mở rộng" icon="expand-outline" size="sm" variant="soft" onPress={() => router.push((selected ? `/map?uid=${selected}` : '/map') as any)} />
                   </View>

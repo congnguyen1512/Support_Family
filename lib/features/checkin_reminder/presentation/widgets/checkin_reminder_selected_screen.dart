@@ -522,23 +522,38 @@ class _SaveButton extends StatelessWidget {
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton.icon(
-        onPressed: () {},
+        onPressed: () {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Row(
+                children: [
+                  Icon(Icons.check_circle_rounded, color: Colors.white),
+                  SizedBox(width: 8),
+                  Text('Đã lưu thiết lập nhắc nhở thành công!'),
+                ],
+              ),
+              backgroundColor: const Color(0xFF00ACB1),
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+          );
+          Navigator.of(context).maybePop();
+        },
         style: ElevatedButton.styleFrom(
-          elevation: 0,
-          backgroundColor: const Color(0xFFF0F9F9),
-          foregroundColor: const Color(0xFF00ACB1),
+          elevation: 2,
+          backgroundColor: const Color(0xFF00ACB1),
+          foregroundColor: Colors.white,
           padding: const EdgeInsets.symmetric(vertical: 16),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           shadowColor: const Color(0x4D00ACB1),
         ),
-        icon: const Icon(Icons.save_outlined, size: 18),
+        icon: const Icon(Icons.check_rounded, size: 20, color: Colors.white),
         label: Text(
           'Lưu thiết lập',
           style: GoogleFonts.beVietnamPro(
-            color: const Color(0xFF00ACB1),
-            fontSize: 18,
+            color: Colors.white,
+            fontSize: 16,
             fontWeight: FontWeight.w700,
-            height: 28 / 18,
           ),
         ),
       ),

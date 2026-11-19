@@ -70,7 +70,7 @@ class SafeZoneBloc extends ChangeNotifier {
       _state = _state.copyWith(
         isSaving: false,
         zones: [created, ..._state.zones],
-        successMessage: 'Da tao vung an toan.',
+        successMessage: 'Đã tạo vùng an toàn.',
         clearError: true,
       );
     } catch (error) {
@@ -92,7 +92,7 @@ class SafeZoneBloc extends ChangeNotifier {
       _state = _state.copyWith(
         isSaving: false,
         zones: _state.zones.map((zone) => zone.id == updated.id ? updated : zone).toList(),
-        successMessage: 'Da cap nhat vung an toan.',
+        successMessage: 'Đã cập nhật vùng an toàn.',
         clearError: true,
       );
     } catch (error) {
@@ -114,7 +114,7 @@ class SafeZoneBloc extends ChangeNotifier {
       _state = _state.copyWith(
         isSaving: false,
         zones: _state.zones.where((zone) => zone.id != event.id).toList(),
-        successMessage: 'Da xoa vung an toan.',
+        successMessage: 'Đã xóa vùng an toàn.',
         clearError: true,
       );
     } catch (error) {

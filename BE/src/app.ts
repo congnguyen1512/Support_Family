@@ -25,7 +25,7 @@ app.use(cors());
 app.use(express.json({ limit: '12mb' }));
 
 app.get('/', (_req, res) => {
-  res.json({ message: 'FamilyGuard Backend is running' });
+  res.json({ message: 'Support Family Backend is running' });
 });
 
 app.use('/api', authRoutes);

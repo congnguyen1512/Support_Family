@@ -4,6 +4,7 @@ import 'package:latlong2/latlong.dart';
 import 'package:family_guard/core/routes/app_routes.dart';
 import 'package:family_guard/core/widgets/app_back_header.dart';
 import 'package:family_guard/features/safe_zone/data/datasources/safe_zone_service.dart';
+import 'package:family_guard/features/safe_zone/domain/entities/safe_zone.dart';
 
 /// ============================================================
 /// SAFE ZONE DELETE CONFIRM SCREEN - Xác nhận xóa vùng an toàn
@@ -61,8 +62,10 @@ class _SafeZoneDeleteConfirmScreenState
     final navigator = Navigator.of(context);
     final service = SafeZoneProvider.read(context);
     final zones = service.zones;
-    final zone = zones.isNotEmpty ? zones.first : null;
-    final zoneName = zone?.name ?? 'Nhà riêng';
+    final argId = ModalRoute.of(context)?.settings.arguments as String?;
+    final zone = (argId != null ? service.getZone(argId) : null) ??
+        (zones.isNotEmpty ? zones.first : null);
+    final zoneName = zone?.name ?? 'Vùng an toàn';
 
     // Actually remove from service
     if (zone != null) {
@@ -89,14 +92,21 @@ class _SafeZoneDeleteConfirmScreenState
     });
   }
 
+
   @override
   Widget build(BuildContext context) {
+    final service = SafeZoneProvider.of(context);
+    final zones = service.zones;
+    final argId = ModalRoute.of(context)?.settings.arguments as String?;
+    final zone = (argId != null ? service.getZone(argId) : null) ??
+        (zones.isNotEmpty ? zones.first : null);
+
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: Stack(
         children: [
           // ── Nền: map + zone circle + AppBar + search bar ──────
-          _buildMapBackground(context),
+          _buildMapBackground(context, zone),
 
           // ── Lớp mờ overlay ─────────────────────────────────────
           AnimatedBuilder(
@@ -114,7 +124,7 @@ class _SafeZoneDeleteConfirmScreenState
               translation: Offset(0, _slideAnim.value),
               child: child,
             ),
-            child: _buildConfirmSheet(context),
+            child: _buildConfirmSheet(context, zone),
           ),
         ],
       ),
@@ -122,13 +132,12 @@ class _SafeZoneDeleteConfirmScreenState
   }
 
   // ── Nền bản đồ (tái sử dụng từ edit screen) ───────────────────────
-  Widget _buildMapBackground(BuildContext context) {
-    final service = SafeZoneProvider.of(context);
-    final zones = service.zones;
-    final center = zones.isNotEmpty
-        ? LatLng(zones.first.latitude, zones.first.longitude)
+  Widget _buildMapBackground(BuildContext context, SafeZone? zone) {
+    final center = zone != null
+        ? LatLng(zone.latitude, zone.longitude)
         : const LatLng(10.7769, 106.7009);
-    final radius = zones.isNotEmpty ? zones.first.radius : 500.0;
+    final radius = zone?.radius ?? 500.0;
+
 
     return Column(
       children: [
@@ -380,7 +389,10 @@ class _SafeZoneDeleteConfirmScreenState
   }
 
   // ── Modal xác nhận xóa ────────────────────────────────────────────
-  Widget _buildConfirmSheet(BuildContext context) {
+  Widget _buildConfirmSheet(BuildContext context, SafeZone? zone) {
+    final zoneName = zone?.name.isNotEmpty == true ? zone!.name : 'Nhà riêng';
+    final radiusText = zone != null ? 'Bán kính: ${zone.radius.round()}m' : 'Bán kính: 500m';
+
     return Align(
       alignment: Alignment.bottomCenter,
       child: Container(
@@ -483,13 +495,13 @@ class _SafeZoneDeleteConfirmScreenState
                     ),
                   ),
                   const SizedBox(width: 14),
-                  const Expanded(
+                  Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Nhà riêng',
-                          style: TextStyle(
+                          zoneName,
+                          style: const TextStyle(
                             color: Color(0xFF111827),
                             fontSize: 16,
                             fontFamily: 'Lexend',
@@ -497,10 +509,10 @@ class _SafeZoneDeleteConfirmScreenState
                             height: 1.50,
                           ),
                         ),
-                        SizedBox(height: 2),
+                        const SizedBox(height: 2),
                         Text(
-                          '123 Đường Nguyễn Huệ, Quận 1, TP. HCM',
-                          style: TextStyle(
+                          radiusText,
+                          style: const TextStyle(
                             color: Color(0xFF6B7280),
                             fontSize: 13,
                             fontFamily: 'Lexend',
@@ -514,6 +526,7 @@ class _SafeZoneDeleteConfirmScreenState
                 ],
               ),
             ),
+
 
             // Thông báo cảnh báo
             Container(

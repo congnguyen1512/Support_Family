@@ -58,6 +58,8 @@ export const qk = {
   messages: (peer: string) => ['messages', peer] as const,
   quickContact: ['quickContact'] as const,
   history: (uid: string, from: string, to: string) => ['history', uid, from, to] as const,
+  safeZoneEvents: (uid?: string, from?: string, to?: string, type?: string) =>
+    ['safeZoneEvents', uid ?? 'all', from ?? '', to ?? '', type ?? 'all'] as const,
 };
 
 const useEnabled = () => Boolean(useAuthStore((s) => s.session?.accessToken));
@@ -134,6 +136,22 @@ export const useLocationHistory = (uid?: string, from?: string, to?: string) =>
     queryKey: qk.history(uid ?? '', from ?? '', to ?? ''),
     queryFn: () => locationApi.history(uid!, from, to),
     enabled: useEnabled() && Boolean(uid && from && to),
+  });
+
+export const useSafeZoneEvents = (
+  memberUid?: string,
+  from?: string,
+  to?: string,
+  type?: 'enter' | 'leave',
+) =>
+  useQuery({
+    queryKey: qk.safeZoneEvents(memberUid, from, to, type),
+    queryFn: () =>
+      memberUid
+        ? safeZoneApi.events({ member_uid: memberUid, from, to, type, limit: 1000 })
+        : Promise.resolve([]),
+    enabled: useEnabled() && Boolean(memberUid),
+    refetchInterval: 30_000,
   });
 
 /* ── Thành viên gộp ────────────────────────────────────────── */

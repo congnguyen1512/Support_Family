@@ -21,12 +21,17 @@ export class QuickContactsService {
     ownerUid: string,
     input: SaveQuickContactInput,
   ): Promise<QuickContactRecord> {
+    const cleanMemberUid =
+      input.member_uid && input.member_uid.trim().length > 0
+        ? input.member_uid.trim()
+        : null;
+
     const payload = {
       owner_uid: ownerUid,
       name: input.name.trim(),
       phone: input.phone.trim(),
       avatar_url: input.avatar_url?.trim() || null,
-      member_uid: input.member_uid?.trim() || null,
+      member_uid: cleanMemberUid,
       updated_at: new Date().toISOString(),
     };
 

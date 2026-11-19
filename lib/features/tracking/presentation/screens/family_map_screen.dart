@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:family_guard/core/constants/app_routes.dart';
 import 'package:family_guard/core/di/app_dependencies.dart';
+import 'package:family_guard/core/widgets/buttons/app_back_button.dart';
 import 'package:family_guard/core/widgets/app_flow_bottom_nav.dart';
 import 'package:family_guard/features/calling/presentation/screens/call_flow_models.dart';
 import 'package:family_guard/features/tracking/presentation/screens/member_tracking/member_tracking_models.dart';
@@ -195,10 +196,10 @@ class _FamilyMapScreenState extends State<FamilyMapScreen>
                 ),
                 if (!widget.showBottomNav)
                   Positioned(
-                    left: 14,
-                    top: 14,
-                    child: _StandaloneBackButton(
-                      onTap: () => Navigator.maybePop(context),
+                    left: 16,
+                    top: 16,
+                    child: AppBackButton(
+                      onPressed: () => Navigator.maybePop(context),
                     ),
                   ),
               ],
@@ -385,7 +386,7 @@ class _FamilyMapScreenState extends State<FamilyMapScreen>
       subtitle:
           location.formattedAddress ??
           location.coordinateLabel ??
-          'Vi tri chua cap nhat',
+          'Vị trí chưa cập nhật',
       distanceLabel: _formatDistanceFromMe(location, myLocation),
       lastUpdatedLabel: _formatUpdatedAt(location.updatedAt),
       activityIcon: _activityIconFor(location.speed),
@@ -426,7 +427,7 @@ class _FamilyMapScreenState extends State<FamilyMapScreen>
     if (email != null && email.isNotEmpty) {
       return email;
     }
-    return 'Thanh vien';
+    return 'Thành viên';
   }
 
   _MemberFilter _mapRole(String? userType, String? role) {
@@ -496,23 +497,23 @@ class _FamilyMapScreenState extends State<FamilyMapScreen>
 
   String _formatUpdatedAt(DateTime? updatedAt) {
     if (updatedAt == null) {
-      return 'Chua cap nhat';
+      return 'Chưa cập nhật';
     }
 
     final localTime = updatedAt.toLocal();
     final difference = DateTime.now().difference(localTime);
 
     if (difference.inSeconds < 60) {
-      return 'Vua cap nhat';
+      return 'Vừa cập nhật';
     }
     if (difference.inMinutes < 60) {
-      return '${difference.inMinutes} phut truoc';
+      return '${difference.inMinutes} phút trước';
     }
     if (difference.inHours < 24) {
-      return '${difference.inHours} gio truoc';
+      return '${difference.inHours} giờ trước';
     }
     if (difference.inDays < 7) {
-      return '${difference.inDays} ngay truoc';
+      return '${difference.inDays} ngày trước';
     }
 
     final day = localTime.day.toString().padLeft(2, '0');
@@ -529,7 +530,7 @@ class _FamilyMapScreenState extends State<FamilyMapScreen>
     if (!location.hasLocation ||
         myLocation == null ||
         !myLocation.hasLocation) {
-      return 'Chua xac dinh';
+      return 'Chưa xác định';
     }
 
     final distance = const Distance().as(
@@ -1080,39 +1081,6 @@ class _BottomSheetAndNav extends StatelessWidget {
             ),
           if (!showBottomNav) const SizedBox(height: 10),
         ],
-      ),
-    );
-  }
-}
-
-class _StandaloneBackButton extends StatelessWidget {
-  const _StandaloneBackButton({required this.onTap});
-
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 44,
-      height: 44,
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.95),
-        shape: BoxShape.circle,
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x1A000000),
-            blurRadius: 10,
-            offset: Offset(0, 2),
-          ),
-        ],
-      ),
-      child: IconButton(
-        onPressed: onTap,
-        icon: const Icon(
-          Icons.arrow_back_ios_new_rounded,
-          size: 20,
-          color: Color(0xFF334155),
-        ),
       ),
     );
   }

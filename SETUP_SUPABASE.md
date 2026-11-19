@@ -1,4 +1,4 @@
-# Hướng dẫn cài lại FamilyGuard với Supabase mới
+# Hướng dẫn cài lại Support Family với Supabase mới
 
 ## Bước 0 — Cài sẵn công cụ
 - **Node.js** ≥ 18 (máy bạn đang có v24 ✅)

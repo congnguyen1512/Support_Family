@@ -1,7 +1,9 @@
 import 'package:family_guard/core/constants/app_colors.dart';
 import 'package:family_guard/core/constants/app_routes.dart';
-import 'package:family_guard/core/notification/popup_error.dart';
+import 'package:family_guard/core/di/app_dependencies.dart';
+import 'package:family_guard/core/widgets/buttons/app_back_button.dart';
 import 'package:family_guard/features/calling/presentation/screens/call_flow_models.dart';
+import 'package:family_guard/features/member_management/domain/entities/relation_direction_helper.dart';
 import 'package:family_guard/features/tracking/presentation/screens/member_tracking/member_tracking_models.dart';
 import 'package:family_guard/features/calling/presentation/widgets/call_bottom_sheets.dart';
 import 'package:flutter/material.dart';
@@ -95,6 +97,81 @@ class _MemberDetailScaffoldState extends State<_MemberDetailScaffold> {
     setState(() {
       _relationship = selectedRelationship;
     });
+
+    try {
+      final relationships = await AppDependencies.instance.getRelationshipsUseCase();
+      final match = relationships.where((r) {
+        final u = r.relationUser;
+        return (u?.name != null && u!.name == widget.args.name) ||
+               (u?.phone != null && u!.phone == widget.args.phoneNumber);
+      }).firstOrNull;
+
+      if (match != null) {
+        await AppDependencies.instance.updateRelationshipUseCase(
+          id: match.id,
+          relationType: selectedRelationship,
+          reverseRelationType: RelationDirectionHelper.resolveReverseRelation(selectedRelationship),
+        );
+      }
+    } catch (_) {}
+  }
+
+  Future<void> _handleDeleteMember() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogCtx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Text('Xóa thành viên', style: TextStyle(fontWeight: FontWeight.bold)),
+        content: Text('Bạn có chắc muốn xóa thành viên "${widget.args.name}" khỏi gia đình không?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogCtx, false),
+            child: const Text('Hủy', style: TextStyle(color: Color(0xFF64748B))),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: const Color(0xFFEF4444)),
+            onPressed: () => Navigator.pop(dialogCtx, true),
+            child: const Text('Xóa'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true || !mounted) return;
+
+    try {
+      final relationships = await AppDependencies.instance.getRelationshipsUseCase();
+      final match = relationships.where((r) {
+        final u = r.relationUser;
+        return (u?.name != null && u!.name == widget.args.name) ||
+               (u?.phone != null && u!.phone == widget.args.phoneNumber);
+      }).firstOrNull;
+
+      if (match != null) {
+        await AppDependencies.instance.deleteRelationshipUseCase(match.id);
+      }
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Đã xóa thành viên "${widget.args.name}" khỏi gia đình'),
+          backgroundColor: AppColors.primary,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+      );
+      Navigator.maybePop(context, true);
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Không thể xóa thành viên: $e'),
+          backgroundColor: Colors.redAccent,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
   }
 
   @override
@@ -155,13 +232,7 @@ class _MemberDetailScaffoldState extends State<_MemberDetailScaffold> {
                   ),
                   const SizedBox(height: 30),
                   _DeleteButton(
-                    onTap: () => showPopupError(
-                      context,
-                      title: 'Chưa thể xóa thành viên',
-                      message:
-                          'Luồng xóa thành viên chưa được kết nối ở màn này.',
-                      actionLabel: 'Đã hiểu',
-                    ),
+                    onTap: _handleDeleteMember,
                   ),
                 ],
               ),
@@ -184,18 +255,10 @@ class _TopBar extends StatelessWidget {
     return SizedBox(
       height: 56,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 9),
+        padding: const EdgeInsets.symmetric(horizontal: 16),
         child: Row(
           children: [
-            IconButton(
-              onPressed: onBack,
-              splashRadius: 20,
-              icon: const Icon(
-                Icons.arrow_back_ios_new_rounded,
-                size: 20,
-                color: AppColors.brand,
-              ),
-            ),
+            AppBackButton(onPressed: onBack),
             const Spacer(),
             InkWell(
               onTap: onEdit,

@@ -24,7 +24,7 @@ class SafeZoneModel extends SafeZone {
     final latitude = _toDouble(json['center_latitude']) ?? _toDouble(json['latitude']) ?? 0;
     final longitude = _toDouble(json['center_longitude']) ?? _toDouble(json['longitude']) ?? 0;
     final radius = _toDouble(json['radius_meters']) ?? _toDouble(json['radius']) ?? 0;
-    final name = json['name']?.toString().trim() ?? 'Vung an toan';
+    final name = json['name']?.toString().trim() ?? 'Vùng an toàn';
     final targetUid = json['target_uid']?.toString();
     final address =
         json['address']?.toString().trim().isNotEmpty == true
@@ -71,13 +71,13 @@ class SafeZoneModel extends SafeZone {
 
   static SafeZoneType _inferZoneType(String name) {
     final normalized = name.toLowerCase();
-    if (normalized.contains('nha')) {
+    if (normalized.contains('nha') || normalized.contains('nhà')) {
       return SafeZoneType.home;
     }
-    if (normalized.contains('truong')) {
+    if (normalized.contains('truong') || normalized.contains('trường')) {
       return SafeZoneType.school;
     }
-    if (normalized.contains('benh')) {
+    if (normalized.contains('benh') || normalized.contains('bệnh')) {
       return SafeZoneType.hospital;
     }
     return SafeZoneType.custom;

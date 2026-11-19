@@ -222,7 +222,7 @@ class SafeZoneService extends ChangeNotifier {
     return zone.copyWith(
       targetUid: targetUid,
       recipientIds: targetUid == null ? const [] : [targetUid],
-      name: zone.name.trim().isEmpty ? 'Vung an toan' : zone.name.trim(),
+      name: zone.name.trim().isEmpty ? 'Vùng an toàn' : zone.name.trim(),
     );
   }
 
@@ -235,7 +235,7 @@ class SafeZoneService extends ChangeNotifier {
     if (trimmedEmail.isNotEmpty) {
       return trimmedEmail;
     }
-    return 'Thanh vien';
+    return 'Thành viên';
   }
 
   int? _calculateAge(String? birthday) {
@@ -257,20 +257,20 @@ class SafeZoneService extends ChangeNotifier {
 
   String _resolveAgeGroup(String role, int? age) {
     if (role == 'nguoichamsoc') {
-      return 'NGUOI CHAM SOC';
+      return 'NGƯỜI CHĂM SÓC';
     }
     if (age != null && age < 16) {
-      return 'TRE EM';
+      return 'TRẺ EM';
     }
     if (age != null && age >= 60) {
-      return '60+ TUOI';
+      return '60+ TUỔI';
     }
-    return 'NGUOI DUOC CHAM SOC';
+    return 'NGƯỜI ĐƯỢC CHĂM SÓC';
   }
 
   Color _badgeColor(String ageGroup) {
     final normalized = ageGroup.toLowerCase();
-    if (normalized.contains('tre')) {
+    if (normalized.contains('tre') || normalized.contains('trẻ')) {
       return const Color(0xFF2563EB);
     }
     if (normalized.contains('60')) {
@@ -306,7 +306,7 @@ class SafeZoneProvider extends InheritedNotifier<SafeZoneService> {
   static SafeZoneService of(BuildContext context) {
     final service = maybeOf(context);
     if (service == null) {
-      throw FlutterError('SafeZoneProvider khong ton tai trong widget tree.');
+      throw FlutterError('SafeZoneProvider không tồn tại trong widget tree.');
     }
     return service;
   }
@@ -318,7 +318,7 @@ class SafeZoneProvider extends InheritedNotifier<SafeZoneService> {
             ? AppDependencies.instance.safeZoneService
             : null);
     if (service == null) {
-      throw FlutterError('SafeZoneProvider khong ton tai trong widget tree.');
+      throw FlutterError('SafeZoneProvider không tồn tại trong widget tree.');
     }
     unawaited(service.initialize());
     return service;

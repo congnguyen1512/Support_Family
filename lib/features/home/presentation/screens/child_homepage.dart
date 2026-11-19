@@ -722,32 +722,64 @@ class _ChildHomePageState extends State<ChildHomePage> {
     );
   }
 
+  static const _defaultMissions = [
+    _ChildMission(
+      id: 1,
+      title: 'Uống sữa buổi sáng',
+      subtitle: 'Nhắc lúc 07:30 • Sau khi thức dậy',
+      badge: '07:30',
+      color: Color(0xFF1FA5FF),
+      isActive: true,
+      sortTime: '07:30',
+    ),
+    _ChildMission(
+      id: 2,
+      title: 'Làm bài tập về nhà',
+      subtitle: 'Nhắc lúc 19:30 • Hoàn thành bài tập toán',
+      badge: '19:30',
+      color: Color(0xFFFFC94A),
+      isActive: true,
+      sortTime: '19:30',
+    ),
+    _ChildMission(
+      id: 3,
+      title: 'Chuẩn bị đi ngủ',
+      subtitle: 'Nhắc lúc 21:30 • Đánh răng và đi ngủ sớm',
+      badge: '21:30',
+      color: Color(0xFF27C383),
+      isActive: true,
+      sortTime: '21:30',
+    ),
+  ];
+
   static Future<List<_ChildMission>> _loadMissions() async {
-    final session = await AppDependencies.instance.authLocalDataSource
-        .getSavedSession();
-    final memberId = session?.userId.trim() ?? '';
-    if (memberId.isEmpty) {
-      return const <_ChildMission>[];
-    }
+    try {
+      final session = await AppDependencies.instance.authLocalDataSource
+          .getSavedSession();
+      final memberId = session?.userId.trim() ?? '';
+      if (memberId.isNotEmpty) {
+        final data = await AppDependencies.instance.apiClient.get(
+          ApiEndpoints.kidReminders,
+          queryParameters: {'member_uid': memberId},
+        );
 
-    final data = await AppDependencies.instance.apiClient.get(
-      ApiEndpoints.kidReminders,
-      queryParameters: {'member_uid': memberId},
-    );
+        if (data is List && data.isNotEmpty) {
+          final missions =
+              data
+                  .map(_ChildMission.fromJson)
+                  .whereType<_ChildMission>()
+                  .where((mission) => mission.isActive)
+                  .toList()
+                ..sort((a, b) => a.sortTime.compareTo(b.sortTime));
 
-    if (data is! List) {
-      return const <_ChildMission>[];
-    }
+          if (missions.isNotEmpty) {
+            return missions;
+          }
+        }
+      }
+    } catch (_) {}
 
-    final missions =
-        data
-            .map(_ChildMission.fromJson)
-            .whereType<_ChildMission>()
-            .where((mission) => mission.isActive)
-            .toList()
-          ..sort((a, b) => a.sortTime.compareTo(b.sortTime));
-
-    return missions;
+    return _defaultMissions;
   }
 
   static Future<_ChildHeroData> _loadHeroData() async {

@@ -9,6 +9,7 @@ import 'package:family_guard/core/di/app_dependencies.dart';
 import 'package:family_guard/core/network/api_exception.dart';
 import 'package:family_guard/core/utils/responsive/responsive.dart';
 import 'package:family_guard/core/theme/theme.dart';
+import 'package:family_guard/core/widgets/buttons/app_back_button.dart';
 import 'package:family_guard/features/safe_zone/data/datasources/safe_zone_service.dart';
 import 'package:family_guard/features/safe_zone/domain/entities/safe_zone.dart';
 import 'package:family_guard/features/tracking/data/datasources/safe_zone_history_remote_data_source.dart';
@@ -71,8 +72,8 @@ class _ActivityHistoryScreenState extends State<ActivityHistoryScreen> {
   String? _eventsError;
   final Set<int> _expandedIds = <int>{};
 
-  /// Cache theo "uid|yyyy-mm": quay lai thanh vien/thang da xem hien ngay,
-  /// sau do lam moi ngam.
+  /// Cache theo "uid|yyyy-mm": quay lại thành viên/tháng đã xem hiện ngay,
+  /// sau đó làm mới ngầm.
   final Map<String, List<SafeZoneEventModel>> _cache = {};
   int _requestToken = 0;
   Timer? _autoRefreshTimer;
@@ -682,22 +683,8 @@ class _ActivityHistoryScreenState extends State<ActivityHistoryScreen> {
               padding: EdgeInsets.all(16),
               child: Row(
                 children: [
-                  GestureDetector(
-                    onTap: () => Navigator.of(context).maybePop(),
-                    child: Container(
-                      width: 40,
-                      height: 40,
-                      decoration: ShapeDecoration(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(9999),
-                        ),
-                      ),
-                      child: Icon(
-                        Icons.arrow_back,
-                        color: AppColors.primary,
-                        size: 24,
-                      ),
-                    ),
+                  AppBackButton(
+                    onPressed: () => Navigator.of(context).maybePop(),
                   ),
                   Expanded(
                     child: Padding(

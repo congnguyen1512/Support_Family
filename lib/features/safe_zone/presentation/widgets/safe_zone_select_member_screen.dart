@@ -76,20 +76,26 @@ class SafeZoneSelectMemberScreen extends StatelessWidget {
                       const SizedBox(height: 16),
 
                       // Nút "Thêm thành viên mới"
-                      OutlinedButton.icon(
-                        onPressed: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Tính năng thêm thành viên mới sẽ được cập nhật'),
+                      SizedBox(
+                        width: double.infinity,
+                        height: 50,
+                        child: OutlinedButton.icon(
+                          onPressed: () {
+                            Navigator.of(context).pushNamed(AppRoutes.addMember);
+                          },
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: const Color(0xFF00ACB2),
+                            side: const BorderSide(width: 1.5, color: Color(0xFF00ACB2)),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
                             ),
-                          );
-                        },
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: const Color(0xFF00ACB2),
-                          side: const BorderSide(width: 2, color: Color(0x4C00ACB2)),
+                          ),
+                          icon: const Icon(Icons.person_add_rounded, size: 20),
+                          label: const Text(
+                            'Thêm thành viên mới',
+                            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
+                          ),
                         ),
-                        icon: const Icon(Icons.add_circle_outline_rounded, size: 20),
-                        label: const Text('Thêm thành viên mới'),
                       ),
                     ],
                   ),

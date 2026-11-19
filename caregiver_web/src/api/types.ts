@@ -130,6 +130,29 @@ export interface SafeZoneInput {
   is_active?: boolean;
 }
 
+export type SafeZoneEventType = 'enter' | 'leave';
+
+export interface SafeZoneEvent {
+  id: number;
+  safe_zone_id: number | null;
+  member_uid: string;
+  owner_uid: string | null;
+  event_type: SafeZoneEventType;
+  zone_name: string;
+  zone_latitude: number | null;
+  zone_longitude: number | null;
+  zone_radius_meters: number | null;
+  latitude: number | null;
+  longitude: number | null;
+  distance_meters: number | null;
+  address: string | null;
+  occurred_at: string;
+  stay_started_at: string | null;
+  stay_ended_at: string | null;
+  stay_duration_seconds: number | null;
+  is_ongoing: boolean;
+}
+
 export interface MemberUserLite {
   uid: string;
   name: string;

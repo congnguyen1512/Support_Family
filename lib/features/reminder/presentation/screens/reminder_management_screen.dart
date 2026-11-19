@@ -288,15 +288,11 @@ class _ReminderManagementScreenState extends State<ReminderManagementScreen> {
     final addIconSz = ResponsiveHelper.sp(context, 24);
     final addLabelSz = ResponsiveHelper.sp(context, 10);
     return GestureDetector(
-      onTap: () {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('Chức năng thêm thành viên đang phát triển'),
-            backgroundColor: AppColors.primary,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          ),
-        );
+      onTap: () async {
+        await Navigator.of(context).pushNamed(AppRoutes.addMember);
+        if (mounted) {
+          _loadFamilyMembers();
+        }
       },
       child: Container(
         width: cardW,

@@ -58,7 +58,7 @@ class LoginCubit extends ChangeNotifier {
         isLoading: false,
         errorMessage: mapNetworkErrorMessage(
           error,
-          fallback: 'Dang nhap that bai. Vui long thu lai.',
+          fallback: 'Đăng nhập thất bại. Vui lòng thử lại.',
         ),
       );
       notifyListeners();

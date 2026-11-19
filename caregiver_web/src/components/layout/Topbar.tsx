@@ -16,6 +16,7 @@ export const QUICK_ACTIONS = [
   { key: 'reminder', label: 'Tạo nhắc nhở', icon: 'alarm-outline', href: '/reminders?new=1', hint: 'Uống thuốc, ăn uống...' },
   { key: 'appointment', label: 'Đặt lịch khám', icon: 'medkit-outline', href: '/appointments?new=1', hint: 'Lịch tái khám, bác sĩ' },
   { key: 'zone', label: 'Thêm vùng an toàn', icon: 'shield-checkmark-outline', href: '/safe-zones?new=1', hint: 'Geofence cho thành viên' },
+  { key: 'history', label: 'Lịch sử di chuyển', icon: 'time-outline', href: '/history', hint: 'Nhật ký vào/rời vùng & lộ trình' },
   { key: 'activity', label: 'Thêm bài vận động', icon: 'walk-outline', href: '/activities?new=1', hint: 'Đi bộ, yoga, đạp xe' },
   { key: 'invite', label: 'Mời thành viên', icon: 'person-add-outline', href: '/members?invite=1', hint: 'Tìm qua email / SĐT' },
 ];

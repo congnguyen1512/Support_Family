@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
 enum SafeZoneType {
-  home('Nha', Icons.home_rounded, Color(0xFFEFF6FF), Color(0xFF3B82F6)),
-  school('Truong hoc', Icons.school_rounded, Color(0xFFFFFBEB), Color(0xFFD97706)),
-  hospital('Benh vien', Icons.local_hospital_rounded, Color(0xFFFFF1F2), Color(0xFFF43F5E)),
-  custom('Tuy chinh', Icons.tune_rounded, Color(0xFFF8FAFC), Color(0xFF64748B));
+  home('Nhà', Icons.home_rounded, Color(0xFFEFF6FF), Color(0xFF3B82F6)),
+  school('Trường học', Icons.school_rounded, Color(0xFFFFFBEB), Color(0xFFD97706)),
+  hospital('Bệnh viện', Icons.local_hospital_rounded, Color(0xFFFFF1F2), Color(0xFFF43F5E)),
+  custom('Tùy chỉnh', Icons.tune_rounded, Color(0xFFF8FAFC), Color(0xFF64748B));
 
   final String label;
   final IconData icon;

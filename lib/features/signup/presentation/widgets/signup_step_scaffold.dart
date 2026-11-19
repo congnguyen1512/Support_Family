@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:family_guard/core/widgets/buttons/app_back_button.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class SignupStepScaffold extends StatelessWidget {
@@ -134,9 +135,8 @@ class _TopBar extends StatelessWidget {
       children: [
         Align(
           alignment: Alignment.centerLeft,
-          child: IconButton(
+          child: AppBackButton(
             onPressed: onBack,
-            icon: const Icon(Icons.arrow_back, color: Color(0xFF0F172A), size: 26),
           ),
         ),
         Text(

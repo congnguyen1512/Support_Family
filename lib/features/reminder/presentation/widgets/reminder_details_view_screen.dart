@@ -639,11 +639,12 @@ class _ReminderDetailsViewScreenState extends State<ReminderDetailsViewScreen> {
       confirmText: 'Xóa',
       icon: Icons.delete_outline_rounded,
       onConfirm: () {
-        Navigator.pop(context);
+        Navigator.pop(context, {'deleted': true});
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Đã xóa lịch nhắc'),
             backgroundColor: Color(0xFFFF5252),
+            behavior: SnackBarBehavior.floating,
           ),
         );
       },

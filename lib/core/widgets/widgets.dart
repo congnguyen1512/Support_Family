@@ -2,6 +2,7 @@ export 'app_bottom_menu.dart';
 export 'app_primary_button.dart';
 export 'app_text_input.dart';
 
+export 'buttons/app_back_button.dart';
 export 'buttons/app_button.dart';
 export 'display/app_avatar.dart';
 export 'display/app_field_label.dart';

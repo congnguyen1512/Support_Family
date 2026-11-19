@@ -1,8 +1,11 @@
 import 'dart:math' as math;
 
 import 'package:family_guard/core/constants/app_colors.dart';
+import 'package:family_guard/core/widgets/buttons/app_back_button.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+
+export 'buttons/app_back_button.dart';
 
 class AppHeaderTheme {
   const AppHeaderTheme._();
@@ -10,7 +13,7 @@ class AppHeaderTheme {
   static const background = Colors.transparent;
   static const title = AppColors.primary;
   static const backButton = Colors.transparent;
-  static const backIcon = Color(0xFF5B7275);
+  static const backIcon = Color(0xFF1E293B);
   static const border = Color(0x14000000);
 }
 
@@ -40,11 +43,7 @@ class AppBackLabel extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              Icons.arrow_back_ios_new_rounded,
-              size: iconSize,
-              color: AppHeaderTheme.backIcon,
-            ),
+            AppBackButton(onPressed: onTap, size: 36, iconSize: 16),
             const SizedBox(width: 8),
             Text(
               label,
@@ -105,13 +104,13 @@ class AppBackHeaderBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
-    final displayedLeadingWidth = showLeading ? leadingAreaWidth : 0.0;
-    final displayedTrailingWidth = trailing != null
+    final effectiveLeadingWidth = showLeading ? (leadingAreaWidth + leadingInset) : 0.0;
+    final effectiveTrailingWidth = trailing != null
         ? trailingAreaWidth
-        : displayedLeadingWidth;
+        : effectiveLeadingWidth;
     final titleHorizontalInset = math.max(
-      displayedLeadingWidth,
-      displayedTrailingWidth,
+      effectiveLeadingWidth,
+      effectiveTrailingWidth,
     );
 
     return Material(
@@ -166,29 +165,16 @@ class AppBackHeaderBar extends StatelessWidget implements PreferredSizeWidget {
                 Row(
                   children: [
                     SizedBox(
-                      width: displayedLeadingWidth,
+                      width: effectiveLeadingWidth,
                       child: Align(
                         alignment: Alignment.centerLeft,
                         child: showLeading
-                            ? InkWell(
-                                borderRadius: BorderRadius.circular(999),
-                                onTap:
-                                    onBack ??
-                                    () => Navigator.maybePop(context),
-                                child: Padding(
-                                  padding: EdgeInsets.only(left: leadingInset),
-                                  child: SizedBox(
-                                    width: leadingSize,
-                                    height: leadingSize,
-                                    child: const Align(
-                                      alignment: Alignment.centerLeft,
-                                      child: Icon(
-                                        Icons.arrow_back_ios_new_rounded,
-                                        size: 18,
-                                        color: AppHeaderTheme.backIcon,
-                                      ),
-                                    ),
-                                  ),
+                            ? Padding(
+                                padding: EdgeInsets.only(left: leadingInset),
+                                child: AppBackButton(
+                                  onPressed: onBack,
+                                  size: 40,
+                                  iconSize: 18,
                                 ),
                               )
                             : const SizedBox.shrink(),
@@ -196,7 +182,7 @@ class AppBackHeaderBar extends StatelessWidget implements PreferredSizeWidget {
                     ),
                     const Spacer(),
                     SizedBox(
-                      width: displayedTrailingWidth,
+                      width: effectiveTrailingWidth,
                       child: Align(
                         alignment: Alignment.centerRight,
                         child: trailing ?? const SizedBox.shrink(),
